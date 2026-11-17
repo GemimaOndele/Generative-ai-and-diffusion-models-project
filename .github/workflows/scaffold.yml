@@ -1,0 +1,24 @@
+name: RCS — contrôle du squelette (sans exécution IA)
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  scaffold:
+    name: Vérification documentaire et syntaxe Python
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Vérifier la syntaxe Python
+        run: python -m compileall -q src tests
+      - name: Vérifier les fichiers et leurs gabarits
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Portée des vérifications
+        run: echo "Aucune qualité de modèle IA ni résultat clinique n'est testé par ce workflow."
