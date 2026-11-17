@@ -1,0 +1,29 @@
+# Environnements, secrets et fichiers locaux
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
+# Données, modèles et résultats volumineux ou sensibles
+/data/raw/
+/data/private/
+/data/processed/
+*.sqlite
+*.sqlite3
+*.db
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+# Artefacts d'exécution à examiner avant publication
+/experiments/results/live/
+/logs/
