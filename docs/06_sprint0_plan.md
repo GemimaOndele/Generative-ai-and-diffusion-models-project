@@ -60,3 +60,10 @@ Réunion de lancement et estimation → point court de synchronisation → revue
 - PR structure GitHub : https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1
 - C3 : `docs/08_cm03_experiment_readiness.md` dans cette PR
 - TP04 : `docs/07_tp04_protocole_preparation.md` et `experiments/tp04_cases_draft.jsonl` dans cette PR
+
+## Conditions transversales supplémentaires issues du rappel professeur (20/11/2026)
+- **Dès le Sprint 0**, prévoir estimation des dépenses directes (API/cloud/stockage), des heures humaines, des licences et de l'infrastructure ; suivi sur toute la vie du projet (RCS-90). Aucune valorisation horaire factice n'est une facture réelle.
+- Ouvrir ou actualiser le registre des risques existant (RCS-18) avec propriétaire, probabilité/impact et actions préventives ; sous-groupes insuffisamment couverts et biais discutés avec RCS-88.
+- Préparer la cartographie versionnée de la solution (RCS-87) et le contrat de traces (RCS-89) avant de déclarer un modèle évalué ou une interface de monitoring effective.
+- Les quatre missions RCS-87–90 ne sont **pas ajoutées automatiquement à l'engagement du Sprint** : le groupe doit d'abord estimer les heures/capacités et arbitrer les dépendances. Les coûts/risques sont néanmoins des critères d'entrée à surveiller.
+- Les références complètes sont dans la PR #4 et dans la bibliothèque V3.6/CDC V1.3 destinés au Drive. Les preuves techniques C3/TP04 restent non réalisées.
