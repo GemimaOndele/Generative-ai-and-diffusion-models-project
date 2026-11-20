@@ -105,3 +105,6 @@ Au moins **un test réel** de la séance doit avoir une trace et un résultat **
 5. FinOps Foundation, AI FinOps : https://www.finops.org/wg/finops-for-ai-overview/.
 6. Green Software Foundation SCI-AI : https://greensoftware.foundation/standards/sci-ai/.
 7. CNIL : https://www.cnil.fr/fr/les-fiches-pratiques-ia.
+
+## Articulation au suivi transversal (20/11/2026)
+Le TP05 ne remplace pas la surveillance du budget du **premier jour au dernier** : RCS-90 regroupe dépense monétaire, temps des membres, infrastructure, coûts de supervision et hypothèses de valorisation humaine ; RCS-82 utilise un sous-ensemble observé pour calculer le coût par tâche réussie. Les versions modèles/datasets/prompt et hashes suivis par RCS-87 sont indispensables pour une comparaison financière et énergétique équitable. Le registre des risques RCS-18 et le protocole de biais RCS-88 s'appliquent aux seuils et changements de version ; RCS-89 définit la traçabilité du monitoring. Détails préparés dans la PR #4 (non fusionnée).
