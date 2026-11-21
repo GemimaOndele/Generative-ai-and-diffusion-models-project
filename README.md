@@ -89,7 +89,7 @@ Ces composants sont **cibles ou en cours de développement**, pas un système ho
 
 ## 🌐 Vitrine GitHub Pages — prête à publier après validation
 
-Une page de présentation animée, responsive et accessible est préparée dans [`docs/index.html`](docs/index.html), avec [styles](docs/landing.css), [navigation](docs/landing.js) et visuels originaux. Ce n'est **pas encore un site publié** : GitHub Pages est désactivé tant qu'un administrateur n'a pas choisi `main /docs` après fusion approuvée de PR #1.
+Une page de présentation animée, responsive et accessible est préparée dans [`docs/index.html`](docs/index.html), avec [styles](docs/landing.css), [navigation](docs/landing.js) et visuels originaux. **Une copie autonome est désormais versionnée dans la branche [`gh-pages`](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/tree/gh-pages), sans dépendre de la fusion de PR #1.** GitHub Pages n'est pas encore activé : publier en choisissant `gh-pages / (root)` dans Settings → Pages. Le README de `main` demeure ancien tant que PR #1 n'est pas fusionnée.
 
 - [Guide de publication GitHub Pages](docs/README_PAGES.md)
 - [Paramètres About / Topics / Homepage proposés](.github/REPOSITORY_PROFILE.md)
