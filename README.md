@@ -53,7 +53,7 @@ La **famille pilote de machines**, l'accès aux données et les choix définitif
 - **Données** : Python, collecte/qualité, sources sous licence, manifest et *dataset cards* ; modélisation MCD/MLD avec **JMerise** avant implémentation SQL.
 - **IA J1** : baseline ML et véritable modèle génératif à comparer sur un jeu de test séparé.
 - **IA J2** : documentation autorisée → RAG → LLM A/B → routeur/cascade → citations, refus et validation humaine.
-- **Web** : prototype HTML/CSS/JavaScript puis intégration API et base selon les décisions d'architecture.
+- **Web** : prototype HTML/CSS/JavaScript à quatre vues et **API locale Python/SQLite de validation d'alertes fictives (PR #8)**, sans authentification réelle ; intégration dans la future architecture métier encore à valider.
 - **Observabilité dès le début** : `trace_id`, `run_id`, version modèle/dataset/prompt/code, erreurs, p95, métriques, coûts, effort humain, risques/biais et énergie locale estimée si mesurable.
 - **Gouvernance** : registre de décisions, cartographie probabilité × impact, fiches modèles/données, revues, suivi FinOps et politique de rollback.
 
@@ -77,8 +77,8 @@ Ces composants sont **cibles ou en cours de développement**, pas un système ho
 |:---|:---|
 | Branche `main` | **Protégée**, mais ne contient actuellement que ce README dans sa version ancienne ; la mise à jour est proposée dans [PR #1](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1) |
 | Structure web / backend / IA | Préparée sur [PR #1](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1), **pas encore dans `main`** |
-| Protocoles C3, TP04, TP05 | En branches / Pull Requests, **pas encore des résultats scientifiques validés** |
-| Prototype web 4 vues | [PR #8](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8), tests CI réussis sur données fictives |
+| Protocoles C3, TP04, TP05 | **Mini-DDPM entraîné et testé sur signaux entièrement synthétiques (PR #7)** ; C3 médical et évaluations LLM réelles toujours non validés |
+| Prototype web 4 vues | [PR #8](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8), **API locale SQLite, validation d'alerte fictive, traces**, CI réussie ; non validé métier |
 | Code coût, évaluation et monitoring | [PR #5](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/5), [PR #9](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9), autres PR |
 | Sprint 0 | **Futur** ; calendrier proposé à confirmer, non démarré |
 | Revue PR #1 | Demandée aux quatre autres membres, **aucune approbation** au dernier contrôle |
@@ -89,7 +89,7 @@ Ces composants sont **cibles ou en cours de développement**, pas un système ho
 
 ## 🌐 Vitrine GitHub Pages — prête à publier après validation
 
-Une page de présentation animée, responsive et accessible est préparée dans [`docs/index.html`](docs/index.html), avec [styles](docs/landing.css), [navigation](docs/landing.js) et visuels originaux. **Une copie autonome est désormais versionnée dans la branche [`gh-pages`](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/tree/gh-pages), sans dépendre de la fusion de PR #1.** GitHub signale la fonctionnalité Pages activée depuis la création de la branche, mais l'adresse publique n'a pas encore été vérifiée : confirmer la source `gh-pages / (root)` dans Settings → Pages. Le README de `main` demeure ancien tant que PR #1 n'est pas fusionnée.
+Une page de présentation animée, responsive et accessible est préparée dans [`docs/index.html`](docs/index.html), avec [styles](docs/landing.css), [navigation](docs/landing.js) et visuels originaux. **Une copie autonome est désormais versionnée dans la branche [`gh-pages`](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/tree/gh-pages), sans dépendre de la fusion de PR #1.** La [vitrine GitHub Pages](https://gemimaondele.github.io/Generative-ai-and-diffusion-models-project/) est désormais publiée depuis `gh-pages / (root)` d'après la confirmation des paramètres GitHub. Elle reste une **présentation statique**, sans le backend local. Le README de `main` demeure ancien tant que PR #1 n'est pas fusionnée.
 
 - [Guide de publication GitHub Pages](docs/README_PAGES.md)
 - [Paramètres About / Topics / Homepage proposés](.github/REPOSITORY_PROFILE.md)
