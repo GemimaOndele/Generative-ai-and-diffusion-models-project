@@ -58,3 +58,20 @@ Lancement et estimation, synchronisation courte, revue des livrables et rétrosp
 - Suivi financier RCS-90 et risques RCS-18 dès le début, distincts des tests TP05 finaux.
 
 **Étape humaine restante :** Omar peut vérifier les estimations et la faisabilité ; Ayoub relit le plan ; les cinq membres décident de l'engagement et des dates.
+
+## Proposition de calendrier prêt à soumettre — non validé
+
+Le rythme proposé est un **Sprint 0 court de 2 semaines, lundi 23 novembre → dimanche 6 décembre 2026**, et non un engagement automatique. Le groupe est chargé en autres modules : privilégier les actions **asynchrones** et un petit nombre d'objectifs.
+
+| Date et horaire (Europe/Paris) | Proposition | Engagement |
+|---|---|---|
+| **Dimanche 22 novembre, 20 h** | Chacun répond « OK », « à ajuster » ou suggère un autre créneau | Consultation WhatsApp, non imposée |
+| **Lundi 23 novembre** | Début **seulement si** cinq accords/capacités suffisants et tickets estimés | Sinon glisser d'une semaine |
+| **Mardi 24 novembre, 20 h 30–21 h** | Réunion de lancement (visio), ou décision asynchrone si impossible | À confirmer |
+| **Jeudi 26 novembre** | Point Jira/WhatsApp asynchrone (PR #1, dataset, blocages) | Pas de réunion obligatoire |
+| **Jeudi 3 décembre** | Point Jira/WhatsApp asynchrone (protocoles et budget) | Pas de réunion obligatoire |
+| **Dimanche 6 décembre, 18 h–18 h 30** | Revue + décision sur suite du projet | À confirmer |
+
+**Premier objectif minimal raisonnable** : (1) relire/valider la PR #1, (2) valider capacités et règles de travail, (3) fixer famille/données/risques/budget et protocole C3/TP04. Les dix tickets déjà présents dans le Sprint sont un **backlog candidat**, pas dix obligations à livrer en parallèle. Les membres proposent leur capacité réelle ; une suggestion de 2–3 h hebdomadaires par personne est **une hypothèse de planification**, pas une disponibilité connue.
+
+En cas d'absence de consensus avant le 23 novembre, **ne pas démarrer** et proposer le **30 novembre–13 décembre** comme alternative. Aucun changement de dates ni démarrage réel n'est effectué dans Jira par ce document.
