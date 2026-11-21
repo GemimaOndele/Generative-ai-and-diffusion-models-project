@@ -1,0 +1,20 @@
+name: RCS-38 — API locale et traçabilité de démonstration
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  local-api-tests:
+    name: Tester les décisions simulées HTTP et SQLite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Tests du serveur HTTP/SQLite
+        run: python -m unittest discover -s tests -p 'test_rcs38_api.py' -v
+      - name: Vérifier le contrat existant
+        run: python -m unittest discover -s tests -p 'test_rcs38_monitoring.py' -v
