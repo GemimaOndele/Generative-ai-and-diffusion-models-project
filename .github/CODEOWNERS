@@ -1,0 +1,22 @@
+# RoboCare Sentinel — propriétaires des fichiers (comptes GitHub vérifiés)
+# Ces règles facilitent les demandes de revue ; elles ne remplacent pas
+# les binômes, relais et relecteurs décidés dans Jira.
+# Définir une revue humaine par une autre personne avant toute fusion.
+
+* @GemimaOndele @ayoubmanie
+
+/README.md @GemimaOndele @yayeaminata12
+/CONTRIBUTING.md @GemimaOndele @ayoubmanie
+/.github/ @ayoubmanie @GemimaOndele
+/docs/ @GemimaOndele @yayeaminata12
+/data/ @omk181920 @GemimaOndele
+/db/ @omk181920 @ayoubmanie
+/models/ @eliascre @omk181920
+/src/ @eliascre @ayoubmanie
+/backend/ @ayoubmanie @omk181920
+/frontend/ @ayoubmanie @yayeaminata12
+/experiments/ @eliascre @omk181920
+/tests/ @omk181920 @eliascre
+/governance/ @GemimaOndele @yayeaminata12
+/planning/ @GemimaOndele @omk181920
+/tools/ @omk181920 @GemimaOndele

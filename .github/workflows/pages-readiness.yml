@@ -1,0 +1,22 @@
+name: RCS — vérification préparation Pages
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  page-preview:
+    name: Contrôle des fichiers du site statique
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m unittest discover -s tests -p 'test_pages_readiness.py' -v
+      - run: node --check docs/landing.js
+      - run: echo "Vérifications structurelles uniquement. GitHub Pages n'est pas publié automatiquement."
