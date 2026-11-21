@@ -87,6 +87,14 @@ Ces composants sont **cibles ou en cours de développement**, pas un système ho
 
 **Ne pas confondre « code en branche + tests verts » avec « fonctionnalité intégrée et validée dans `main` ».**
 
+## 🌐 Vitrine GitHub Pages — prête à publier après validation
+
+Une page de présentation animée, responsive et accessible est préparée dans [`docs/index.html`](docs/index.html), avec [styles](docs/landing.css), [navigation](docs/landing.js) et visuels originaux. Ce n'est **pas encore un site publié** : GitHub Pages est désactivé tant qu'un administrateur n'a pas choisi `main /docs` après fusion approuvée de PR #1.
+
+- [Guide de publication GitHub Pages](docs/README_PAGES.md)
+- [Paramètres About / Topics / Homepage proposés](.github/REPOSITORY_PROFILE.md)
+- Prévisualisation locale après checkout de PR #1 : `python -m http.server 8000 --directory docs`.
+
 ## 🚀 Démarrer et contribuer
 
 1. Se connecter au [projet Jira](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) et sélectionner son ticket RCS-XX (responsable/binôme/relecteur connus).
