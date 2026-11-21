@@ -13,3 +13,7 @@ Dans GitHub : Settings → Pages → Build and deployment → Deploy from a bran
 - Aucune collecte de données, aucun login, aucune télémétrie d'un hôpital. Les études sont préparatoires.
 
 Projet : https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project
+
+## Aperçu de l’application
+
+Le site [monitoring/](./monitoring/) propose les quatre écrans de monitoring en lecture seule, uniquement sur données fictives. La version avec API SQLite reste locale dans la PR #8.
