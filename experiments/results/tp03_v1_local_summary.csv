@@ -1,0 +1,4 @@
+variant,strategy,n,quality,quality_usual,quality_complex,quality_stress,p50_ms,p95_ms,calls,input_tokens,output_tokens,errors,escalations,routed_to_B
+default,b0_extractive,10,0.6,0.75,0.5,0.5,4.2,8.8,0,0,0,0,0,0
+default,mono_b,10,0.4,0.0,1.0,0.5,8213.0,30546.4,9,3283,468,0,0,9
+default,mono_b_norag,10,0.2,0.0,0.0,0.5,3944.5,6867.8,9,1281,390,0,0,9
