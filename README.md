@@ -31,8 +31,6 @@ Deux axes scientifiques complémentaires alimentent la même application :
 
 **Important :** un mock teste l'orchestration, jamais la qualité d'un modèle de langage ; une opération de bruitage isolée ne suffit pas à prouver la détection d'anomalies par diffusion. Aucune mesure ou résultat ne doit être inventé.
 
-**TP05 / C5 — FinOps, Green AI & Éthique (90 min, complément J2)** : audit du coût par tâche réussie, frontière énergétique locale/API, risques éthiques et au moins un test, puis synthèse GO/NO-GO. Fichiers prévus : [protocole TP05](docs/06_tp05_finops_green_ethique.md), [résultats](experiments/results/tp05_mesures.csv) (en-tête uniquement, aucune mesure), [monitoring CodeCarbon](docs/09_codecarbon_monitoring.md), [outil Python local optionnel](src/observability/codecarbon_local.py). Jira RCS-81 à RCS-86. **CodeCarbon ne mesure pas les serveurs LLM distants.** Le jalon J1 diffusion ne change pas.
-
 ## Collaboration et sécurité
 
 Consulter les conventions sur la branche de préparation documentaire, une fois la Pull Request relue. Ne jamais versionner des clés API, données personnelles/patients, rapports hospitaliers non autorisés, modèles ou jeux de données lourds sans validation. Décrire provenance, licence et limites des données utilisées.
@@ -41,6 +39,6 @@ Consulter les conventions sur la branche de préparation documentaire, une fois 
 
 - ECE Paris, **CM03 — Projet final Cours 3 : première preuve GenAI**, 14 novembre 2026.
 - ECE Paris, **TP04 — Du POC GenAI V1 à une V2 Multi-LLM démontrable**, 17 novembre 2026.
-- Bibliothèque RoboCare Sentinel V3.4 (mise à jour TP05 V3.5 en préparation) et cahier des charges V1.1 (mise à jour V1.2 en préparation) (documents collaboratifs du groupe).
+- Bibliothèque RoboCare Sentinel V3.4 et cahier des charges V1.1 (documents collaboratifs du groupe).
 
 *Dernière étape du Sprint 0 avant développement : revue collective des fichiers de cadrage, des tests prévus, des accès et de la politique de collaboration.*
