@@ -2,7 +2,7 @@
 
 **Gémima (pilote proposé), Aminata (binôme), Omar (relais), Elias (relecteur).**
 
-**Portée :** uniquement préparation et démonstration synthétique. C3 officiel demande une preuve **GenAI/diffusion en 60 minutes**, non accomplie par le seul détecteur de baseline décrit ci-dessous. La famille d'équipements, la licence du dataset et les cas finaux ne sont pas décidés ; la diffusion n'est pas entraînée.
+**Portée :** préparation et expériences synthétiques, non validation biomédicale. C3 officiel demande une preuve **GenAI/diffusion en 60 minutes**. La baseline MAD ci-dessous ne constitue pas cette preuve à elle seule ; un **mini-DDPM réellement entraîné sur signaux artificiels a maintenant été ajouté** dans `experiments/rcs69_diffusion_numpy.py`, avec ses propres tests et son rapport technique `docs/19_rcs69_diffusion_numpy_poc.md`. La famille d'équipements, la licence du dataset cible et les cas C3 définitifs ne sont pas encore décidés.
 
 ## Choisir une source avant de figer les cas
 | Source candidate | Utilisation potentielle | Limite majeure |
@@ -30,6 +30,10 @@ python -m unittest discover -s tests -p 'test_rcs69_c3.py' -v
 ```
 
 La baseline MAD utilise **une fixture synthétique explicitement créée dans le code** : 20 observations normales pour l'entraînement, 10 observations d'évaluation incluant 2 anomalies injectées artificiellement. Elle montre comment évaluer TP/FP/FN ; **elle n'est pas la baseline officielle C3 sur données réelles**. Tous les scores du script doivent être légendés `synthetic_fixture_not_medical`.
+
+## Second prototype exécutable : mini-diffusion NumPy (synthétique uniquement)
+
+Après installation de `requirements-rcs69.txt`, exécuter `python -m experiments.rcs69_diffusion_numpy --seed 42 --updates 250`. Le modèle apprend à prédire le bruit, réalise un échantillonnage inverse DDPM et compare une erreur de reconstruction à une baseline MAD **sur les mêmes signaux synthétiques de test**, avec seuil fixé sur validation normale. Les résultats numériques sont des expériences artificielles, non des performances sur machines médicales. Voir `docs/19_rcs69_diffusion_numpy_poc.md` pour méthodes, limites et CI.
 
 ## Déroulé du vrai C3 (60 minutes de séance)
 1. 0–10 min : geler 8–10 cas représentatifs avec licence, étiquettes et attentes.
