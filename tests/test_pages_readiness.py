@@ -46,9 +46,9 @@ class TestPagesReadiness(unittest.TestCase):
     def test_admin_configuration_truthfully_documented(self):
         source=(ROOT/".github/REPOSITORY_PROFILE.md").read_text(encoding="utf-8")
         pages=(DOCS/"README_PAGES.md").read_text(encoding="utf-8")
-        self.assertIn("non activé",source.lower())
+        self.assertIn("gh-pages",source)
         self.assertIn("gh-pages / (root)",pages)
-        self.assertIn("sans attendre PR #1",pages)
+        self.assertIn("sans attendre la pr #1",pages.lower())
         self.assertIn("Settings",source)
 
 if __name__=="__main__":

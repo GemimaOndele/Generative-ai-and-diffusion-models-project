@@ -1,6 +1,6 @@
 # Paramètres du dépôt GitHub — configuration à appliquer
 
-**État contrôlé le 21 novembre 2026 :** le dépôt public avait une ancienne description générique sur les modèles de diffusion, **aucun topic**, **aucune Homepage** et **GitHub Pages non activé**.
+**État contrôlé le 21 novembre 2026 :** le dépôt public avait une ancienne description générique sur les modèles de diffusion, **aucun topic**, **aucune Homepage** et **GitHub Pages initialement désactivé ; `has_pages=true` après la création de `gh-pages`, source et adresse publique non vérifiées**.
 
 Les valeurs suivantes sont préparées pour les paramètres **About**. Elles ne sont **pas encore enregistrées dans les Settings**, car la connexion GitHub actuelle ne propose pas de mutation administrative du dépôt.
 
@@ -21,7 +21,7 @@ Les valeurs suivantes sont préparées pour les paramètres **About**. Elles ne 
 
 1. Aller dans le dépôt → **About** (panneau à droite) → roue dentée.
 2. Remplacer Description, ajouter Topics, laisser Website vide tant que la page n'est pas active.
-3. **Sans attendre PR #1**, activer **Settings → Pages → Deploy from a branch → gh-pages / (root)**. Cette branche indépendante a déjà été créée et contient le site. Elle ne modifie pas `main`.
+3. **Sans attendre PR #1**, vérifier **Settings → Pages → Deploy from a branch → gh-pages / (root)**, et enregistrer si ce n'est pas déjà sélectionné. Cette branche indépendante a déjà été créée et contient le site. Elle ne modifie pas `main`.
 4. Vérifier l'URL de publication ; l'ajouter dans Website.
 5. Garder la **protection de `main`** et les validations de PR. Ne pas désactiver le ruleset pour effectuer ces réglages.
 

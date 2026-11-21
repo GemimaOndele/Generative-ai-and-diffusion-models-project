@@ -1,6 +1,6 @@
 # Publication GitHub Pages — RoboCare Sentinel
 
-**Préparation technique terminée sur PR #1 et sur la branche indépendante `gh-pages` ; publication GitHub Pages NON activée.** Le site cible est une **vitrine publique de recherche** : il ne constitue pas une plateforme biomédicale opérationnelle, ne collecte aucune donnée et n'a aucune connexion à un dispositif réel.
+**Préparation technique terminée sur PR #1 et sur la branche indépendante `gh-pages` ; la publication et l'adresse publiques restent à vérifier.** Le site cible est une **vitrine publique de recherche** : il ne constitue pas une plateforme biomédicale opérationnelle, ne collecte aucune donnée et n'a aucune connexion à un dispositif réel.
 
 ## Fichiers préparés
 - `docs/index.html` : accueil du projet (mission, quatre vues, architecture, J1/TP04/TP05, équipe).
@@ -10,7 +10,7 @@
 - `docs/.nojekyll` : publication de fichiers statiques sans transformation Jekyll.
 - Tests CI : présence/validité des fichiers, contraintes de sécurité et absence de données de santé.
 
-## Pour activer la publication — SANS attendre la PR #1
+## Vérifier et configurer la publication — SANS attendre la PR #1
 1. La branche **[`gh-pages`](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/tree/gh-pages)** existe déjà, avec `index.html`, CSS, JavaScript et SVG à la racine. Elle n'est pas protégée par la règle de `main` et n'a pas besoin de fusion de PR #1.
 2. Ouvrir la page **Settings → Pages** du dépôt.
 3. Dans **Build and deployment**, choisir **Source : Deploy from a branch**.
@@ -18,13 +18,13 @@
 5. Attendre l'état de déploiement GitHub et vérifier l'URL renvoyée par la plateforme.
 6. Après vérification, remplir la section **About → Website** avec l'URL réellement publiée.
 
-**URL qui serait normalement utilisée pour un site de projet sur GitHub Pages, mais NON VÉRIFIÉE comme active** :
+**Adresse attendue (NON VÉRIFIÉE comme accessible)** :
 `https://gemimaondele.github.io/Generative-ai-and-diffusion-models-project/`.
 
-> Pour l'instant, la connexion GitHub de ChatGPT permet de créer/modifier des fichiers, des branches et des PR, mais **ne fournit pas de modification des paramètres administratifs de Pages**. Le réglage n'a donc pas été modifié.
+> Pour l'instant, la connexion GitHub de ChatGPT permet de créer/modifier des fichiers, des branches et des PR, mais **ne fournit pas de modification des paramètres administratifs de Pages**. La création de la branche a fait apparaître `has_pages=true` dans les métadonnées GitHub, sans que la source exacte ou la mise en ligne puisse être confirmée depuis le connecteur.
 
 ## Vérifier localement l'aperçu sans publier
-Depuis la **branche PR #1** :
+Depuis la **branche `gh-pages`** :
 ```bash
 python -m http.server 8000
 ```
