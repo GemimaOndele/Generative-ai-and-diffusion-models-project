@@ -1,6 +1,6 @@
 # Publication GitHub Pages — RoboCare Sentinel
 
-**Préparation technique terminée sur PR #1 ; publication GitHub Pages NON activée.** Le site cible est une **vitrine publique de recherche** : il ne constitue pas une plateforme biomédicale opérationnelle, ne collecte aucune donnée et n'a aucune connexion à un dispositif réel.
+**Préparation technique terminée sur PR #1 et sur la branche indépendante `gh-pages` ; publication GitHub Pages NON activée.** Le site cible est une **vitrine publique de recherche** : il ne constitue pas une plateforme biomédicale opérationnelle, ne collecte aucune donnée et n'a aucune connexion à un dispositif réel.
 
 ## Fichiers préparés
 - `docs/index.html` : accueil du projet (mission, quatre vues, architecture, J1/TP04/TP05, équipe).
@@ -10,11 +10,11 @@
 - `docs/.nojekyll` : publication de fichiers statiques sans transformation Jekyll.
 - Tests CI : présence/validité des fichiers, contraintes de sécurité et absence de données de santé.
 
-## Pour activer la publication — seulement après approbation et fusion de PR #1
-1. Vérifier que la PR #1 a reçu les approbations exigées, que les contrôles GitHub Actions sont au vert, puis fusionner.
+## Pour activer la publication — SANS attendre la PR #1
+1. La branche **[`gh-pages`](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/tree/gh-pages)** existe déjà, avec `index.html`, CSS, JavaScript et SVG à la racine. Elle n'est pas protégée par la règle de `main` et n'a pas besoin de fusion de PR #1.
 2. Ouvrir la page **Settings → Pages** du dépôt.
 3. Dans **Build and deployment**, choisir **Source : Deploy from a branch**.
-4. Choisir **Branch : main** et **Folder : /docs** (source : `main /docs`), puis **Save**.
+4. Choisir **Branch : gh-pages** et **Folder : /(root)** (source : `gh-pages / (root)`), puis **Save**.
 5. Attendre l'état de déploiement GitHub et vérifier l'URL renvoyée par la plateforme.
 6. Après vérification, remplir la section **About → Website** avec l'URL réellement publiée.
 
@@ -26,7 +26,7 @@
 ## Vérifier localement l'aperçu sans publier
 Depuis la **branche PR #1** :
 ```bash
-python -m http.server 8000 --directory docs
+python -m http.server 8000
 ```
 Ouvrir `http://localhost:8000/` dans Chrome ou Cursor. La page doit montrer les visuels SVG et permettre de changer les onglets J1/J2/TP05 et le menu mobile.
 
