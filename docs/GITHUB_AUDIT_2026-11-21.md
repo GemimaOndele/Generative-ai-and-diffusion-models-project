@@ -61,3 +61,13 @@ Ces chiffres correspondent à un **inventaire daté** : vérifier les PR pour l'
 - Supprimer une branche temporaire seulement après fusion **et** confirmation d'absence de travail non intégré.
 
 **Ce document décrit un état observé et un plan de corrections, pas une attestation que les neuf PR ont été fusionnées.**
+
+## Vérification About, Topics et GitHub Pages (connexion réelle)
+
+- La description actuelle de dépôt est celle d'un projet générique sur les modèles génératifs et de diffusion : elle **ne met pas en valeur RoboCare Sentinel**.
+- `topics` : tableau vide. `homepage` : null. `has_pages` : false.
+- L'accès GitHub connecté permet **lecture + branches/fichiers/PR**, mais ne propose **aucune mutation de paramètres du dépôt** (About/Topics/Homepage/Pages). Ces éléments ne sont pas changés silencieusement.
+- Préparation effective des fichiers de site **dans PR #1** : `docs/index.html`, `docs/landing.css`, `docs/landing.js`, `docs/.nojekyll`. Les tests vérifient les assets, sans publication.
+- Paramètres prêts à appliquer dans `.github/REPOSITORY_PROFILE.md`. Activation `Settings → Pages → Source: Deploy from a branch → main /docs` seulement après fusion de PR #1.
+- **Ne pas indiquer d'URL publiée dans About avant de vérifier une vraie URL GitHub Pages.**
+
