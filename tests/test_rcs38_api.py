@@ -21,9 +21,9 @@ class TestRCS38LocalAPI(unittest.TestCase):
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
         self.base = "http://127.0.0.1:" + str(self.server.server_address[1])
+        self.addCleanup(self.thread.join, 3)
         self.addCleanup(self.server.server_close)
         self.addCleanup(self.server.shutdown)
-        self.addCleanup(self.thread.join, 3)
 
     def request(self, path, payload=None, *, origin=None, content_type="application/json"):
         data = json.dumps(payload).encode() if payload is not None else None

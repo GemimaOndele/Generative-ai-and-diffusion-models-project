@@ -26,7 +26,7 @@
     <main id="main">
       <section class="notice" role="status">
         <strong>Prototype pédagogique non médical</strong>
-        <p>Les appareils, incidents, montants et mesures affichés sont entièrement fictifs. Les données non disponibles restent « ND ». Aucune décision de maintenance autonome.</p>
+        <p>Les appareils, incidents, montants et mesures affichés sont entièrement fictifs. Les décisions en mode local sont simulées et tracées ; elles n'engagent aucun technicien ni équipement réel. Les données non disponibles restent « ND ».</p>
       </section>
       <div class="toolbar">
         <div>
@@ -39,7 +39,8 @@
           </select>
         </label>
       </div>
-      <div id="content" aria-live="polite"><p>Chargement des données de démonstration...</p></div>
+      <p id="feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+      <div id="content"><p>Chargement des données de démonstration...</p></div>
       <footer>Spécification RCS-38 · Vue fictive · Revue métier attendue (Aminata) et validation des indicateurs (Omar).</footer>
     </main>
   </div>

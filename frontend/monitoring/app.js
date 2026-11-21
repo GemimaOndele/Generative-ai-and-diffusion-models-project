@@ -8,6 +8,7 @@ const views = [
   {id:"platform",title:"Plateforme & Green AI",short:"Plateforme / Green AI"}
 ];
 let data = null, chosenView = "equipment", chosenSite = "all";
+let serviceOnline = false, requestBusy = false;
 const byId = (id) => document.getElementById(id);
 const escapeHtml = (val) => String(val ?? "").replace(/[&<>"']/g,
   c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -16,7 +17,7 @@ const formatND = (val, unit="") => val === null || val === undefined || val === 
 function badge(status) {
   const key = String(status || "ND");
   const cls = ["alerte","à vérifier","invalide","ouvert","en attente"].includes(key.toLowerCase()) ? "warn" :
-    key.toLowerCase() === "critique" ? "critical" :
+    ["critique","rejetée"].includes(key.toLowerCase()) ? "critical" :
     key === "ND" ? "nd" : "";
   return `<span class="tag ${cls}">${escapeHtml(key)}</span>`;
 }
@@ -53,8 +54,35 @@ function dataQuality(){
 function maintenance(){
   const actions=selected(data.actions);
   const pending=actions.filter(x=>x.state==="En attente").length;
-  const rows=actions.map(x=>`<tr><td>${escapeHtml(x.id)}</td><td>${escapeHtml(x.device)}</td><td>${escapeHtml(x.site)}</td><td>${escapeHtml(x.reason)}</td><td>${badge(x.state)}</td></tr>`);
-  return `<div class="metric-grid">${metric("Actions fictives",actions.length,"Historique pédagogique")}${metric("À valider",pending,"Technicien requis")}${metric("Interventions réelles","ND","Aucune machine connectée")}${metric("Temps moyen de résolution","ND","Pas de mesures réelles")}</div><div class="panels">${panel("Interventions simulées",table(["Référence","Équipement","Site","Motif","Statut"],rows),true)}${panel("Workflow cible",`<div class="summary">${row("1. Alerte","Création / journal")}${row("2. Contrôle","Qualité et contexte")}${row("3. Décision","Technicien habilité")}${row("4. Traçabilité","Intervention et approbation")}</div><p class="hint">Le prototype n'autorise aucune intervention sur une machine réelle.</p>`,true)}</div>`;
+  const controls=(a)=>{
+    if(!serviceOnline || a.state!=="En attente")return serviceOnline?"—":'<span class="tag nd">API locale non activée</span>';
+    const id=escapeHtml(a.id);
+    return '<div class="decision-controls">'+
+      '<label class="confirmation-label"><input type="checkbox" class="simulation-confirm" id="confirm-'+id+'"> Confirmation : simulation uniquement</label>'+
+      '<button type="button" class="action-btn approve" data-action-id="'+id+'" data-decision="approved">Approuver (démo)</button>'+
+      '<label class="reason-label" for="reason-'+id+'">Motif du rejet'+
+      '<select id="reason-'+id+'" class="reason-select">'+
+      '<option value="signal_non_confirme">Signal non confirmé</option>'+
+      '<option value="qualite_insuffisante">Qualité insuffisante</option>'+
+      '</select></label>'+
+      '<button type="button" class="action-btn reject" data-action-id="'+id+'" data-decision="rejected">Rejeter (démo)</button>'+
+      '</div>';
+  };
+  const rows=actions.map(x=>'<tr><td>'+escapeHtml(x.id)+'</td><td>'+escapeHtml(x.device)+'</td><td>'+escapeHtml(x.site)+'</td><td>'+escapeHtml(x.reason)+'</td><td>'+badge(x.state)+'</td><td>'+controls(x)+'</td></tr>');
+  const filteredEvents=(data.events||[]).filter(x=>chosenSite==="all" || actions.some(a=>a.id===x.action_id && a.site===chosenSite));
+  const eventRows=filteredEvents.map(x=>'<tr><td><code>'+escapeHtml(x.trace_id.slice(0,8))+'</code></td><td>'+escapeHtml(x.action_id)+'</td><td>'+badge(x.after_state)+'</td><td>'+escapeHtml(x.reason_code)+'</td><td>'+escapeHtml(x.created_at)+'</td></tr>');
+  const cards=metric("Actions fictives",actions.length,"État SQLite en mode API")+
+    metric("En attente",pending,"Confirmation explicite")+
+    metric("Décisions simulées",filteredEvents.length,"Journal de traces non clinique")+
+    metric("Interventions réelles","ND","Aucune machine connectée");
+  return '<div class="metric-grid">'+cards+'</div><div class="panels">'+
+    panel("Alertes et validation humaine simulée",table(["Référence","Équipement","Site","Motif","État","Décision fictive"],rows),true)+
+    panel("Historique des décisions — identifiant de trace",table(["Trace","Action","Décision","Motif","Date UTC"],eventRows),true)+
+    panel("Workflow et limites",'<div class="summary">'+
+      row("1. Alerte","Création / journal")+row("2. Contrôle","Qualité et contexte")+
+      row("3. Décision","Simulation de technicien")+row("4. Traçabilité","SQLite locale + trace_id")+
+      row("Authentification réelle","Non implémentée")+'</div>'+
+      '<p class="hint">Aucune commande biomédicale. Les décisions simulées ne déclenchent aucune intervention. Ne pas déployer sur Internet.</p>',true)+'</div>';
 }
 function platform(){
   const runs=selected(data.runs);
@@ -80,13 +108,88 @@ byId("nav").addEventListener("click",e=>{
   render();
 });
 byId("site-filter").addEventListener("change",e=>{chosenSite=e.target.value;render();});
-fetch("./demo.json",{cache:"no-store"})
-  .then(resp=>{if(!resp.ok)throw new Error("Données de démo introuvables");return resp.json();})
-  .then(json=>{
-    if(json.data_mode!=="fictional_demo_only")throw new Error("La source n'est pas déclarée fictive : affichage bloqué");
-    data=json;
-    const sites=[...new Set(json.devices.map(d=>d.site))].sort((a,b)=>a.localeCompare(b));
-    for(const site of sites){const option=document.createElement("option");option.value=site;option.textContent=site+" (fictif)";byId("site-filter").append(option);}
-    render();
-  })
-  .catch(err=>{byId("content").innerHTML=`<div class="empty">Échec du chargement. Ouvrir via un serveur HTTP local (python -m http.server). Aucune donnée réelle n'a été chargée.</div>`;console.error(err.message)});
+function announce(message,isError=false){
+  const field=byId("feedback");
+  field.hidden=false;
+  field.className="feedback"+(isError?" error":"");
+  field.textContent=message;
+}
+function initializeSites(){
+  const select=byId("site-filter");
+  const previous=select.value;
+  while(select.options.length>1)select.remove(1);
+  const sites=[...new Set(data.devices.map(d=>d.site))].sort((a,b)=>a.localeCompare(b));
+  for(const site of sites){
+    const option=document.createElement("option");
+    option.value=site;
+    option.textContent=site+" (fictif)";
+    select.append(option);
+  }
+  select.value=sites.includes(previous)?previous:"all";
+  chosenSite=select.value;
+}
+async function refreshDemo(){
+  const response=await fetch("/api/v1/demo/overview",{cache:"no-store"});
+  if(!response.ok)throw Error("API locale inaccessible");
+  const json=await response.json();
+  if(json.data_mode!=="fictional_demo_only" || json.server_mode!=="local_demo")
+    throw Error("Source de démonstration non vérifiée");
+  data=json;
+  serviceOnline=true;
+  initializeSites();
+  render();
+}
+byId("content").addEventListener("click",async event=>{
+  const button=event.target.closest("button[data-action-id]");
+  if(!button || requestBusy)return;
+  if(!serviceOnline)return announce("L'API locale doit être démarrée pour valider une simulation.",true);
+  const action=button.dataset.actionId;
+  const decision=button.dataset.decision;
+  const check=byId("confirm-"+action);
+  if(!check || !check.checked){
+    announce("Cochez la confirmation : simulation uniquement.",true);
+    return;
+  }
+  const reasonCode=decision==="approved"?"controle_confirme":byId("reason-"+action).value;
+  requestBusy=true;
+  button.disabled=true;
+  try{
+    const response=await fetch("/api/v1/demo/actions/"+encodeURIComponent(action)+"/decision",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        decision:decision,reason_code:reasonCode,acknowledge_simulation:true
+      })
+    });
+    const result=await response.json();
+    if(!response.ok)throw Error(result.error||"Réponse API invalide");
+    await refreshDemo();
+    announce("Décision fictive enregistrée (trace "+result.trace_id.slice(0,8)+"). Aucune machine réelle concernée.");
+  }catch(error){
+    announce("Échec de la validation simulée : "+error.message,true);
+    try{await refreshDemo();}catch(_){/* conservation du dernier affichage sûr */}
+  }finally{
+    requestBusy=false;
+    button.disabled=false;
+  }
+});
+(async()=>{
+  try{
+    await refreshDemo();
+    announce("API locale connectée : décisions fictives tracées dans SQLite. Aucun accès à une machine réelle.");
+  }catch(_){
+    try{
+      const response=await fetch("./demo.json",{cache:"no-store"});
+      if(!response.ok)throw Error("Fixtures non accessibles");
+      const json=await response.json();
+      if(json.data_mode!=="fictional_demo_only")throw Error("Source non fictive refusée");
+      data=json;
+      serviceOnline=false;
+      initializeSites();
+      render();
+      announce("Lecture seule : pour tester les validations simulées, lancer python -m tools.rcs38_demo_server.");
+    }catch(error){
+      byId("content").textContent="Chargement impossible : vérifier le serveur et les données.";
+      announce("Erreur : "+error.message,true);
+    }
+  }
+})();

@@ -24,3 +24,16 @@ bar{display:block;height:9px;background:#edf2f5;border-radius:20px;overflow:hidd
 footer{color:var(--muted);font-size:11px;padding:28px 0}
 @media(max-width:1080px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panels{grid-template-columns:1fr}.panel.full{grid-column:auto}}
 @media(max-width:690px){.page{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--line);padding:15px}.nav-heading,.sidebar-note{display:none}#nav{display:flex;overflow-x:auto;gap:5px}.nav-btn{white-space:nowrap;width:auto}.metric-grid{grid-template-columns:1fr 1fr}.toolbar{align-items:start}main{padding:22px 14px}.demo-label{font-size:9px}.brand small{font-size:10px}}
+
+/* Décisions fictives : contrôles et retours accessibles */
+.feedback{border:1px solid #a6d5d3;border-left:4px solid #168b84;background:#ecfaf7;padding:11px 14px;border-radius:8px;color:#15564f;font-size:12px;margin:0 0 16px}
+.feedback.error{border-color:#edc4bc;border-left-color:#bb5943;background:#fff1ed;color:#8c3527}
+.decision-controls{min-width:210px;display:flex;flex-wrap:wrap;align-items:end;gap:7px}
+.confirmation-label{width:100%;display:flex;flex-direction:row;align-items:center;gap:7px;color:#475c6d;font-size:11px;font-weight:600}
+.simulation-confirm{height:16px;width:16px;accent-color:#187c85}
+.action-btn{border:1px solid #a7ccd0;border-radius:7px;padding:7px 10px;font-size:11px;font-weight:700;background:#def4ef;color:#1c6b58;cursor:pointer}
+.action-btn.reject{background:#fff0e9;border-color:#e7bea9;color:#a14d2e}
+.action-btn:focus-visible,.reason-select:focus-visible{outline:3px solid #52c6bb;outline-offset:2px}
+.action-btn:disabled{opacity:.55;cursor:not-allowed}
+.reason-label{display:grid;gap:3px;flex:1;font-size:10px;min-width:145px}
+.reason-select{min-width:140px;font-size:11px;padding:7px}

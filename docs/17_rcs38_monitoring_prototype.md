@@ -38,3 +38,30 @@ Le contrôle automatique vérifie le nombre des vues, la cohérence des fixtures
 - **Gémima** : mettre en correspondance les écrans du cahier des charges V1.3, l'évolution RCS-86 et les décisions du groupe.
 
 RCS-38 phase initialement indicative S2 : ce premier prototype ne signifie pas que l'intégration applicative et la validation d'écrans sont terminées. PR distincte ; ne pas fusionner avant la revue humaine.
+
+
+## Itération 2 — API locale, SQLite et validation humaine simulée
+
+**Ce composant est un POC pédagogique local, sans authentification réelle ni usage biomédical.**
+
+Pour lancer la version interactive depuis la branche RCS-38 :
+
+    python -m tools.rcs38_demo_server --port 8000 --db .local/rcs38.sqlite3
+
+Ouvrir ensuite http://127.0.0.1:8000/ . Le serveur écoute uniquement sur 127.0.0.1.
+
+Le mode statique existant reste en lecture seule :
+
+    python -m http.server 8000
+
+Puis http://127.0.0.1:8000/frontend/monitoring/ .
+
+**Contrat HTTP fictif :** GET /api/v1/demo/health ; GET /api/v1/demo/overview ; POST /api/v1/demo/actions/{id}/decision. La requête POST est un objet JSON avec decision (approved/rejected), reason_code (contrôle confirmé, signal non confirmé ou qualité insuffisante en code), acknowledge_simulation=true.
+
+Le serveur vérifie la confirmation, les motifs codifiés, l'origine HTTP, le Content-Type et l'état en attente. Il refuse une seconde décision (409), sauvegarde l'état dans SQLite et génère une trace UUID, horodatage UTC et rôle explicite technicien-demo. La carte Maintenance expose le journal. Aucun nom de patient, aucune commande machine, aucune connexion hospitalière.
+
+Le mode local est **mono-utilisateur, sans mécanisme d'identification vérifié** : ne jamais publier cette API sur GitHub Pages, sur un réseau public ou un serveur de production. Seule l'interface publique statique peut être hébergée séparément.
+
+**Tests** : python -m unittest discover -s tests -p 'test_rcs38_api.py' -v ; python -m unittest discover -s tests -p 'test_rcs38_monitoring.py' -v ; node --check frontend/monitoring/app.js .
+
+**Relectures restantes :** Aminata (compréhension et ergonomie des décisions), Omar (KPI/statuts), Ayoub (contrat API, sécurité et authentification future). Les écrans et indicateurs sont encore en attente de validation métier.
