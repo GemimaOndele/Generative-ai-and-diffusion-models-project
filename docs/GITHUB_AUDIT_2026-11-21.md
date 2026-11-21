@@ -68,6 +68,6 @@ Ces chiffres correspondent à un **inventaire daté** : vérifier les PR pour l'
 - `topics` : tableau vide. `homepage` : null. `has_pages` : false.
 - L'accès GitHub connecté permet **lecture + branches/fichiers/PR**, mais ne propose **aucune mutation de paramètres du dépôt** (About/Topics/Homepage/Pages). Ces éléments ne sont pas changés silencieusement.
 - Préparation effective des fichiers de site **dans PR #1** : `docs/index.html`, `docs/landing.css`, `docs/landing.js`, `docs/.nojekyll`. Les tests vérifient les assets, sans publication.
-- Paramètres prêts à appliquer dans `.github/REPOSITORY_PROFILE.md`. Activation `Settings → Pages → Source: Deploy from a branch → main /docs` seulement après fusion de PR #1.
+- Paramètres prêts à appliquer dans `.github/REPOSITORY_PROFILE.md`. **Nouvelle solution exécutée : création de `gh-pages` indépendante**, avec 7 fichiers (HTML, CSS, JavaScript, 2 SVG, `.nojekyll`, README). Activer `Settings → Pages → Source: Deploy from a branch → gh-pages / (root)` **sans attendre PR #1** ; ce réglage administratif reste à appliquer.
 - **Ne pas indiquer d'URL publiée dans About avant de vérifier une vraie URL GitHub Pages.**
 
