@@ -1,44 +1,125 @@
-# RoboCare Sentinel
+<div align="center">
 
-**Projet fil rouge — ECE Paris · MSc2 Artificial Intelligence**  
-**Domaines :** IA générative, modèles de diffusion, Multi-LLM / Green AI, maintenance d'équipements médicaux.  
-**Équipe :** Gémima, Aminata, Omar, Elias, Ayoub.
+<img src="docs/assets/robocare-hero-animated.svg" alt="Bannière holographique animée RoboCare Sentinel : équipement biomédical stylisé en perspective, visualisations IA et signaux lumineux" width="100%" />
 
-> **État : cadrage / préparation.** Ce dépôt ne contient pas encore de résultat scientifique validé ni d'application médicale opérationnelle. Il ne doit pas être utilisé pour diagnostiquer des patients ou commander un équipement médical réel.
+# 🩺 RoboCare Sentinel
+### AI-assisted medical equipment maintenance · Projet fil rouge ECE Paris
 
-## Objectif
+**MSc2 Artificial Intelligence** · **Prototype de recherche et d'application web**
 
-Concevoir et développer une **plateforme web d'aide à la maintenance biomédicale** pour centraliser des informations techniques autorisées, visualiser des mesures et signalements, détecter des anomalies, préparer des interventions documentées et laisser **la décision finale au technicien**.
+[📋 Jira / Backlog](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) · [🔀 Pull Requests](../../pulls) · [🧭 Guide d'équipe](CONTRIBUTING.md) · [🧪 Prototype web (PR #8)](../../pull/8)
 
-Deux axes scientifiques complémentaires alimentent la même application :
-- **J1 – Generative AI / diffusion :** expérimenter génération/reconstruction de signaux, comparer à une baseline et analyser les limites.
-- **J2 – Multi-LLM / Green AI :** comparer mono-LLM et orchestration de deux modèles réellement distincts sur les mêmes cas, avec qualité, latence, coût et énergie/CO₂e lorsque mesurables.
+`🧩 Application web` · `🧠 Diffusion & anomaly detection` · `🤝 Multi-LLM & RAG` · `🌱 Green AI / FinOps` · `🛡️ Human-in-the-loop`
 
-**Périmètre pilote, datasets, architecture détaillée et critères d'acceptation :** à valider collectivement. Des benchmarks industriels ou données simulées ne démontrent pas l'efficacité sur des machines médicales réelles.
+</div>
 
-## Pilotage du projet
+> [!IMPORTANT]
+> **Projet pédagogique en développement — pas un dispositif médical validé.** Les données industrielles ou fictives ne prouvent aucune efficacité hospitalière. L'IA ne diagnostique aucun patient, ne commande aucune machine et ne remplace jamais le technicien biomédical habilité.
 
-- [Jira RoboCare Sentinel (RCS)](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog)
-- GitHub : un seul dépôt, une branche `main` de référence, branches de travail par ticket et Pull Requests relues.
-- Référents : Gémima (coordination), Aminata (fonctionnel), Omar (données/JMerise), Elias (IA), Ayoub (architecture/intégration). Chaque tâche Jira précise son responsable, son binôme d'apprentissage, son relais et son relecteur.
-- [RCS-46](https://gemimakerenondelepourou.atlassian.net/browse/RCS-46) : organisation du dépôt ; [RCS-47](https://gemimakerenondelepourou.atlassian.net/browse/RCS-47) : premier commit documentaire ; [RCS-48](https://gemimakerenondelepourou.atlassian.net/browse/RCS-48) : branches et PR.
+## ✨ Le projet en une minute
 
-## Rendus pédagogiques à intégrer (non réalisés à ce stade)
+**RoboCare Sentinel** vise à développer une **plateforme web d'aide à la maintenance biomédicale** qui rassemble des données techniques autorisées, détecte expérimentalement des anomalies, facilite l'analyse de documents et présente les informations nécessaires à une **décision humaine traçable**.
 
-**CM03 / C3 — preuve GenAI (60 min)** : 8–10 cas figés, chaîne générative réelle, comparaison baseline, échec analysé, paramètres/seed, preuve reproductible, `docs/03_preuve_technique.md`, `tests/cases.csv`, `experiments/results.csv` et README (RCS-69 à RCS-73).
+La **famille pilote de machines**, l'accès aux données et les choix définitifs des modèles sont **encore à valider collectivement**. Les scénarios fictifs servent exclusivement au développement et à la démonstration.
 
-**TP04 / C4 — Multi-LLM (120 min + 30 min facultatives)** : 10 cas dont quatre stress, modèles A/B identifiés, mono-A / mono-B / V2 comparés, stratégie routing ou cascade, traces et erreurs, GO/NO-GO, `docs/05_tp04_architecture_v2.md`, `docs/05_tp04_benchmark.md`, `src/orchestrator.py`, `experiments/test_cases.jsonl`, `experiments/results/tp04_*.csv` et `data/manifest.md` (RCS-74 à RCS-80).
+<div align="center">
+<img src="docs/assets/architecture.svg" alt="Schéma de l'architecture cible : sources autorisées, contrôle de qualité, IA diffusion et Multi-LLM, application, validation par technicien et monitoring transversal" width="100%" />
+</div>
 
-**Important :** un mock teste l'orchestration, jamais la qualité d'un modèle de langage ; une opération de bruitage isolée ne suffit pas à prouver la détection d'anomalies par diffusion. Aucune mesure ou résultat ne doit être inventé.
+### 🧭 Quatre volets de monitoring prévus
 
-## Collaboration et sécurité
+| Vue | Objectif métier | État |
+|:---|:---|:---|
+| 🏥 **Parc équipements** | Inventaire, familles, statut et historique | Prototype fictif en [PR #8](../../pull/8) |
+| 📈 **Données & anomalies** | Qualité d'entrée, alertes, faux positifs/négatifs, dérive | Prototype fictif ; aucune métrique médicale validée |
+| 🧰 **Maintenance & interventions** | Revue technicien, décisions et interventions tracées | Parcours fictif ; aucune action sur machine |
+| 🌿 **Plateforme & Green AI** | Versions, qualité, latence, budget, coût humain, CodeCarbon local | Contrats préparés ; mesures réelles **ND** |
 
-Consulter les conventions sur la branche de préparation documentaire, une fois la Pull Request relue. Ne jamais versionner des clés API, données personnelles/patients, rapports hospitaliers non autorisés, modèles ou jeux de données lourds sans validation. Décrire provenance, licence et limites des données utilisées.
+**Démonstration locale du prototype (branche PR #8, pas encore fusionnée)** :
+`python -m http.server 8000`, puis ouvrir `http://localhost:8000/frontend/monitoring/`.
 
-## Sources pédagogiques
+## 🔬 Deux jalons scientifiques, trois consignes pédagogiques
 
-- ECE Paris, **CM03 — Projet final Cours 3 : première preuve GenAI**, 14 novembre 2026.
-- ECE Paris, **TP04 — Du POC GenAI V1 à une V2 Multi-LLM démontrable**, 17 novembre 2026.
-- Bibliothèque RoboCare Sentinel V3.4 et cahier des charges V1.1 (documents collaboratifs du groupe).
+| Module | Séance | Ce qu'il faut démontrer | Préparation dans GitHub |
+|:---|:---|:---|:---|
+| **C3 · GenAI / diffusion** | **60 min** | 8–10 cas gelés, modèle de diffusion véritable, comparaison à une baseline, erreur analysée | [PR #2](../../pull/2) et [PR #7](../../pull/7) |
+| **TP04 · Multi-LLM** | **120 min + 30 min facultatives** | Mono-A / mono-B / V2 (routing ou cascade) sur les mêmes 10 cas dont 4 stress, citations et mesures | [PR #2](../../pull/2), [PR #9](../../pull/9) |
+| **TP05 · FinOps, Green AI & Éthique** | **90 min**, *complément de J2* | Coût par tâche réussie, énergie/CO₂e avec frontières claires, ≥3 risques éthiques et ≥1 test tracé | [PR #3](../../pull/3), [PR #5](../../pull/5), [PR #9](../../pull/9) |
 
-*Dernière étape du Sprint 0 avant développement : revue collective des fichiers de cadrage, des tests prévus, des accès et de la politique de collaboration.*
+**TP05 ne crée pas de troisième jalon.** Un mock ne démontre pas les performances d'un LLM, un simple bruitage n'atteste pas l'apprentissage d'une diffusion et **CodeCarbon exécuté localement ne mesure pas l'énergie des serveurs LLM distants**.
+
+## 🧩 Architecture technique et traçabilité
+
+- **Données** : Python, collecte/qualité, sources sous licence, manifest et *dataset cards* ; modélisation MCD/MLD avec **JMerise** avant implémentation SQL.
+- **IA J1** : baseline ML et véritable modèle génératif à comparer sur un jeu de test séparé.
+- **IA J2** : documentation autorisée → RAG → LLM A/B → routeur/cascade → citations, refus et validation humaine.
+- **Web** : prototype HTML/CSS/JavaScript puis intégration API et base selon les décisions d'architecture.
+- **Observabilité dès le début** : `trace_id`, `run_id`, version modèle/dataset/prompt/code, erreurs, p95, métriques, coûts, effort humain, risques/biais et énergie locale estimée si mesurable.
+- **Gouvernance** : registre de décisions, cartographie probabilité × impact, fiches modèles/données, revues, suivi FinOps et politique de rollback.
+
+Ces composants sont **cibles ou en cours de développement**, pas un système hospitalier déjà déployé.
+
+## 👥 L'équipe
+
+| Membre | Domaine de référence | Missions initiales / binômes |
+|:---|:---|:---|
+| **Gémima** | Coordination, cohérence métier–données, budget | Sprint 0 [RCS-17](https://gemimakerenondelepourou.atlassian.net/browse/RCS-17) · Monitoring [RCS-38](https://gemimakerenondelepourou.atlassian.net/browse/RCS-38) · Coût [RCS-90](https://gemimakerenondelepourou.atlassian.net/browse/RCS-90) |
+| **Aminata** | Fonctionnel, cas de test, éthique | TP04 RCS-74 · Éthique RCS-84 · Binôme monitoring/biais |
+| **Omar** | Data Engineering, JMerise, baselines, FinOps | Jira RCS-16 · Baseline RCS-71 · FinOps RCS-82 |
+| **Elias** | Diffusion, LLM, évaluation des biais | Diffusion RCS-70 · Modèles A/B RCS-75 · Biais RCS-88 |
+| **Ayoub** | Architecture, intégration, CI, monitoring | Socle GitHub RCS-46/48 · Versionnement RCS-87 · Traces RCS-89 |
+
+**52 missions historiques validées**, complétées par les tâches pédagogiques et de gouvernance. Les nouvelles attributions RCS-81 à RCS-90 sont **à ratifier** ; chaque ticket précise responsable, binôme, relais et relecteur.
+
+## 🚦 État réel du dépôt — audit du 21 novembre 2026
+
+| Sujet | État constaté |
+|:---|:---|
+| Branche `main` | **Protégée**, mais ne contient actuellement que ce README dans sa version ancienne ; la mise à jour est proposée dans [PR #1](../../pull/1) |
+| Structure web / backend / IA | Préparée sur [PR #1](../../pull/1), **pas encore dans `main`** |
+| Protocoles C3, TP04, TP05 | En branches / Pull Requests, **pas encore des résultats scientifiques validés** |
+| Prototype web 4 vues | [PR #8](../../pull/8), tests CI réussis sur données fictives |
+| Code coût, évaluation et monitoring | [PR #5](../../pull/5), [PR #9](../../pull/9), autres PR |
+| Sprint 0 | **Futur** ; calendrier proposé à confirmer, non démarré |
+| Revue PR #1 | Demandée aux quatre autres membres, **aucune approbation** au dernier contrôle |
+
+📂 [Voir toutes les PR](../../pulls) · 📑 [Audit technique détaillé](docs/GITHUB_AUDIT_2026-11-21.md) · 🔐 [Règle de protection de main](../../rules/27460937)
+
+**Ne pas confondre « code en branche + tests verts » avec « fonctionnalité intégrée et validée dans `main` ».**
+
+## 🚀 Démarrer et contribuer
+
+1. Se connecter au [projet Jira](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) et sélectionner son ticket RCS-XX (responsable/binôme/relecteur connus).
+2. Examiner d'abord la [**PR #1 — socle commun**](../../pull/1) : approuver ou demander des corrections. **Pas besoin de finir son propre code avant cette revue.**
+3. Après fusion approuvée, synchroniser `main`, puis créer une **branche temporaire par ticket** : `feature/RCS-XX-sujet`, `experiment/RCS-XX-sujet`, `docs/RCS-XX-sujet`…
+4. Écrire code **et tests**, citer ses sources/versions et ses risques, créer une PR et demander une revue à un autre membre. Une CI réussie ne dispense pas de la revue.
+5. Une fois la PR fusionnée et vérifiée, **supprimer normalement la branche temporaire** si elle ne contient plus de travail non intégré. Conserver les versions stables par tags/releases et registre d'artefacts.
+
+⚙️ Les règles complètes sont dans [CONTRIBUTING.md](CONTRIBUTING.md). L'éditeur **Cursor, VS Code ou autre** peut ouvrir le même dépôt et les mêmes branches.
+
+### 📅 Proposition de Sprint 0 — à approuver, pas encore planifiée dans Jira
+
+**Du lundi 23 novembre au dimanche 6 décembre 2026** (deux semaines de préparation compatible avec des semaines étudiantes chargées).
+
+- **Réponse rapide des cinq membres** : accord sur le principe et créneaux possibles avant le **dimanche 22 novembre à 20 h** (Paris).
+- **Réunion de lancement proposée** : **mardi 24 novembre à 20 h 30** (30 min, à décaler si nécessaire).
+- **Suivi léger asynchrone** : chaque jeudi (26/11 et 03/12), par Jira/WhatsApp, sans imposer une réunion supplémentaire.
+- **Revue proposée** : **dimanche 6 décembre à 18 h** (30 min).
+
+Le groupe peut raccourcir, allonger ou décaler ces dates : aucune date n'est **validée** avant retour collectif, et le Sprint Jira reste **futur**.
+
+## 📚 Documentation et conformité des données
+
+Les documents collaboratifs **fiche d'équipe V5, bibliothèque V3.6 et cahier des charges V1.3** ont été reportés par la coordinatrice dans le **Drive partagé**. Ils complètent la documentation technique de GitHub, qui conserve les scripts, versions, preuves et Pull Requests.
+
+**Sécurité :** aucun nom de patient, secret, rapport clinique non autorisé ni dataset sensible dans ce dépôt public. Des sources de maintenance industrielles/simulées doivent rester clairement identifiées comme non médicales. Les modèles et métriques n'ont pas de validation clinique.
+
+**Ressources :** [CodeCarbon](https://docs.codecarbon.io/latest/) · [FinOps Foundation](https://www.finops.org/) · [Conventions GitHub](CONTRIBUTING.md).
+
+<div align="center">
+
+**RoboCare Sentinel · From data to dependable decisions, with a human in control.**
+
+*ECE Paris · MSc2 AI · 2026–2027*
+
+</div>
