@@ -21,7 +21,7 @@ Les valeurs suivantes sont préparées pour les paramètres **About**. Elles ne 
 
 1. Aller dans le dépôt → **About** (panneau à droite) → roue dentée.
 2. Remplacer Description, ajouter Topics, laisser Website vide tant que la page n'est pas active.
-3. Une fois PR #1 fusionnée, activer **Settings → Pages → Deploy from a branch → main /docs**.
+3. **Sans attendre PR #1**, activer **Settings → Pages → Deploy from a branch → gh-pages / (root)**. Cette branche indépendante a déjà été créée et contient le site. Elle ne modifie pas `main`.
 4. Vérifier l'URL de publication ; l'ajouter dans Website.
 5. Garder la **protection de `main`** et les validations de PR. Ne pas désactiver le ruleset pour effectuer ces réglages.
 
