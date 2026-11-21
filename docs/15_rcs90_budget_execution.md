@@ -48,3 +48,20 @@ La bibliothèque V3.6 et le CDC V1.3 décrivent la gouvernance globale ; la PR #
 5. Mesures réelles (encore manquantes), trois scénarios ROI et décision GO/NO-GO seulement après preuves.
 
 **Sources de départ :** TP05 ECE (20/11/2026) ; rappel professeur versionnement/coût du cycle de vie ; tickets RCS-65, RCS-82, RCS-90.
+
+## Vérification locale du 21 novembre 2026
+
+Branche `feature/RCS-90-suivi-couts-complets`, référence initiale `c19eb4e`,
+Windows / Python 3.12.2. Commandes réellement exécutées :
+
+```bash
+python -m unittest discover -s tests -v
+python -m tools.rcs90_finops --costs planning/rcs90_costs.csv --worklogs planning/rcs90_worklogs.csv
+```
+
+Les 9 tests réussissent. Le calculateur retourne `preparatory`, 0 ligne de coût,
+0 ligne de temps et `null` pour dépenses, prévisions, heures, valorisation et
+coût par succès. Les registres demeurent vierges : aucun temps, coût ou nombre
+de succès n'a été imputé. Le fonctionnement du calculateur est vérifié ; le
+budget complet, les preuves de factures/temps et la validation collective restent
+à fournir. Aucun changement du calcul n'a été nécessaire sur ce parcours.
