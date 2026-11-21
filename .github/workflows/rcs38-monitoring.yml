@@ -20,3 +20,4 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_rcs38_monitoring.py' -v
       - run: python -m tools.rcs38_contract
       - run: node --check frontend/monitoring/app.js
+      - run: node --test tests/test_rcs38_frontend.cjs

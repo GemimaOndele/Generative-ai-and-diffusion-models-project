@@ -6,6 +6,24 @@
 
 > **État : cadrage / préparation.** Ce dépôt ne contient pas encore de résultat scientifique validé ni d'application médicale opérationnelle. Il ne doit pas être utilisé pour diagnostiquer des patients ou commander un équipement médical réel.
 
+## Démonstration locale RCS-38 (branche de PR #8)
+
+Ouvrir `RoboCare-Sentinel.code-workspace` dans Cursor, puis utiliser les tâches
+RCS-38 du menu Terminal → Run Task, ou lancer depuis la racine :
+
+```bash
+python -m tools.rcs38_demo_server --port 8000 --db .local/rcs38.sqlite3
+```
+
+Ouvrir http://127.0.0.1:8000/ . Python 3.11+ suffit pour l'API et SQLite ; aucun
+service cloud, clé API ou paquet Python tiers n'est nécessaire à ce prototype.
+La base locale conserve les décisions simulées. Pour une nouvelle session de
+démonstration sans effacer la précédente, choisir un autre chemin `--db`.
+Arrêter le serveur avec Ctrl+C avant de relancer la tâche sur le même port.
+
+Le [compte rendu des vérifications locales](docs/20_verification_locale_2026-11-21.md)
+précise les tests, limites et revues restant nécessaires.
+
 ## Objectif
 
 Concevoir et développer une **plateforme web d'aide à la maintenance biomédicale** pour centraliser des informations techniques autorisées, visualiser des mesures et signalements, détecter des anomalies, préparer des interventions documentées et laisser **la décision finale au technicien**.

@@ -11,13 +11,14 @@ from datetime import datetime, timezone
 import hashlib
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
-import os
 from pathlib import Path
 import re
 import sqlite3
 import tempfile
 from urllib.parse import urlsplit
 from uuid import uuid4
+
+from tools.rcs38_contract import validate_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONT = ROOT / "frontend" / "monitoring"
@@ -36,6 +37,7 @@ def utc_now() -> str:
 
 
 def load_fixture(path: Path = FIXTURE) -> dict:
+    validate_fixture(path)
     raw = path.read_bytes()
     fixture = json.loads(raw)
     if fixture.get("data_mode") != DATA_MODE:
@@ -200,6 +202,8 @@ def make_handler(store: DemoStore):
             super().end_headers()
 
         def do_GET(self):
+            if not self._local_host():
+                return self._json(403, {"error": "Hôte local obligatoire"})
             path = urlsplit(self.path).path
             if path == "/api/v1/demo/health":
                 return self._json(200, {
@@ -221,7 +225,23 @@ def make_handler(store: DemoStore):
                 return
             return super().do_GET()
 
+        def do_HEAD(self):
+            if not self._local_host():
+                self.send_response(403)
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            return super().do_HEAD()
+
+        def _local_host(self):
+            port = self.server.server_address[1]
+            return self.headers.get("Host") in {
+                f"127.0.0.1:{port}", f"localhost:{port}"
+            }
+
         def do_POST(self):
+            if not self._local_host():
+                return self._json(403, {"error": "Hôte local obligatoire"})
             path = urlsplit(self.path).path
             match = ACTION_PATH.fullmatch(path)
             if not match:

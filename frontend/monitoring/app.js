@@ -48,7 +48,7 @@ function dataQuality(){
   const anomalies=readings.filter(x=>x.anomaly===true);
   const invalid=readings.filter(x=>x.quality!=="valide");
   const cards=[metric("Échantillons fictifs",readings.length,"Données simulées"),metric("Alertes candidates",anomalies.length,"À vérifier par un humain"),metric("Données invalides",invalid.length,"Aucune interprétation clinique"),metric("Taux de faux négatifs","ND","Absence de vérité terrain")].join("");
-  const rows=readings.map(d=>`<tr><td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.site)}</td><td>${formatND(d.value,d.unit)}</td><td>${badge(d.quality)}</td><td>${badge(d.anomaly?"Alerte":"Non signalée")}</td></tr>`);
+  const rows=readings.map(d=>`<tr><td>${escapeHtml(d.device)}</td><td>${escapeHtml(d.site)}</td><td>${escapeHtml(formatND(d.value,d.unit))}</td><td>${badge(d.quality)}</td><td>${badge(d.anomaly?"Alerte":"Non signalée")}</td></tr>`);
   return `<div class="metric-grid">${cards}</div><div class="panels">${panel("Observations fictives",table(["Équipement","Site","Mesure (démo)","Qualité","Signal"],rows))}${panel("Contrôles nécessaires",`<div class="summary">${row("Vérité terrain","ND")}${row("Précision / rappel","ND")}${row("Dérive des données","À définir")}${row("Métriques par sous-groupe","À définir")}</div><p class="hint">Une donnée invalide ne doit jamais servir de preuve de panne. RCS-69 et RCS-88 encadrent les évaluations scientifiques.</p>`)}</div>`;
 }
 function maintenance(){
@@ -89,7 +89,7 @@ function platform(){
   const knownCosts=runs.filter(r=>r.cost_eur!==null);
   const costSum=knownCosts.reduce((sum,r)=>sum+r.cost_eur,0);
   const p95="ND"; // Ne pas calculer une latence p95 sur une liste de démonstration non gelée.
-  const rows=runs.map(x=>`<tr><td>${escapeHtml(x.run_id)}</td><td>${escapeHtml(x.model)}</td><td>${escapeHtml(x.version)}</td><td>${formatND(x.latency_ms,"ms")}</td><td>${formatND(x.cost_eur,"€")}</td><td>${formatND(x.energy_kwh,"kWh")}</td><td>${badge(x.boundary)}</td></tr>`);
+  const rows=runs.map(x=>`<tr><td>${escapeHtml(x.run_id)}</td><td>${escapeHtml(x.model)}</td><td>${escapeHtml(x.version)}</td><td>${escapeHtml(formatND(x.latency_ms,"ms"))}</td><td>${escapeHtml(formatND(x.cost_eur,"€"))}</td><td>${escapeHtml(formatND(x.energy_kwh,"kWh"))}</td><td>${badge(x.boundary)}</td></tr>`);
   const cards=[metric("Exécutions fictives",runs.length,"Illustration sans appel LLM"),metric("Coût d'exemple",knownCosts.length===runs.length&&runs.length ? costSum.toFixed(3)+" €":"ND","Montant fictif, pas une facture"),metric("Latence p95",p95,"Pas de benchmark gelé"),metric("Énergie distante","ND","Non observable via CodeCarbon local")].join("");
   return `<div class="metric-grid">${cards}</div><div class="panels">${panel("Exécutions pédagogiques",table(["Run fictif","Modèle","Version","Latence","Coût","Énergie","Frontière"],rows),true)}${panel("Couverture Green AI / gouvernance",`<div class="summary">${row("CPU/GPU local CodeCarbon","Non instrumenté")}${row("Énergie LLM distant","ND")}${row("Provenance des données","Fictive")}${row("Modèles A/B réels","Non choisis")}${row("Coût par tâche réussie","ND")}${row("Biais et drift","Non évalués")}</div><p class="hint">Les coûts de démonstration ne sont pas des montants payés. CodeCarbon n'observe pas les serveurs des API distantes. RCS-81/82/83/87/89/90 définissent le futur suivi mesuré.</p>`,true)}</div>`;
 }
@@ -97,7 +97,11 @@ function render(){
   if(!data) return;
   const selectedTitle=views.find(v=>v.id===chosenView).title;
   byId("section-title").textContent=selectedTitle;
-  byId("nav").innerHTML=views.map((v,i)=>`<button class="nav-btn" type="button" data-view="${v.id}" aria-current="${chosenView===v.id?"page":"false"}"><span class="nav-num">${i+1}</span> ${escapeHtml(v.short)}</button>`).join("");
+  // Preserve the focused navigation button when switching views with a keyboard.
+  if(!byId("nav").children.length)
+    byId("nav").innerHTML=views.map((v,i)=>`<button class="nav-btn" type="button" data-view="${v.id}"><span class="nav-num">${i+1}</span> ${escapeHtml(v.short)}</button>`).join("");
+  for(const button of byId("nav").querySelectorAll("button[data-view]"))
+    button.setAttribute("aria-current",button.dataset.view===chosenView?"page":"false");
   const renderers={equipment,data:dataQuality,maintenance,platform};
   byId("content").innerHTML=renderers[chosenView]();
 }

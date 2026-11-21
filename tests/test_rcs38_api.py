@@ -25,11 +25,13 @@ class TestRCS38LocalAPI(unittest.TestCase):
         self.addCleanup(self.server.server_close)
         self.addCleanup(self.server.shutdown)
 
-    def request(self, path, payload=None, *, origin=None, content_type="application/json"):
+    def request(self, path, payload=None, *, origin=None, content_type="application/json", host=None):
         data = json.dumps(payload).encode() if payload is not None else None
         headers = {"Content-Type": content_type} if data is not None else {}
         if origin:
             headers["Origin"] = origin
+        if host:
+            headers["Host"] = host
         req = Request(self.base + path, data=data, headers=headers)
         try:
             with urlopen(req, timeout=4) as response:
@@ -114,6 +116,43 @@ class TestRCS38LocalAPI(unittest.TestCase):
 
     def test_no_public_network_bind(self):
         self.assertEqual(self.server.server_address[0], "127.0.0.1")
+
+    def test_foreign_host_rejected_for_read_write_and_head(self):
+        # A loopback bind alone does not prevent a foreign DNS name resolving to it.
+        for path in ("/index.html", "/api/v1/demo/overview"):
+            self.assertEqual(self.request(path, host="external.example")[0], 403)
+        payload = {"decision": "approved", "reason_code": "controle_confirme",
+                   "acknowledge_simulation": True}
+        self.assertEqual(self.request("/api/v1/demo/actions/ACT-DEMO-01/decision",
+                                      payload, host="external.example")[0], 403)
+        request = Request(self.base + "/index.html", method="HEAD",
+                          headers={"Host": "external.example"})
+        with self.assertRaises(HTTPError) as error:
+            urlopen(request, timeout=4)
+        self.assertEqual(error.exception.code, 403)
+        port = self.server.server_address[1]
+        self.assertEqual(self.request("/api/v1/demo/overview", host=f"localhost:{port}")[0], 200)
+        self.assertEqual(self.request("/api/v1/demo/overview")[1]["events"], [])
+
+    def test_fixture_contract_enforced_by_server_loader(self):
+        fixture = json.loads((ROOT / "frontend/monitoring/demo.json").read_text(encoding="utf-8"))
+        path = Path(self.temp.name) / "invalid.json"
+        for field, value in (("site", "unapproved-site"), ("patient_id", "FORBIDDEN_TEST_MARKER")):
+            changed = json.loads(json.dumps(fixture))
+            changed["devices"][0][field] = value
+            path.write_text(json.dumps(changed), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                load_fixture(path)
+
+    def test_simultaneous_decisions_commit_one_event(self):
+        from concurrent.futures import ThreadPoolExecutor
+        payload = {"decision": "approved", "reason_code": "controle_confirme",
+                   "acknowledge_simulation": True}
+        path = "/api/v1/demo/actions/ACT-DEMO-01/decision"
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            responses = list(pool.map(lambda _: self.request(path, payload)[0], range(2)))
+        self.assertEqual(sorted(responses), [200, 409])
+        self.assertEqual(len(self.request("/api/v1/demo/overview")[1]["events"]), 1)
 
 
 if __name__ == "__main__":
