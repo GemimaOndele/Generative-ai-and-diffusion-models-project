@@ -14,6 +14,7 @@ class TestReadmeQuality(unittest.TestCase):
             with self.subTest(label=label):
                 self.assertIn(label, readme)
         self.assertIn("PR #1", readme)
+        self.assertNotIn("../../pull/", readme, "Utiliser des URLs GitHub stables pour les PR")
         self.assertIn("non", readme.lower())
 
     def test_all_local_visual_assets_exist_and_are_safe(self):
