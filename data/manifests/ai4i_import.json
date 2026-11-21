@@ -1,0 +1,22 @@
+{
+  "source": {
+    "id": "S04",
+    "nom": "AI4I 2020 Predictive Maintenance Dataset (UCI)",
+    "url": "https://archive.ics.uci.edu/dataset/601/ai4i",
+    "licence": "CC BY 4.0",
+    "categorie": "Substitut générique NON médical (données synthétiques industrielles)",
+    "date_verif": "2026-11-20"
+  },
+  "import": {
+    "fichier": "ai4i2020.csv",
+    "sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e",
+    "statut": "importe",
+    "lot_id": 1,
+    "nb_lignes": 10000,
+    "nb_acceptees": 10000,
+    "nb_rejetees": 0,
+    "nb_doublons": 0,
+    "erreurs": []
+  },
+  "genere_le": "2026-11-20T12:09:53+00:00"
+}
