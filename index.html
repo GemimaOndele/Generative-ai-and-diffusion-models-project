@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#081b30">
+  <meta name="description" content="RoboCare Sentinel — prototype académique de plateforme web d'assistance à la maintenance biomédicale, Diffusion, Multi-LLM, RAG et Green AI. ECE Paris MSc2 AI.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="RoboCare Sentinel · Research prototype">
+  <meta property="og:description" content="AI-assisted maintenance research · Diffusion · Multi-LLM · Responsible Green AI · Human oversight">
+  <meta property="og:image" content="./assets/robocare-hero-animated.svg">
+  <title>RoboCare Sentinel · Diffusion × Multi-LLM × Green AI</title>
+  <link rel="stylesheet" href="./landing.css">
+  <script defer src="./landing.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Aller au contenu</a>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <header class="header">
+    <a class="logo" href="#home" aria-label="RoboCare Sentinel, retour en haut">
+      <span class="logo-mark" aria-hidden="true"><span>R</span></span>
+      <span><strong>ROBOCARE</strong><small>SENTINEL</small></span>
+    </a>
+    <button type="button" id="menu-toggle" class="menu-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Afficher le menu">☰</button>
+    <nav id="site-nav" class="site-nav" aria-label="Navigation principale">
+      <a href="#mission">Mission</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#research">Recherche</a>
+      <a href="#team">Équipe</a>
+      <a class="nav-cta" href="https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </nav>
+  </header>
+  <main id="main">
+    <section id="home" class="hero">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow"><span class="pulse-dot"></span> ECE PARIS · MSC2 ARTIFICIAL INTELLIGENCE</p>
+          <h1>Technology for <em>dependable decisions.</em></h1>
+          <p class="lead">Une plateforme de recherche pour explorer comment l'IA générative, les modèles de diffusion et les systèmes Multi-LLM peuvent <strong>assister la maintenance d'équipements médicaux</strong>.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#mission">Découvrir le projet <span aria-hidden="true">↗</span></a>
+            <a class="btn ghost" href="https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pulls" target="_blank" rel="noopener noreferrer">Voir le développement</a>
+          </div>
+          <p class="disclaimer">⚠️ Prototype universitaire, non clinique : aucun diagnostic patient ni commande d'appareil réel. L'utilisateur humain conserve la décision finale.</p>
+        </div>
+        <div class="hero-art">
+          <img src="./assets/robocare-hero-animated.svg" width="1200" height="430" alt="Machine biomédicale symbolique en perspective 3D, entourée de visualisations holographiques animées" loading="eager">
+          <div class="hero-floating chip-one"><span>◉</span> Human-in-the-loop</div>
+          <div class="hero-floating chip-two"><span>⌁</span> Model observability</div>
+        </div>
+      </div>
+      <div class="scroll-marker"><span class="line"></span> SCROLL TO EXPLORE</div>
+    </section>
+    <section id="mission" class="section">
+      <div class="heading-row">
+        <div>
+          <p class="eyebrow">01 / WHY WE BUILD</p>
+          <h2>Une plateforme, <em>quatre vues complémentaires.</em></h2>
+        </div>
+        <p>La recherche doit aboutir à une véritable application, avec des limites explicites et une validation humaine à chaque étape sensible.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature">
+          <span class="feature-index">01</span><div class="feature-icon" aria-hidden="true">▣</div>
+          <h3>Equipment fleet</h3><p>Inventaire, statut, historique et traçabilité des équipements pilotes, après validation du périmètre et des sources.</p><span class="chip">Parc & équipements</span>
+        </article>
+        <article class="feature">
+          <span class="feature-index">02</span><div class="feature-icon" aria-hidden="true">⌁</div>
+          <h3>Data & anomalies</h3><p>Contrôle qualité, signaux, anomalies candidates, analyse des faux positifs et limites de transfert entre domaines.</p><span class="chip">Détection & qualité</span>
+        </article>
+        <article class="feature">
+          <span class="feature-index">03</span><div class="feature-icon" aria-hidden="true">✓</div>
+          <h3>Maintenance workflow</h3><p>Alerte, revue technique, intervention simulée et journal d'approbation : aucune action autonome sur machine.</p><span class="chip">Décisions humaines</span>
+        </article>
+        <article class="feature">
+          <span class="feature-index">04</span><div class="feature-icon" aria-hidden="true">↗</div>
+          <h3>AI & Green monitoring</h3><p>Versions, qualité, coût complet, temps humain, latence, risques, biais et frontières environnementales.</p><span class="chip">MLOps · FinOps · Green AI</span>
+        </article>
+      </div>
+      <div class="prototype-link">
+        <div><strong>Une première interface de démonstration existe déjà.</strong><p>Quatre vues fonctionnelles sur données entièrement fictives · PR n° 8 · Validation métier en attente.</p></div>
+        <a href="https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8" target="_blank" rel="noopener noreferrer">Explorer le prototype ↗</a>
+      </div>
+    </section>
+    <section id="architecture" class="section architecture">
+      <div class="section-title"><p class="eyebrow">02 / SYSTEM DESIGN</p><h2>From trusted data <em>to informed action.</em></h2></div>
+      <div class="architecture-frame">
+        <img src="./assets/architecture.svg" width="1200" height="290" loading="lazy" alt="Architecture cible : sources autorisées, qualité, modèles IA, plateforme et décision par un technicien ; observabilité transverse.">
+      </div>
+      <div class="architecture-points">
+        <p><strong>Versioned by design</strong><span>Datasets, modèles, prompts, sources et versions de code liées aux traces.</span></p>
+        <p><strong>Safety by design</strong><span>Réponses sourcées, refus justifiés, revue humaine, risques et biais documentés.</span></p>
+        <p><strong>Cost-aware by design</strong><span>Énergie locale, budget et effort humain suivis dès le cadrage — sans inventer de mesures.</span></p>
+      </div>
+    </section>
+    <section id="research" class="section">
+      <div class="heading-row">
+        <div><p class="eyebrow">03 / SCIENTIFIC TRACKS</p><h2>Two research milestones. <em>One responsible product.</em></h2></div>
+        <p>TP05 enrichit le deuxième jalon Multi-LLM. Aucun résultat scientifique ou clinique n'est présenté comme validé avant son exécution.</p>
+      </div>
+      <div class="track-tabs" role="tablist" aria-label="Choisir un axe de recherche">
+        <button id="tab-j1" type="button" role="tab" aria-controls="track-content" aria-selected="true" data-track="j1">J1 · Diffusion</button>
+        <button id="tab-j2" type="button" role="tab" aria-controls="track-content" aria-selected="false" data-track="j2" tabindex="-1">J2 · Multi-LLM</button>
+        <button id="tab-tp05" type="button" role="tab" aria-controls="track-content" aria-selected="false" data-track="tp05" tabindex="-1">TP05 · Green AI</button>
+      </div>
+      <article id="track-content" class="track-panel" role="tabpanel" aria-labelledby="tab-j1" tabindex="0">
+        <div class="track-number" aria-hidden="true">J1</div>
+        <div class="track-copy"><span class="tag">GENAI · CM03 · 60 MIN</span><h3>Diffusion-based anomaly detection</h3><p>Comparer un véritable modèle génératif (diffusion / reconstruction) à une baseline sur des cas gelés, documenter la reproductibilité et un échec.</p><div class="track-meta"><span>État : préparation</span><span>Pas de validation médicale</span></div></div>
+      </article>
+      <div class="research-footer">Les études utilisent uniquement des données sous licence autorisée. Les données industrielles et synthétiques ne valident pas le comportement sur dispositifs biomédicaux.</div>
+    </section>
+    <section id="team" class="section">
+      <div class="heading-row"><div><p class="eyebrow">04 / THE PEOPLE</p><h2>Five minds. <em>One mission.</em></h2></div><p>Les compétences complémentaires — IA, data, logiciel, fonctionnel et coordination — sont reliées par des binômes et une revue des contributions.</p></div>
+      <div class="team-grid">
+        <div class="person"><span>GO</span><strong>Gémima</strong><small>Coordination · Data · FinOps</small></div>
+        <div class="person"><span>AD</span><strong>Aminata</strong><small>Produit · Fonctionnel · Éthique</small></div>
+        <div class="person"><span>OK</span><strong>Omar</strong><small>Data · JMerise · Baselines</small></div>
+        <div class="person"><span>EC</span><strong>Elias</strong><small>Diffusion · LLM · Évaluation</small></div>
+        <div class="person"><span>AM</span><strong>Ayoub</strong><small>Architecture · CI · Observabilité</small></div>
+      </div>
+      <div class="cta-end">
+        <p class="eyebrow">FOLLOW THE BUILD</p><h2>Build with evidence.<br><em>Ship with care.</em></h2>
+        <a class="btn primary" href="https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project" target="_blank" rel="noopener noreferrer">GitHub repository ↗</a>
+        <a class="btn ghost" href="https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog" target="_blank" rel="noopener noreferrer">Jira / Roadmap ↗</a>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div><strong>RoboCare Sentinel</strong><span>ECE Paris · MSc2 AI · 2026–2027</span></div>
+    <p>Research prototype · Human oversight by design · No patient data</p>
+    <a href="#home">Back to top ↑</a>
+  </footer>
+</body>
+</html>
