@@ -14,15 +14,15 @@
 
 | PR | Branche | Fichiers ajoutés/modifiés avant audit | Domaine | Décision de fusion |
 |---|---|---:|---|---|
-| [#1](../../pull/1) | `docs/RCS-46-structure-projet` | 24 | Socle, CONTRIBUTING, CI, TP04 | **Première**, après revue humaine ; nouveau README + assets dans cette PR |
-| [#2](../../pull/2) | `docs/RCS-17-sprint0-c3-tp04-preparation` | 6 | Sprint 0, C3, TP04, cas fictifs | Réviser/actualiser après #1 |
-| [#3](../../pull/3) | `docs/RCS-81-tp05-finops-green-ethique` | 8 | TP05, CodeCarbon, CSV fictifs vides | README concurrent à retirer ; revue après #1 |
-| [#4](../../pull/4) | `docs/RCS-87-cartographie-versioning-risques-couts` | 19 | Governance/model cards, coûts, traces | README concurrent à retirer ; revue après #1 |
-| [#5](../../pull/5) | `feature/RCS-90-suivi-couts-complets` | 7 | Calculateur des coûts, CI | Coordonner registres avec #4 |
-| [#6](../../pull/6) | `docs/RCS-17-sprint0-readiness` | 5 | Contrôle de capacité et plan Sprint | Éviter doublons du plan #2 |
-| [#7](../../pull/7) | `docs/RCS-69-preparer-cas-diffusion` | 6 | Cas C3 et baseline artificielle | Ne pas annoncer diffusion démontrée |
-| [#8](../../pull/8) | `feature/RCS-38-monitoring-quatre-vues` | 8 | Prototype web 4 vues fictif | Interface non validée métier |
-| [#9](../../pull/9) | `experiment/RCS-81-evaluation-tp04-tp05` | 6 | Comparateur LLM sur cas gelés | Pas de résultats LLM réels |
+| [#1](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1) | `docs/RCS-46-structure-projet` | 24 | Socle, CONTRIBUTING, CI, TP04 | **Première**, après revue humaine ; nouveau README + assets dans cette PR |
+| [#2](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/2) | `docs/RCS-17-sprint0-c3-tp04-preparation` | 6 | Sprint 0, C3, TP04, cas fictifs | Réviser/actualiser après #1 |
+| [#3](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/3) | `docs/RCS-81-tp05-finops-green-ethique` | 8 | TP05, CodeCarbon, CSV fictifs vides | README concurrent à retirer ; revue après #1 |
+| [#4](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/4) | `docs/RCS-87-cartographie-versioning-risques-couts` | 19 | Governance/model cards, coûts, traces | README concurrent à retirer ; revue après #1 |
+| [#5](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/5) | `feature/RCS-90-suivi-couts-complets` | 7 | Calculateur des coûts, CI | Coordonner registres avec #4 |
+| [#6](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/6) | `docs/RCS-17-sprint0-readiness` | 5 | Contrôle de capacité et plan Sprint | Éviter doublons du plan #2 |
+| [#7](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/7) | `docs/RCS-69-preparer-cas-diffusion` | 6 | Cas C3 et baseline artificielle | Ne pas annoncer diffusion démontrée |
+| [#8](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8) | `feature/RCS-38-monitoring-quatre-vues` | 8 | Prototype web 4 vues fictif | Interface non validée métier |
+| [#9](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9) | `experiment/RCS-81-evaluation-tp04-tp05` | 6 | Comparateur LLM sur cas gelés | Pas de résultats LLM réels |
 
 Ces chiffres correspondent à un **inventaire daté** : vérifier les PR pour l'état courant.
 
