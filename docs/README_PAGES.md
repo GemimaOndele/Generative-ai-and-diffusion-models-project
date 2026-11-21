@@ -14,7 +14,7 @@
 1. Vérifier que la PR #1 a reçu les approbations exigées, que les contrôles GitHub Actions sont au vert, puis fusionner.
 2. Ouvrir la page **Settings → Pages** du dépôt.
 3. Dans **Build and deployment**, choisir **Source : Deploy from a branch**.
-4. Choisir **Branch : main** et **Folder : /docs**, puis **Save**.
+4. Choisir **Branch : main** et **Folder : /docs** (source : `main /docs`), puis **Save**.
 5. Attendre l'état de déploiement GitHub et vérifier l'URL renvoyée par la plateforme.
 6. Après vérification, remplir la section **About → Website** avec l'URL réellement publiée.
 
