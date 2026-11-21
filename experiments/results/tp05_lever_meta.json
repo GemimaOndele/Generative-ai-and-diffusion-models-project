@@ -1,0 +1,13 @@
+{
+  "mode": "local",
+  "model_a": "HuggingFaceTB/SmolLM2-360M-Instruct@a10cc15",
+  "model_b": "Qwen/Qwen2.5-0.5B-Instruct@7ae5576",
+  "cases": "experiments/test_cases.jsonl",
+  "n_cases": 10,
+  "git_commit": "337ea85",
+  "max_new_tokens": 60,
+  "simulation": false,
+  "warning": "",
+  "python": "3.12.10",
+  "machine": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel"
+}
