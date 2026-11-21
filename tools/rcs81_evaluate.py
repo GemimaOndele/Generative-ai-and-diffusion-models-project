@@ -40,7 +40,10 @@ def csv_rows(path: str | Path, columns: set[str]) -> list[dict[str, str]]:
         rows = list(reader)
     if any(None in row for row in rows):
         raise ValueError("CSV mal formé: colonnes superflues dans une ligne")
-    return rows
+    if any(any(value is None for value in row.values()) for row in rows):
+        raise ValueError("CSV mal formé: valeurs manquantes dans une ligne")
+    # Normalize before both validation and aggregation, including model identity.
+    return [{key: value.strip() for key, value in row.items()} for row in rows]
 
 
 def positive_decimal(value: str, label: str) -> Decimal | None:
@@ -142,6 +145,14 @@ def summarize(manifest: str | Path, results: str | Path) -> dict:
     b={r["model_id"] for r in grouped["mono-B"]}
     if len(a)!=1 or len(b)!=1 or a==b:
         raise ValueError("Deux modèles LLM distincts A/B doivent être identifiés")
+    baseline_identities = set()
+    for strategy in ("mono-A", "mono-B"):
+        identities = {(r["model_id"], r["model_version"]) for r in grouped[strategy]}
+        if len(identities) != 1:
+            raise ValueError("Une seule version de modèle doit être utilisée par baseline")
+        baseline_identities.update(identities)
+    if any((r["model_id"], r["model_version"]) not in baseline_identities for r in grouped["V2"]):
+        raise ValueError("La V2 doit réutiliser les modèles et versions des baselines A/B")
     metrics={}
     for strategy,rr in grouped.items():
         successes=sum(r["success"]=="pass" for r in rr)
@@ -150,6 +161,7 @@ def summarize(manifest: str | Path, results: str | Path) -> dict:
         total=sum(costs,Decimal(0)) if complete_costs else None
         metrics[strategy]={
             "model_ids": sorted({r["model_id"] for r in rr}),
+            "model_versions": sorted({(r["model_id"], r["model_version"]) for r in rr}),
             "cases":len(rr),
             "business_success_count":successes,
             "business_success_rate":decimal_str(Decimal(successes)/Decimal(10),"0.000"),

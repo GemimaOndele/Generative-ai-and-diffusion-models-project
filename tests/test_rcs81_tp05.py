@@ -76,5 +76,38 @@ class TestJointEvaluation(unittest.TestCase):
         self.assertIsNone(x["results"]["mono-A"]["cost_total_eur"])
         self.assertIsNone(x["results"]["V2"]["cost_per_success_eur"])
 
+    def modified_runs(self, change):
+        path = self.runs()
+        with path.open(encoding="utf-8", newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        change(rows)
+        return self.write("modified.csv", RUN_COLUMNS, rows)
+
+    def test_whitespace_does_not_change_success_counts(self):
+        path = self.modified_runs(lambda rows: rows[0].update(success=" pass ", citation_status=" verified "))
+        result = summarize(self.cases(), path)
+        self.assertEqual(result["results"]["mono-A"]["business_success_count"], 9)
+        self.assertEqual(result["results"]["mono-A"]["citation_verified_count"], 10)
+
+    def test_model_alias_whitespace_cannot_fake_distinct_models(self):
+        def change(rows):
+            for row in rows:
+                if row["strategy"] == "mono-B":
+                    row["model_id"] = " LLM-A "
+        with self.assertRaisesRegex(ValueError, "distincts"):
+            summarize(self.cases(), self.modified_runs(change))
+
+    def test_changing_baseline_version_rejected(self):
+        path = self.modified_runs(lambda rows: rows[0].update(model_version="other-test-version"))
+        with self.assertRaisesRegex(ValueError, "version"):
+            summarize(self.cases(), path)
+
+    def test_v2_must_use_baseline_models_and_versions(self):
+        for field, value in (("model_id", "uncompared-test-model"), ("model_version", "other-test-version")):
+            with self.subTest(field=field):
+                path = self.modified_runs(lambda rows: rows[-1].update({field: value}))
+                with self.assertRaisesRegex(ValueError, "V2"):
+                    summarize(self.cases(), path)
+
 if __name__=="__main__":
     unittest.main()

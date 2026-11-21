@@ -58,3 +58,19 @@ Il ne décide jamais GO/NO-GO seul : revue humaine obligatoire sur cas sensibles
 - Gémima : faire adopter l'unité fonctionnelle, tenir le registre de décision et suivre la PR.
 
 **Aucun jeu clinique ni donnée sensible ne doit figurer sur le dépôt public.** Le fait que la CI réussisse ne vaut ni audit FinOps final, ni comparaison scientifique exécutée.
+
+## Vérification locale du 21 novembre 2026
+
+Exécution Windows / Python 3.12.2 : les six tests initiaux réussissent.
+Quatre nouveaux tests de régression reproduisent cinq échecs avant correction :
+espaces autour de `pass`/`verified` non comptabilisés, même modèle A/B déguisé
+par des espaces, versions variables au sein d'une baseline, et modèle/version
+V2 absent des baselines. Le parseur normalise désormais les champs avant
+validation ET agrégation ; la comparaison impose une version par baseline et
+la réutilisation de leurs identités modèle/version par V2.
+
+Après correction : `python -m unittest discover -s tests -v` → 10 tests réussis.
+`python -m tools.rcs81_evaluate` → `BLOCKED / cases_not_frozen`, toujours attendu.
+Aucun cas n'a été gelé, aucun appel LLM ni benchmark réel n'a été produit.
+Les fixtures des tests restent des fixtures logicielles ; aucune approbation
+scientifique ne peut en être déduite. La revue des modèles/traces demeure humaine.
