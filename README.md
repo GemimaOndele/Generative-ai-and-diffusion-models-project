@@ -7,7 +7,7 @@
 
 **MSc2 Artificial Intelligence** · **Prototype de recherche et d'application web**
 
-[📋 Jira / Backlog](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) · [🔀 Pull Requests](../../pulls) · [🧭 Guide d'équipe](CONTRIBUTING.md) · [🧪 Prototype web (PR #8)](../../pull/8)
+[📋 Jira / Backlog](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) · [🔀 Pull Requests](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pulls) · [🧭 Guide d'équipe](CONTRIBUTING.md) · [🧪 Prototype web (PR #8)](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8)
 
 `🧩 Application web` · `🧠 Diffusion & anomaly detection` · `🤝 Multi-LLM & RAG` · `🌱 Green AI / FinOps` · `🛡️ Human-in-the-loop`
 
@@ -30,7 +30,7 @@ La **famille pilote de machines**, l'accès aux données et les choix définitif
 
 | Vue | Objectif métier | État |
 |:---|:---|:---|
-| 🏥 **Parc équipements** | Inventaire, familles, statut et historique | Prototype fictif en [PR #8](../../pull/8) |
+| 🏥 **Parc équipements** | Inventaire, familles, statut et historique | Prototype fictif en [PR #8](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8) |
 | 📈 **Données & anomalies** | Qualité d'entrée, alertes, faux positifs/négatifs, dérive | Prototype fictif ; aucune métrique médicale validée |
 | 🧰 **Maintenance & interventions** | Revue technicien, décisions et interventions tracées | Parcours fictif ; aucune action sur machine |
 | 🌿 **Plateforme & Green AI** | Versions, qualité, latence, budget, coût humain, CodeCarbon local | Contrats préparés ; mesures réelles **ND** |
@@ -42,9 +42,9 @@ La **famille pilote de machines**, l'accès aux données et les choix définitif
 
 | Module | Séance | Ce qu'il faut démontrer | Préparation dans GitHub |
 |:---|:---|:---|:---|
-| **C3 · GenAI / diffusion** | **60 min** | 8–10 cas gelés, modèle de diffusion véritable, comparaison à une baseline, erreur analysée | [PR #2](../../pull/2) et [PR #7](../../pull/7) |
-| **TP04 · Multi-LLM** | **120 min + 30 min facultatives** | Mono-A / mono-B / V2 (routing ou cascade) sur les mêmes 10 cas dont 4 stress, citations et mesures | [PR #2](../../pull/2), [PR #9](../../pull/9) |
-| **TP05 · FinOps, Green AI & Éthique** | **90 min**, *complément de J2* | Coût par tâche réussie, énergie/CO₂e avec frontières claires, ≥3 risques éthiques et ≥1 test tracé | [PR #3](../../pull/3), [PR #5](../../pull/5), [PR #9](../../pull/9) |
+| **C3 · GenAI / diffusion** | **60 min** | 8–10 cas gelés, modèle de diffusion véritable, comparaison à une baseline, erreur analysée | [PR #2](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/2) et [PR #7](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/7) |
+| **TP04 · Multi-LLM** | **120 min + 30 min facultatives** | Mono-A / mono-B / V2 (routing ou cascade) sur les mêmes 10 cas dont 4 stress, citations et mesures | [PR #2](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/2), [PR #9](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9) |
+| **TP05 · FinOps, Green AI & Éthique** | **90 min**, *complément de J2* | Coût par tâche réussie, énergie/CO₂e avec frontières claires, ≥3 risques éthiques et ≥1 test tracé | [PR #3](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/3), [PR #5](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/5), [PR #9](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9) |
 
 **TP05 ne crée pas de troisième jalon.** Un mock ne démontre pas les performances d'un LLM, un simple bruitage n'atteste pas l'apprentissage d'une diffusion et **CodeCarbon exécuté localement ne mesure pas l'énergie des serveurs LLM distants**.
 
@@ -75,22 +75,22 @@ Ces composants sont **cibles ou en cours de développement**, pas un système ho
 
 | Sujet | État constaté |
 |:---|:---|
-| Branche `main` | **Protégée**, mais ne contient actuellement que ce README dans sa version ancienne ; la mise à jour est proposée dans [PR #1](../../pull/1) |
-| Structure web / backend / IA | Préparée sur [PR #1](../../pull/1), **pas encore dans `main`** |
+| Branche `main` | **Protégée**, mais ne contient actuellement que ce README dans sa version ancienne ; la mise à jour est proposée dans [PR #1](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1) |
+| Structure web / backend / IA | Préparée sur [PR #1](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1), **pas encore dans `main`** |
 | Protocoles C3, TP04, TP05 | En branches / Pull Requests, **pas encore des résultats scientifiques validés** |
-| Prototype web 4 vues | [PR #8](../../pull/8), tests CI réussis sur données fictives |
-| Code coût, évaluation et monitoring | [PR #5](../../pull/5), [PR #9](../../pull/9), autres PR |
+| Prototype web 4 vues | [PR #8](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8), tests CI réussis sur données fictives |
+| Code coût, évaluation et monitoring | [PR #5](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/5), [PR #9](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9), autres PR |
 | Sprint 0 | **Futur** ; calendrier proposé à confirmer, non démarré |
 | Revue PR #1 | Demandée aux quatre autres membres, **aucune approbation** au dernier contrôle |
 
-📂 [Voir toutes les PR](../../pulls) · 📑 [Audit technique détaillé](docs/GITHUB_AUDIT_2026-11-21.md) · 🔐 [Règle de protection de main](../../rules/27460937)
+📂 [Voir toutes les PR](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pulls) · 📑 [Audit technique détaillé](docs/GITHUB_AUDIT_2026-11-21.md) · 🔐 [Règle de protection de main](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/rules/27460937)
 
 **Ne pas confondre « code en branche + tests verts » avec « fonctionnalité intégrée et validée dans `main` ».**
 
 ## 🚀 Démarrer et contribuer
 
 1. Se connecter au [projet Jira](https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog) et sélectionner son ticket RCS-XX (responsable/binôme/relecteur connus).
-2. Examiner d'abord la [**PR #1 — socle commun**](../../pull/1) : approuver ou demander des corrections. **Pas besoin de finir son propre code avant cette revue.**
+2. Examiner d'abord la [**PR #1 — socle commun**](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/1) : approuver ou demander des corrections. **Pas besoin de finir son propre code avant cette revue.**
 3. Après fusion approuvée, synchroniser `main`, puis créer une **branche temporaire par ticket** : `feature/RCS-XX-sujet`, `experiment/RCS-XX-sujet`, `docs/RCS-XX-sujet`…
 4. Écrire code **et tests**, citer ses sources/versions et ses risques, créer une PR et demander une revue à un autre membre. Une CI réussie ne dispense pas de la revue.
 5. Une fois la PR fusionnée et vérifiée, **supprimer normalement la branche temporaire** si elle ne contient plus de travail non intégré. Conserver les versions stables par tags/releases et registre d'artefacts.
