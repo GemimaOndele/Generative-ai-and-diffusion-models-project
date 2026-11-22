@@ -1,0 +1,23 @@
+name: "RCS-38/52 — integration du vrai schema RCS-50"
+on:
+  push:
+    branches: ["test/RCS-38-52-real-schema-integration-20261122"]
+  pull_request:
+    paths:
+      - "tools/rcs38_ai4i_bridge.py"
+      - "tests/test_rcs38_omar_integration.py"
+      - ".github/workflows/rcs38-omar-cross-integration.yml"
+permissions:
+  contents: read
+jobs:
+  real-schema-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Actual migrations and CSV pipeline to read-only adapter
+        run: python -m unittest discover -s tests -p 'test_rcs38_omar_integration.py' -v
+      - name: Python syntax
+        run: python -m py_compile tools/rcs38_ai4i_bridge.py tests/test_rcs38_omar_integration.py
