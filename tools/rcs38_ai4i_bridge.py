@@ -109,3 +109,23 @@ def preview_ai4i(db_path: str | Path, limit: int = 100) -> dict:
         }
     finally:
         connection.close()
+
+if __name__ == "__main__":
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(
+        description="Export de consultation AI4I non médical (aucune écriture DB)"
+    )
+    parser.add_argument("--db", type=Path, required=True,
+                        help="Base SQLite créée par le pipeline RCS-50")
+    parser.add_argument("--out", type=Path, required=True,
+                        help="Fichier JSON local destiné à ai4i_preview.html")
+    parser.add_argument("--limit", type=int, default=100)
+    args = parser.parse_args()
+    if args.db.expanduser().resolve() == args.out.expanduser().resolve():
+        parser.error("--out must differ from --db")
+    exported = preview_ai4i(args.db, args.limit)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(exported, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Export non médical en lecture seule : {len(exported['observations'])} observations.")
