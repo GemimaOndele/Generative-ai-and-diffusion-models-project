@@ -57,3 +57,17 @@ assert preview["control_enabled"] is False
 5. Elias : valider protocole seuils / labels / splits et versions de modèle, sans interprétation clinique.
 
 **Ordre des PR :** socle PR #1 revu → branches de contrat & migration Omar → tests d'intégration → composant UI. Cette PR est empilée sur la branche RCS-38 ; elle **ne doit pas** être fusionnée dans main avant PR #8 et l'accord d'intégration.
+
+## Aperçu web local, strictement en lecture seule
+
+Une page distincte `frontend/monitoring/ai4i_preview.html` est reliée depuis le monitoring fictif. **Ce n'est pas un cinquième module clinique** : le navigateur lit exclusivement un export JSON choisi localement via `<input type=file>` (pas d'upload ni de fetch). Le contrat refuse `data_mode=fictional_demo_only`, exige `source_mode=industrial_proxy_non_medical`, `medical_data=false`, `control_enabled=false`, `actions=[]`, une source S04 non médicale et un SHA-256 par observation.
+
+Après génération de la base **sur une copie locale du pipeline RCS-52**, depuis la branche contenant l'adaptateur :
+
+```bash
+python -m tools.rcs38_ai4i_bridge --db data/rcs_poc.sqlite --out .local/rcs38_ai4i_preview.json --limit 100
+```
+
+Puis démarrer le serveur RCS-38 local comme d'habitude et ouvrir `http://127.0.0.1:8000/ai4i_preview.html`. Sélectionner le JSON local ; il reste sur le poste de démonstration. Le fichier de sortie est volontairement stocké sous `.local/` et **ne doit pas être ajouté au dépôt**. Le schéma industriel (SQL) et l'adaptateur Python restent sur des branches différentes jusqu'à l'intégration. Le test croisé qui réunit le schéma RCS-50, l'ingestion CSV et cet adaptateur est proposé dans la PR #23.
+
+**Portée de la preuve** : page d'affichage locale et pont de lecture. Ce n'est ni un serveur connecté au POC d'Omar en continu, ni un simulateur de décision hospitalière, ni une évaluation médicale. Ne pas importer de données d'hôpital réelles dans cette page.
