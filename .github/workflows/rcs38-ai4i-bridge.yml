@@ -18,5 +18,7 @@ jobs:
           python-version: "3.12"
       - name: Verify adapter using self-contained synthetic fixture
         run: python -m unittest discover -s tests -p 'test_rcs38_ai4i_bridge.py' -v
+      - name: Validate JavaScript for offline read-only preview
+        run: node --check frontend/monitoring/ai4i_preview.js
       - name: Check source syntax
         run: python -m py_compile tools/rcs38_ai4i_bridge.py tests/test_rcs38_ai4i_bridge.py
