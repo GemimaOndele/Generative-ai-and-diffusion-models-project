@@ -21,16 +21,23 @@
         !Array.isArray(json.observations) ||
         !Array.isArray(json.actions) || json.actions.length !== 0 ||
         !json.source || json.source.id !== "S04" ||
-        !/non[ -]médical/i.test(json.source.categorie || "")) {
+        !/non[ -](?:médical|medical)/i.test(json.source.categorie || "")) {
       throw new Error("Contrat invalide : seul l'export AI4I non médical, strictement en lecture seule, est accepté.");
     }
     if (json.observations.length > 1000) {
       throw new Error("Trop d'observations. Produire un export limité à 1000 lignes.");
     }
+    const allowedEquipment = new Set();
+    for (const device of json.equipment) {
+      if (!device || typeof device.id !== "string" || !device.id.startsWith("AI4I-")) {
+        throw new Error("Inventaire de substitution industriel invalide.");
+      }
+      allowedEquipment.add(device.id);
+    }
     for (const obs of json.observations) {
       if (!obs || typeof obs !== "object" ||
           typeof obs.equipment_id !== "string" ||
-          !obs.equipment_id.startsWith("AI4I-") ||
+          !allowedEquipment.has(obs.equipment_id) ||
           !obs.provenance || obs.provenance.source_id !== "S04" ||
           !/^[a-fA-F0-9]{64}$/.test(obs.provenance.file_sha256 || "") ||
           !obs.measurement || !obs.anomaly) {
