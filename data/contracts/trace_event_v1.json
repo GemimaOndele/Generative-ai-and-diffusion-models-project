@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://robocare-sentinel.local/contracts/trace_event_v1.json",
+  "title": "RoboCare Sentinel Trace Event v1",
+  "description": "Contrat JSON strict pour les événements d'observabilité (RCS-89). Aucun champ PII/patient autorisé.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "timestamp_utc",
+    "trace_id",
+    "run_id",
+    "component",
+    "model_version",
+    "status",
+    "latency_ms",
+    "cost_eur",
+    "energy_kwh",
+    "energy_kwh_status",
+    "boundary",
+    "fallback_triggered"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{7,63}$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"
+    },
+    "component": {
+      "type": "string",
+      "enum": ["ingestion", "diffusion_j1", "orchestrator_j2", "alerts_hitl", "api"]
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ok", "fallback", "error"]
+    },
+    "latency_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "cost_eur": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "energy_kwh": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "energy_kwh_status": {
+      "type": "string",
+      "enum": ["measured", "estimated", "ND"]
+    },
+    "boundary": {
+      "type": "string",
+      "enum": ["local_compute", "remote_api", "hybrid"]
+    },
+    "fallback_triggered": {
+      "type": "boolean"
+    },
+    "error_code": {
+      "type": ["string", "null"],
+      "maxLength": 64
+    }
+  }
+}
