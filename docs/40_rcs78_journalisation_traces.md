@@ -37,3 +37,23 @@ La seconde commande exige un workspace contenant **les traces de la branche RCS-
 Aucune commande à un appareil médical et aucune donnée patient ne doit apparaître dans ce dépôt. Les traces peuvent comporter des textes sensibles ; le rapport n'affiche que des **indicateurs de couverture** et alerte sur les noms de champs sensibles. L'absence de champ sensible ne prouve pas l'absence de donnée sensible dans les valeurs ; **une revue du corpus source reste obligatoire**.
 
 Cette PR est **empilée sur la branche RCS-81**. Elle ne doit pas être fusionnée vers `main` directement. La PR #1 doit d'abord être approuvée et les divergences des schémas de résultats résolues.
+
+## Vérification de compatibilité avec la branche RCS-77 (23/11/2026)
+
+Le fichier **exact** `experiments/results/tp04_local_traces.jsonl` de la branche `experiment/RCS-77-comparer-mono-routing-cascade` (blob GitHub SHA `492b853891da93b7d2357aa66f12b060f34b17cf`) a été relu et les **métadonnées agrégées** sans exposer le contenu de `answer` ou des documents. Il comporte **90 traces valides**, 9 groupes stratégie/variante de 10 cas chacun, sans doublon stratégie/variante/cas dans cette version. Les noms des stratégies correspondent aux enums du nouvel auditeur : `b0_extractive`, `mono_a`, `mono_b`, `routing`, `cascade`.
+
+| Groupe | Traces | Modèle signalé dans les traces | p95 observée (ms, nearest rank) |
+|---|---:|---:|---:|
+| b0_extractive:default | 10 | 0/10 | 8,4 |
+| mono_a:default | 10 | 9/10 | 11 841,4 |
+| mono_b:default | 10 | 9/10 | 12 622,8 |
+| routing:default | 10 | 9/10 | 35 861,1 |
+| cascade:default | 10 | 9/10 | 24 615,8 |
+| mono_a:noguards | 10 | 10/10 | 22 052,3 |
+| mono_b:noguards | 10 | 10/10 | 34 518,6 |
+| cascade:noguards | 10 | 10/10 | 38 232,8 |
+| routing:route8w | 10 | 9/10 | 32 304,0 |
+
+Les 90 lignes ont un champ de score proxy et **`cost_eur=null`** : couverture coûts manquante **90/90**, pas un prix nul. Les statuts d'exécution sont `ok`. Ces nombres sont une **lecture analytique des métadonnées du fichier source**, pas une nouvelle exécution des LLM, une approbation scientifique, ni la preuve que la CI de cette PR a importé le fichier d'Omar. Les contrôles `model_trace_coverage` ne garantissent pas la vérification des versions de modèle. Les scores du rapport de benchmark RCS-77 peuvent utiliser une méthode d'agrégation de latence différente ; ne pas confondre les deux sans confronter les définitions. La branche RCS-78 n'intègre pas les traces brutes pour éviter toute duplication de réponses pouvant comporter du contenu sensible.
+
+La prochaine validation est une revue conjointe des versions, licences et critères de gel, notamment les cas T07/T08 où la simple présence d'une citation ne garantit pas la fidélité.
