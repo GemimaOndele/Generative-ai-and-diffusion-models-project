@@ -97,3 +97,9 @@ Règles du protocole : mêmes cas figés pour A/B/C/V2, seed et config consigné
 - Aucun score de performance n'est revendiqué sans exécution traçable.
 - Les résultats sur données synthétiques ou industrielles ne se transfèrent pas automatiquement au biomédical.
 - Les contrôles locaux d'Omar et les 30 tests CI ne doivent pas être présentés comme une évaluation RCS‑81 validée.
+
+## Outil de comparaison
+
+- src/compare_approaches.py : données structurées A/B/C/V2, hypothèses H1–H4, protocole et contrôle « aucune mesure inventée ».
+- CLI : python -m src.compare_approaches (code 0 si aucun résultat chiffré n'est présent).
+- Tests : 	ests/test_compare_approaches.py, inclus dans la suite python -m unittest discover -s tests -p 'test_*.py'.
