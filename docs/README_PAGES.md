@@ -38,3 +38,11 @@ Ouvrir `http://localhost:8000/` dans Chrome ou Cursor. La page doit montrer les 
 - Si des informations confidentielles sont ajoutées ultérieurement : bloquer la publication, revoir les droits et procéder à la revue sécurité.
 
 Documentation : [GitHub Pages — Configuring a publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+
+## Clarification à la suite de la revue d'Ayoub du 23/11/2026
+
+**Source de publication souhaitée :** `gh-pages / (root)`, à confirmer dans les paramètres du dépôt. Le dossier `docs/` présent sur la PR #1 contient une **copie de préparation historique** du site et ne doit **pas** devenir une seconde source de déploiement. Ne pas choisir `main /docs` comme source Pages. Lors d'une modification du site, mettre à jour **la branche publiée** `gh-pages` via sa propre revue ; ne pas continuer deux versions divergentes.
+
+Les SVG `docs/assets/robocare-hero-animated.svg` et `docs/assets/architecture.svg` de la PR #1 restent utiles à la présentation de `README.md` sur `main`, et leur présence n'active pas une seconde publication. La question du retrait ou de l'archivage des trois fichiers `docs/index.html`, `docs/landing.css`, `docs/landing.js` de la branche de préparation doit être tranchée avec Ayoub en vérifiant d'abord les tests CI qui les référencent ; ne les supprimer ni les déplacer silencieusement.
+
+**État de revue GitHub :** une recommandation de squash dans un commentaire n'est pas une approbation formelle. Voir la PR #1 et ses contrôles.
