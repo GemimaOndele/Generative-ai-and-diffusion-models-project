@@ -1,6 +1,6 @@
 # Registre des décisions (ADR) et des risques — RoboCare Sentinel
 
-> **Statut : gabarit opérationnel.** Ne pas inventer de date, de résultat ou de décision non entérinée. Mettre à jour à chaque sprint/revue.
+> **Statut : gabarit opérationnel, aligné sur le socle RCS‑75 le 2026‑11‑23.** Ne pas inventer de date, de résultat ou de décision non entérinée. Mettre à jour à chaque sprint/revue. Les valeurs exactes de modèles, versions, fournisseur et licence restent `ND` tant qu'elles ne sont pas validées collectivement.
 
 ## 1. Registre des décisions (ADR)
 
@@ -8,8 +8,9 @@
 |---|---|---|---|---|---|---|---|---|---|---|
 | ADR-001 | ND | Proposé | Adopter un dépôt Git unique avec branches par ticket et PR relues | Pilotage projet RCS | Mono-repo / multi-repo | Traçabilité, revue, lien Jira-Git | Discipline Git requise | Équipe | Équipe | README.md, RCS-46/47/48 |
 | ADR-002 | ND | Proposé | Ne pas inventer de résultats/mesures ; marquer ND/estimé/mesuré | Exigences TP/CM | Publier estimations comme mesures | Intégrité scientifique | Certaines sections restent ND jusqu'à exécution | Elias | Aminata/Omar | Tickets TP04/TP05 |
-| ADR-003 | ND | À décider | Choix modèle A/B pour TP04 V2 | Jalon J2 Multi-LLM | A/B/C... | À compléter après vérification droits/licence/coût/région | Bloque exécution live TP04 | Elias | Aminata | RCS-75, `docs/05_tp04_architecture_v2.md` |
-| ADR-004 | ND | À décider | Patron V2 (routing vs cascade) | Défaut V1 à prouver | Routing / Cascade / Critique | Cascade proposée sous réserve de défaut V1 identifié | Implémentation/benchmark à réaliser | Elias | Ayoub | RCS-75, RCS-62 |
+| ADR-003 | 2026-11-23 | Proposé — en attente de validation | Nommer deux modèles A/B distincts avec identité exacte (provider, version, licence, région, rétention) avant tout appel live | Jalon J2 Multi-LLM | A/B/C… | Exigence RCS‑75 : `validate_pair` vérifie identité, droits et budget ; valeurs réelles non encore figées (`ND`) | Bloque l'exécution live ; le mode démo reste disponible | Elias | Aminata/Omar | RCS-75, `docs/05_tp04_architecture_v2.md`, `src/model_config.py`, `config/tp04_models.example.json`, `tests/test_model_config.py` |
+| ADR-004 | 2026-11-23 | Proposé (principe) — à confirmer par benchmark | Patron V2 : **routing** multi‑LLM par défaut ; **cascade** uniquement si un défaut V1 est prouvé et documenté | Défaut V1 à prouver | Routing / Cascade / Critique | Le routing évite d'appeler le second modèle quand ce n'est pas utile ; la cascade sert de repli/critique sur cas incertains (`src/orchestrator.py`) | Traces et coûts enregistrés ; nécessite les 30 tests CI | Elias | Ayoub | RCS-75, RCS-62, `docs/05_tp04_architecture_v2.md`, `src/orchestrator.py`, `tests/test_orchestrator.py`, `.github/workflows/tp04-tests.yml` |
+| ADR-005 | 2026-11-23 | Accepté (local) | Unifier le socle : un seul `src/`, `tests/`, `data/` ; supprimer `src/src/`, `tests/tests/`, `data/data/` ; orchestrateur canonique | Revue PR #30 (`ModuleNotFoundError: src.scoring`) | Arborescences dupliquées / socle unique | Une seule source de vérité, importable ; la CI vérifie l'absence de doublons | Branches filles basées sur `3b70661` ; zéro push pour les branches locales | Elias | Omar/Gémima | PR #30, `.github/workflows/tp04-tests.yml`, commit `3b70661` |
 
 ### Modèle ADR court (à copier)
 
@@ -35,12 +36,13 @@
 | ID | Catégorie | Risque (cause → événement → impact) | Prob. | Grav. | Expo. | Déclencheurs | Mitigation | Plan de contingence | Propriétaire | Reviewer | Ticket/Test | Date revue | Statut |
 |---|---|---|---:|---:|---:|---|---|---|---|---|---|---|---|
 | R-001 | Données/RGPD | Données sensibles/patients versionnées → fuite/confidentialité → incident légal/éthique | 2 | 5 | 10 | Fichier brut ajouté au repo | `.gitignore`, revue PR, manifest, anonymisation validée | Retrait immédiat, rotation secrets, revue | Équipe | Omar | RCS-18 | ND | Ouvert |
-| R-002 | IA/Qualité | Réponse LLM plausible mais fausse → mauvaise décision maintenance → risque opérationnel | 3 | 5 | 15 | Cas stress, source absente/contradictoire | Validation schéma, abstention, revue humaine, tests T07-T10 | Bloquer sortie, escalade humain | Elias | Aminata | RCS-62/79 | ND | Ouvert |
+| R-002 | IA/Qualité | Réponse LLM plausible mais fausse → mauvaise décision maintenance → risque opérationnel | 3 | 5 | 15 | Cas stress, source absente/contradictoire | Validation schéma, abstention, revue humaine, tests T07-T10, 30 tests CI | Bloquer sortie, escalade humain | Elias | Aminata | RCS-61/62/79 | 2026-11-23 | Ouvert |
 | R-003 | Biais/Robustesse | Dataset non représentatif (site/appareil/sous-groupe) → biais/faux négatifs → iniquité/performance trompeuse | 3 | 4 | 12 | Nouveau site/appareil | Model/dataset cards, matrice biais, tests stress | Restreindre périmètre, disclaimer | Elias | Aminata | RCS-88 | ND | Ouvert |
-| R-004 | Fournisseur/API | Indisponibilité/changement API/modèle → benchmark non reproductible → retard J2 | 3 | 3 | 9 | Timeout, version drift | Versionner modèle, fallback, mode démo, logs | Retour baseline V1 | Elias | Ayoub | RCS-61/62 | ND | Ouvert |
-| R-005 | Budget/FinOps | Appels payants non maîtrisés → dépassement budget → arrêt expérimentation | 2 | 4 | 8 | Absence plafond | `--confirm-paid-calls`, budget cap, suivi coût par succès | Stop appels, mode démo | Elias | Omar | RCS-65/85 | ND | Ouvert |
+| R-004 | Fournisseur/API | Indisponibilité/changement API/modèle → benchmark non reproductible → retard J2 | 3 | 3 | 9 | Timeout, version drift | Versionner modèle via `src/model_config.py` + `config/tp04_models.example.json`, fallback, mode démo, logs | Retour baseline V1 | Elias | Ayoub | RCS-61/62/75 | 2026-11-23 | Ouvert |
+| R-005 | Budget/FinOps | Appels payants non maîtrisés → dépassement budget → arrêt expérimentation | 2 | 4 | 8 | Absence plafond | `--confirm-paid-calls`, budget cap dans l'orchestrateur, suivi coût par succès | Stop appels, mode démo | Elias | Omar | RCS-65/85 | 2026-11-23 | Ouvert |
 | R-006 | Sécurité | Prompt injection via source RAG/document → action non autorisée/fuite → incident | 3 | 4 | 12 | Source non fiable | Filtrage, allowlist outils, tests injection, revue humaine | Désactiver outil, audit traces | Elias | Ayoub | RCS-62 | ND | Ouvert |
 | R-007 | Diffusion | Interprétation abusive d'un smoke test synthétique → fausse preuve J1 → décision invalide | 3 | 4 | 12 | Absence dataset réel | Étiqueter synthétique, protocole J1, preuves reproductibles | Retirer revendication, refaire essai | Elias | Gémima | RCS-57/70 | ND | Ouvert |
+| R-008 | Organisation/Code | Arborescences dupliquées (`src/src`, `tests/tests`, `data/data`) → imports cassés/PR non mergeable → perte de temps revue | 3 | 3 | 9 | Deux copies du même module | CI duplicate-dir check, socle unique, revue PR #30 | Rebase sur `3b70661`, suppression des doublons | Elias | Omar/Gémima | RCS-75, PR #30 | 2026-11-23 | Mitigé |
 
 ## 3. Gouvernance de revue
 
@@ -48,3 +50,4 @@
 - Escalade : tout risque exposition ≥ 12 ou impact 5 doit être porté au point de coordination.
 - Lien avec : RCS-88 (biais), RCS-89 (alertes), RCS-90 (coûts), RCS-63/78/86 (monitoring) si existants.
 - Preuve de clôture : lien vers test, PR, résultat, ou décision ADR.
+- Références socle (2026-11-23) : `docs/05_tp04_architecture_v2.md`, `docs/05_tp04_benchmark.md`, `.github/workflows/tp04-tests.yml`. Les contrôles logiciels locaux valident le code ; ils ne constituent pas une évaluation RCS‑81 figée collectivement.
