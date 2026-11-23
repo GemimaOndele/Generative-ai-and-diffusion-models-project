@@ -80,3 +80,10 @@
 - Preuve de clôture : lien vers test, PR, résultat, ou décision ADR.
 - Références socle (2026-11-23) : `docs/05_tp04_architecture_v2.md`, `docs/05_tp04_benchmark.md`, `.github/workflows/tp04-tests.yml`. Les contrôles logiciels locaux valident le code ; ils ne constituent pas une évaluation RCS‑81 figée collectivement.
 - À chaque sprint : réexaminer exposition initiale **et** résiduelle, réviser le GO/NO-GO, et consigner la date de revue réelle (jamais anticipée).
+
+## 4. Outil de validation du registre
+
+- src/governance.py : calcul d'exposition, matrice 5×5, analyse des tables ADR/risques et contrôle « aucune exposition résiduelle inventée ».
+- CLI : python -m src.governance docs/registre_decisions_risques.md (code 0 si le registre est cohérent).
+- Tests : 	ests/test_governance_register.py, exécutés avec la suite python -m unittest discover -s tests -p 'test_*.py'.
+- Le script ne remplace pas la revue humaine : il garantit la cohérence formelle, pas la vérité des décisions.
