@@ -1,6 +1,8 @@
 # 🧩 Code applicatif et orchestrateur
 
-- `src/orchestrator.py` est **un squelette** TP04 ; il n'appelle aucun LLM et lève volontairement `NotImplementedError`.
+- `src/orchestrator.py` est l'**orchestrateur TP04** (RCS-75) : mono-A, mono-B, routing et cascade bornée, refus/abstention, traces sans secret. Le squelette `NotImplementedError` du socle est remplacé, sans appel LLM réel tant que la configuration live n'est pas validée.
+- `src/model_config.py` valide l'identité exacte des deux modèles (nom, version, fournisseur, licence, droits, région, rétention, budget) ; `src/scoring.py` fournit le score automatique limité à la décision observable ; `src/run_benchmark.py` exécute le smoke test démo ou le mode live après autorisation.
+- `config/tp04_models.example.json` est le gabarit de configuration live, **sans clé API**.
 - Le [CodeCarbon local facultatif](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/3) est proposé dans `src/observability/` (PR #3) ; il ne mesure pas les fournisseurs de modèles distants.
 - Le [comparateur TP04/TP05](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9) vérifie le protocole et les résultats de modèles réels **lorsqu'ils existent**.
 - Le [prototype web](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/8) est dans `frontend/monitoring/`, sans API.

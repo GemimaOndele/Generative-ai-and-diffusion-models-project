@@ -1,0 +1,43 @@
+{
+  "_note": "Modèle à copier puis renseigner. Aucune clé API ici : elle reste dans la variable nommée par api_key_env. Ne pas committer le fichier rempli s'il contient des informations confidentielles.",
+  "models": {
+    "A": {
+      "model_name": "",
+      "provider": "",
+      "version": "",
+      "family": "",
+      "license": "",
+      "usage_rights_verified": false,
+      "region": "",
+      "retention_policy": "",
+      "data_transfer_authorized": false,
+      "base_url": "",
+      "api_key_env": "LLM_A_API_KEY",
+      "price_in_eur_per_1k_input": null,
+      "price_in_eur_per_1k_output": null
+    },
+    "B": {
+      "model_name": "",
+      "provider": "",
+      "version": "",
+      "family": "",
+      "license": "",
+      "usage_rights_verified": false,
+      "region": "",
+      "retention_policy": "",
+      "data_transfer_authorized": false,
+      "base_url": "",
+      "api_key_env": "LLM_B_API_KEY",
+      "price_in_eur_per_1k_input": null,
+      "price_in_eur_per_1k_output": null
+    }
+  },
+  "policy": {
+    "timeout_a_s": 8.0,
+    "timeout_b_s": 15.0,
+    "max_calls_per_case": 2,
+    "max_cost_eur_per_case": null,
+    "v2_pattern": "cascade",
+    "allow_paid_calls": false
+  }
+}

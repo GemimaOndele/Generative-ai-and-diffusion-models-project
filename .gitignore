@@ -1,38 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
 # Environnements et secrets locaux
 .env
 .env.*
 !.env.example
-.venv/
-venv/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.ipynb_checkpoints/
-.DS_Store
-.vscode/
-.idea/
+*.log
 *.pem
 *.key
-credentials.json
-# Données, modèles et résultats volumineux ou sensibles
-/data/raw/
-/data/private/
-/data/processed/
-/data/sensitive/
-/governance/private/
-/planning/private/
-/artifacts/private/
+*.secret
+*.secrets
+credentials*.json
+secrets*.json
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# Données, modèles et artefacts volumineux ou sensibles
+data/raw/
+data/private/
+data/processed/
+data/sensitive/
+governance/private/
+planning/private/
+artifacts/private/
 *.sqlite
 *.sqlite3
 *.db
 *.pkl
 *.joblib
+models/
+checkpoints/
+*.ckpt
 *.pt
 *.pth
-*.ckpt
+*.onnx
 *.safetensors
-# Artefacts d'exécution locale à contrôler avant publication
-/experiments/results/live/
-/logs/
-/local_runs/
-/tmp/
+
+# Résultats générés (garder templates si besoin via !pattern)
+experiments/results/*.json
+experiments/results/*.csv
+!experiments/results/tp05_mesures.csv
+experiments/results/live/
+
+# Exécution locale / temporaire
+logs/
+local_runs/
+tmp/
+*.tmp
+*.bak

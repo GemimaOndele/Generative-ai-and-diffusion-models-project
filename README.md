@@ -59,6 +59,17 @@ La **famille pilote de machines**, l'accès aux données et les choix définitif
 
 Ces composants sont **cibles ou en cours de développement**, pas un système hospitalier déjà déployé.
 
+### 🧪 TP04 — orchestrateur Multi-LLM (RCS-75)
+
+L'implémentation est désormais dans `src/` uniquement : `src/orchestrator.py` (mono-A, mono-B, routing et cascade bornée), `src/model_config.py` (identité A/B, licence, droits, budget), `src/scoring.py`, `src/run_benchmark.py`, avec un seul `tests/` et un seul `data/`. Les dix cas pédagogiques proposés sont dans `experiments/tp04_cases.jsonl` ; `experiments/test_cases.jsonl` reste vide, conformément au contrat du socle.
+
+```bash
+python -m unittest discover -s tests -p 'test_*.py' -v
+python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --out experiments/results/tp04_demo
+```
+
+Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
