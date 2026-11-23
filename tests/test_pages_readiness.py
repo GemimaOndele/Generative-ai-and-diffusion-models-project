@@ -1,55 +1,46 @@
-"""Tests de contrat de la vitrine statique GitHub Pages.
-Tests structuraux seulement, sans navigateur/serveur exécutés ici.
+"""Verify the single-source GitHub Pages publishing contract.
+
+The real HTML/CSS/JS website lives on the gh-pages branch at / (root).
+The main branch retains only README visual assets and publishing guidance.
+These tests deliberately do NOT require a duplicate website under docs/.
 """
-import pathlib
-import re
+from pathlib import Path
 import unittest
 from xml.etree import ElementTree
 
-ROOT=pathlib.Path(__file__).resolve().parents[1]
-DOCS=ROOT/"docs"
+ROOT = Path(__file__).resolve().parents[1]
+DOCS = ROOT / "docs"
+
 
 class TestPagesReadiness(unittest.TestCase):
-    def test_pages_assets_and_nojekyll(self):
-        for rel in ("index.html","landing.css","landing.js",".nojekyll",
-                    "assets/robocare-hero-animated.svg","assets/architecture.svg"):
+    def test_single_source_no_duplicated_website_on_main(self):
+        for rel in ("index.html", "landing.css", "landing.js"):
             with self.subTest(path=rel):
-                self.assertTrue((DOCS/rel).is_file(),rel)
-        for svg in ("robocare-hero-animated.svg","architecture.svg"):
-            ElementTree.parse(DOCS/"assets"/svg)
+                self.assertFalse((DOCS / rel).exists(),
+                                 "Le site vitrine doit rester sur gh-pages uniquement")
 
-    def test_landing_has_all_milestones_and_safety(self):
-        html=(DOCS/"index.html").read_text(encoding="utf-8")
-        js=(DOCS/"landing.js").read_text(encoding="utf-8")
-        css=(DOCS/"landing.css").read_text(encoding="utf-8")
-        for phrase in ("TP04","TP05","Diffusion","Green AI","Gémima",
-                       "Aminata","Omar","Elias","Ayoub"):
-            with self.subTest(phrase=phrase):
-                self.assertIn(phrase,html+js)
-        for phrase in ("aucun diagnostic", "aucune action", "Prototype"):
-            self.assertTrue(phrase.lower() in (html+js).lower())
-        self.assertIn("prefers-reduced-motion",css)
-        self.assertIn('role="tablist"',html)
-        self.assertIn("aria-expanded",html)
-        self.assertIn("aria-selected",js)
+    def test_readme_visuals_are_available_and_safe(self):
+        for name in ("robocare-hero-animated.svg", "architecture.svg"):
+            with self.subTest(name=name):
+                path = DOCS / "assets" / name
+                self.assertTrue(path.is_file())
+                ElementTree.parse(path)
+                xml = path.read_text(encoding="utf-8").lower()
+                for forbidden in ("<script", "<foreignobject", "javascript:",
+                                  "onload=", "onerror="):
+                    self.assertNotIn(forbidden, xml)
 
-    def test_no_unsafe_active_content(self):
-        html=(DOCS/"index.html").read_text(encoding="utf-8").lower()
-        js=(DOCS/"landing.js").read_text(encoding="utf-8").lower()
-        for banned in ("<iframe","<form", "localstorage", "sessionstorage",
-                       "navigator.geolocation", "document.cookie", "fetch(",
-                       "api_key", "patient_name"):
-            self.assertNotIn(banned,html+js)
-        self.assertNotIn("onclick=",html)
-        self.assertIn('rel="noopener noreferrer"',html)
+    def test_admin_contract_is_documented(self):
+        source = (ROOT / ".github/REPOSITORY_PROFILE.md").read_text(encoding="utf-8")
+        pages = (DOCS / "README_PAGES.md").read_text(encoding="utf-8")
+        contributing = (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+        self.assertIn("gh-pages", source)
+        self.assertIn("gh-pages / (root)", pages)
+        self.assertIn("Settings", source)
+        self.assertIn("Squash", contributing)
+        self.assertIn("main /docs", pages)
+        self.assertIn("publication", pages.lower())
 
-    def test_admin_configuration_truthfully_documented(self):
-        source=(ROOT/".github/REPOSITORY_PROFILE.md").read_text(encoding="utf-8")
-        pages=(DOCS/"README_PAGES.md").read_text(encoding="utf-8")
-        self.assertIn("gh-pages",source)
-        self.assertIn("gh-pages / (root)",pages)
-        self.assertIn("sans attendre la pr #1",pages.lower())
-        self.assertIn("Settings",source)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
