@@ -7,6 +7,8 @@ on:
     paths:
       - "tools/rcs38_ai4i_bridge.py"
       - "tests/test_rcs38_ai4i_bridge.py"
+      - "tests/test_rcs38_ai4i_preview.cjs"
+      - "frontend/monitoring/ai4i_preview.js"
       - ".github/workflows/rcs38-ai4i-bridge.yml"
 jobs:
   verify:
@@ -20,5 +22,7 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_rcs38_ai4i_bridge.py' -v
       - name: Validate JavaScript for offline read-only preview
         run: node --check frontend/monitoring/ai4i_preview.js
+      - name: Validate local AI4I UI behavior and rejection paths
+        run: node --test tests/test_rcs38_ai4i_preview.cjs
       - name: Check source syntax
         run: python -m py_compile tools/rcs38_ai4i_bridge.py tests/test_rcs38_ai4i_bridge.py
