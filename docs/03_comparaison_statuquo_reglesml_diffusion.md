@@ -2,6 +2,14 @@
 
 > **Statut : analyse cadrée, alignée sur le socle RCS‑75 le 2026‑11‑23.** Ne pas présenter de résultat mesuré non exécuté. Les affirmations doivent rester falsifiables et sourcées. Les modèles exacts, versions, fournisseur et licences restent `ND` jusqu'à validation.
 
+## 0. Gouvernance du ticket (RCS-22)
+
+- Responsable Jira : **Elias** (recherche IA, diffusion, RAG, Multi-LLM).
+- Binôme de contribution et de progression : **Aminata**.
+- Relais en cas de blocage : **Omar**.
+- Relectrice des critères d'acceptation : **Gémima**.
+- Attribution approuvée collectivement ; Sprint et dates à fixer en planification (non supposés ici).
+
 ## Question
 
 Quelle approche est la plus adaptée, à ce stade du projet RoboCare Sentinel, pour la détection/analyse d'anomalies sur signaux/événements d'équipements, avant toute validation terrain ?
@@ -18,7 +26,7 @@ Quelle approche est la plus adaptée, à ce stade du projet RoboCare Sentinel, p
 | Coût exploitation | Élevé en temps humain | Faible à moyen | Moyen à élevé selon infra/modèle |
 | Latence | Variable humaine | Faible | Moyenne à élevée selon modèle |
 | Explicabilité | Élevée | Moyenne à élevée (règles/arbre) | Plus faible, nécessite analyse prudente |
-| Risques principaux | Oubli, charge, variabilité humaine | Biais labels, dérive, faux positifs/négatifs | Surinterprétation, coût, reproductibilité, absence de preuve clinique |
+| Limites | Oubli, charge, variabilité humaine | Biais labels, dérive, faux positifs/négatifs | Surinterprétation, coût, reproductibilité, absence de preuve clinique |
 | Faisabilité POC étudiant | Élevée | Élevée | Moyenne (smoke test faisable, preuve robuste plus coûteuse) |
 | Preuve requise | Procédures et retours terrain | Notebook reproductible, métriques, split, confusion matrix | Cas figés, seed, config, logs, baseline comparée, limites |
 
@@ -30,6 +38,8 @@ Quelle approche est la plus adaptée, à ce stade du projet RoboCare Sentinel, p
 - **H2 (diffusion)** : Sur les mêmes cas figés, un POC diffusion apporte un gain mesurable (ex. rappel sur anomalies subtiles ou qualité de reconstruction) par rapport à la baseline règles/ML, sans dégrader le coût/latence au-delà du seuil approuvé.
 - **H3 (prudence)** : Si le gain n'est pas mesuré ou si le coût/risque dépasse le seuil, la baseline règles/ML reste la référence.
 - **H4 (routage V2)** : Le routage multi‑LLM réduit le coût par cas réussi sans perte de qualité par rapport à un mono‑LLM. À vérifier par RCS‑79 ; aucune conclusion n'est figée avant exécution traçable.
+
+Chaque hypothèse est réfutable : H1 par un F1 non supérieur, H2 par l'absence de gain mesurable ou un dépassement coût/latence, H3 par une preuve contraire sur cas figés, H4 par une absence de réduction de coût ou une perte de qualité.
 
 ## Critères de décision (à renseigner avant benchmark)
 
@@ -45,11 +55,33 @@ Quelle approche est la plus adaptée, à ce stade du projet RoboCare Sentinel, p
 
 Tant que RCS‑81 n'a pas figé collectivement les cas et les seuils d'évaluation, ces valeurs restent `ND` : les contrôles logiciels locaux (30 tests, smoke demo, CI) valident le **code**, pas une performance métier.
 
+## Choix justifié (provisoire, non validé)
+
+Le choix retenu **pour la phase actuelle** est : **B. règles/ML comme référence**, avec **C. diffusion comme POC cadré** et **V2 routage comme optimisation à mesurer**, pour trois raisons :
+
+1. **Falsifiabilité** : H1/H2/H4 définissent des conditions explicites de rejet ; aucune d'elles n'est encore confirmée (critères `ND`).
+2. **Reproductibilité** : B est la seule approche dont la preuve (notebook, split, métriques) est immédiatement comparable sur les mêmes cas ; C et V2 exigent données/GPU ou appels validés.
+3. **Risque maîtrisé** : H3 impose le retour à B si le gain n'est pas mesuré ou si coût/latence dépassent le seuil ; les risques R-002/R-004/R-007 du registre RCS-18 restent ouverts.
+
+Ce choix n'est **pas** un GO final : il sera confirmé, infirmé ou remplacé après benchmark sur cas figés RCS‑81. Aucun modèle, version, fournisseur ou licences exacts ne sont supposés.
+
+## Protocole minimal pour trancher
+
+| Axe Jira | Mesure à produire | Statut aujourd'hui | Source / propriétaire |
+|---|---|---|---|
+| Qualité | Rappel, précision, F1, faux négatifs sur cas figés | ND | `docs/05_tp04_benchmark.md`, RCS-79/RCS-81 |
+| Diversité | Couverture des cas, comportement sur motifs inédits | ND | RCS-79 |
+| Coût | Coût par cas réussi, coût GPU/appels | ND | `src/orchestrator.py` (ledger), RCS-65/85 |
+| Limites | Cas d'échec, abstraction, périmètre biomédical non prouvé | ND | RCS-18 (R-007), RCS-88 |
+| Faisabilité | Environnement, données autorisées, reproductibilité CI | ND (hors code) | RCS-56/57/70, CI `tp04-tests.yml` |
+
+Règles du protocole : mêmes cas figés pour A/B/C/V2, seed et config consignés, traces conservées, mode démo par défaut, aucun appel live sans identité A/B validée (RCS-75), aucun seuil inventé avant RCS-81.
+
 ## Recommandation provisoire (non validée)
 
 - **Court terme / POC** : commencer par **B. règles/ML** comme baseline reproductible et comparable.
 - **J1 recherche** : mener un **POC diffusion** cadré (RCS-56/57/70) en parallèle, sur données autorisées/synthétiques clairement étiquetées, sans revendication clinique.
-- **V2 LLM** : utiliser l'implémentation RCS‑75 comme socle de démonstration (mode démo), sans appel live ni modifier de modèle tant que l'identité exacte n'est pas validée.
+- **V2 LLM** : utiliser l'implémentation RCS‑75 comme socle de démonstration (mode démo), sans appel live ni modification de modèle tant que l'identité exacte n'est pas validée.
 - **Décision finale** : GO/NO-GO uniquement après benchmark sur mêmes cas, avec limites, coûts et risques documentés.
 
 ## Liens avec les autres tickets
