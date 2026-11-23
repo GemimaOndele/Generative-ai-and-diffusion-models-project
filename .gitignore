@@ -1,0 +1,38 @@
+# Environnements et secrets locaux
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
+*.pem
+*.key
+credentials.json
+# Données, modèles et résultats volumineux ou sensibles
+/data/raw/
+/data/private/
+/data/processed/
+/data/sensitive/
+/governance/private/
+/planning/private/
+/artifacts/private/
+*.sqlite
+*.sqlite3
+*.db
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+# Artefacts d'exécution locale à contrôler avant publication
+/experiments/results/live/
+/logs/
+/local_runs/
+/tmp/
