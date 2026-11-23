@@ -16,10 +16,12 @@ class TraceAuditTests(unittest.TestCase):
         self.path.write_text("\n".join(json.dumps(x) for x in records), encoding="utf-8")
 
     def record(self, case="T01", strategy="mono_a", **kw):
-        return {"trace_id": "dummy-1", "case_id": case,
-                "strategy": strategy, "status": "ok", "latency_ms": 12,
-                "variant": "default", "score": 1, "models": ["local-a"],
-                "cost_eur": None, **kw}
+        rec = {"trace_id": "dummy-1", "case_id": case,
+               "strategy": strategy, "status": "ok", "latency_ms": 12,
+               "variant": "default", "score": 1, "models": ["local-a"],
+               "cost_eur": None}
+        rec.update(kw)
+        return rec
 
     def test_metadata_no_raw_answers(self):
         one = self.record()
