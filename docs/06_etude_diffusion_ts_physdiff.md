@@ -1,6 +1,6 @@
 # RCS-56 — Étude Diffusion-TS et PhysDiff
 
-> **Statut : veille technique à compléter.** Vérifier licences, dates, versions, et faisabilité réelle avant toute intégration. Ne pas présenter ces fiches comme une validation expérimentale.
+> **Statut : veille technique avec licences vérifiées le 2026‑11‑23 ; aucune validation expérimentale revendiquée.** Les cases cochées ci-dessous concernent l'analyse documentaire, pas l'exécution. La disponibilité GPU locale et le jeu de données restent `ND`.
 
 ## Fiche 1 — Diffusion-TS
 
@@ -13,40 +13,42 @@
 | Sorties | Séries synthétiques / reconstructions selon tâche |
 | Intérêt pour RoboCare | Génération/reconstruction de signaux capteurs pour J1, augmentation prudente, analyse d'écarts |
 | Limites | Pas spécifique biomédical; nécessite adaptation données, évaluation rigoureuse, coût compute; risque d'artefacts |
-| Licence | À vérifier sur le repo officiel avant usage (ne pas présumer compatible) |
-| Faisabilité POC | Moyenne : code public annoncé, mais dépendances GPU/données/prétraitement à valider |
-| Prérequis | PyTorch, dataset temporel autorisé, pipeline preprocessing, métriques temporelles |
+| Licence | **MIT — vérifié le 2026‑11‑23** via le fichier `LICENSE` et le badge du README officiel (https://github.com/Y-debug-sys/Diffusion-TS/blob/main/LICENSE). Le copyright amont est indiqué « XXX » : conserver la mention telle quelle en cas de réutilisation. |
+| Faisabilité POC | Moyenne : code public et licence confirmée, mais **GPU CUDA requis**, Python 3.8 / PyTorch 2.0 selon le README officiel, et données autorisées nécessaires ; smoke test petit modèle envisageable après validation environnement |
+| Prérequis | conda/venv, PyTorch 2.0, dataset temporel autorisé/synthétique, pipeline preprocessing, métriques temporelles, GPU CUDA |
 | Risques | Biais de données, fuite de distribution, surinterprétation clinique, coût GPU |
-| Décision provisoire | **À tester en smoke test** uniquement après vérification licence/données |
+| Décision provisoire | **Priorité 1 pour l'étude J1**, sous réserve GPU/données ; smoke test uniquement, aucune intégration de code faite ici |
 
 ### Critères d'acceptation RCS-56 (Diffusion-TS)
-- [ ] Fiche critique complétée (source, licence, hypothèses, limites)
-- [ ] Vérification licence/droits d'usage
-- [ ] Évaluation capacité GPU/environnement
-- [ ] Plan de faisabilité (smoke test, métriques, risques)
+
+- [x] Fiche critique complétée (source, licence, hypothèses, limites)
+- [x] Vérification licence/droits d'usage — MIT confirmé sur le dépôt officiel
+- [ ] Évaluation capacité GPU/environnement — **ND**, à faire avant tout smoke test
+- [x] Plan de faisabilité documenté (smoke test, métriques, risques) — voir ci-dessous ;GPU non encore évalué
 
 ## Fiche 2 — PhysDiff
 
 | Champ | Contenu |
 |---|---|
-| Référence | Yuan et al., *PhysDiff: Physics-Guided Human Motion Diffusion Model*, ICCV 2023. arXiv:2212.02500. Site/projet: https://nvlabs.github.io/PhysDiff/ |
+| Référence | Yuan et al., *PhysDiff: Physics-Guided Human Motion Diffusion Model*, ICCV 2023 (Oral). arXiv:2212.02500. Page projet : https://nvlabs.github.io/PhysDiff/ . Code auteur : https://github.com/umariqb/PhysDiff |
 | Type | Diffusion guidée par contraintes physiques (mouvement humain) |
 | Problème ciblé | Génération de mouvements physiquement plausibles (pénétration sol, flottement, etc.) |
 | Données/entrées | Données de mouvement humain / représentations 3D selon papier |
 | Sorties | Séquences de mouvement générées avec contrainte physique |
 | Intérêt pour RoboCare | Intérêt méthodologique : ajouter contraintes domaine/physique à une diffusion; transposition directe aux signaux biomédicaux non évidente |
 | Limites | Domaine différent (motion capture) ; pas directement applicable aux signaux d'équipements médicaux sans reformulation complète |
-| Licence | À vérifier (code/assets NVIDIA/projet) avant usage |
-| Faisabilité POC | Faible à moyenne pour RoboCare J1 : forte adaptation nécessaire |
-| Prérequis | Compréhension du domaine, reformulation des contraintes physiques biomédicales, données adaptées |
-| Risques | Mauvaise transposition domaine, coût ingénierie élevé, faux sentiment de robustesse |
-| Décision provisoire | **Veille méthodologique** ; ne pas prioriser pour POC J1 immédiat sauf contrainte physique claire |
+| Licence | **Non déclarée — vérifié le 2026‑11‑23** : l'API GitHub du dépôt officiel `umariqb/PhysDiff` renvoie `license: null`, aucun fichier `LICENSE` n'est présent, et la page projet/arXiv ne précisent pas la licence du code (seul l'article est sous licence arXiv `nonexclusive-distrib`). Droits d'usage **non confirmés** : ne pas intégrer ni copier de code sans clarification écrite. |
+| Faisabilité POC | Faible à moyenne pour RoboCare J1 : forte adaptation nécessaire, et blocage licence tant qu'elle n'est pas déclarée |
+| Prérequis | Compréhension du domaine, reformulation des contraintes physiques biomédicales, données adaptées, clarification licence |
+| Risques | Mauvaise transposition domaine, coût ingénierie élevé, faux sentiment de robustesse, incertitude juridique sur le code |
+| Décision provisoire | **NO-GO pour intégration code** ; veille méthodologique uniquement. |
 
 ### Critères d'acceptation RCS-56 (PhysDiff)
-- [ ] Fiche critique complétée
-- [ ] Analyse de transposabilité au domaine RoboCare
-- [ ] Vérification licence/droits
-- [ ] Conclusion GO/NO-GO pour POC
+
+- [x] Fiche critique complétée
+- [x] Analyse de transposibilité au domaine RoboCare — faible, nécessite reformulation complète
+- [x] Vérification licence/droits effectuée — résultat : **licence code non déclarée** (voir ci-dessus)
+- [x] Conclusion GO/NO-GO pour POC — **NO-GO intégration** ; garder comme référence méthodologique seulement
 
 ## Plan de faisabilité comparé
 
@@ -55,13 +57,22 @@
 | Pertinence RoboCare J1 | Élevée (séries temporelles) | Faible/méthodologique |
 | Effort d'adaptation | Moyen | Élevé |
 | Données nécessaires | Séries temporelles autorisées | Données motion/contraintes, reformulation |
-| GPU requis | Probable (smoke test possible petit modèle) | Probable + pipeline spécifique |
-| Risque principal | Mauvaise généralisation / artefacts | Hors domaine / transposition invalide |
-| Recommandation | Priorité 1 pour étude J1 | Priorité 2 (veille) |
+| GPU requis | Oui (README officiel, CUDA) | Probable + pipeline spécifique |
+| Licence code | MIT (confirmée) | Non déclarée (bloquante) |
+| Risque principal | Mauvaise généralisation / artefacts | Hors domaine / transposition invalide / droits non confirmés |
+| Recommandation | Priorité 1 pour étude J1, sous réserve GPU + données | Priorité 2 (veille), NO-GO intégration |
+
+## Preuves de vérification (2026-11-23)
+
+- Diffusion-TS : `https://github.com/Y-debug-sys/Diffusion-TS/blob/main/LICENSE` (MIT) et README officiel (badge licence, Python 3.8, PyTorch 2.0, « one CUDA capable GPU »).
+- PhysDiff : `https://api.github.com/repos/umariqb/PhysDiff` (`"license": null`), absence de `LICENSE` à la racine, `https://nvlabs.github.io/PhysDiff/` et `https://arxiv.org/abs/2212.02500` (licence article uniquement).
+- Aucun code de ces dépôts n'a été copié dans ce dépôt.
 
 ## Prochaines actions
 
-1. Vérifier licences et conditions d'usage des repos officiels.
-2. Identifier un dataset temporel autorisé/synthétique pour smoke test Diffusion-TS.
-3. Définir métriques J1 : reconstruction, détection, faux positifs/négatifs, coût, reproductibilité.
-4. Ne lancer aucun entraînement lourd sans validation données/GPU/budget.
+1. [x] Vérifier licences et conditions d'usage : MIT pour Diffusion-TS ; non déclarée pour PhysDiff.
+2. [ ] Identifier un dataset temporel autorisé/synthétique pour smoke test Diffusion-TS.
+3. [ ] Évaluer la capacité GPU locale (ND) avant de lancer quoi que ce soit.
+4. [ ] Définir métriques J1 : reconstruction, détection, faux positifs/négatifs, coût, reproductibilité.
+5. [ ] Demander clarification de licence à l'équipe PhysDiff uniquement si un besoin méthodologique précis apparaît.
+6. [ ] Ne lancer aucun entraînement lourd sans validation données/GPU/budget.
