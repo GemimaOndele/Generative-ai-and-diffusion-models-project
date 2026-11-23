@@ -37,5 +37,15 @@ Chaque membre participe à une mission principale, une mission de montée en com
 4. **Supprimer normalement la branche temporaire après sa fusion**, uniquement si aucun travail non fusionné n'y reste. La PR et les commits resteront visibles dans GitHub. Conserver les versions stables par tags/releases et registry, **pas** par branches personnelles permanentes.
 5. Ouvrir la prochaine branche depuis `main` synchronisée, jamais depuis une ancienne branche fusionnée sans vérifier les dépendances.
 
-## Ordre des PR de préparation (au 20/11/2026)
-PR #1 structure d'abord, puis revue/harmonisation des PR #2 (Sprint 0/C3/TP04), #3 (TP05/CodeCarbon) et #4 (versions/biais/risques/coûts). Les PR #2 à #4 sont des brouillons non fusionnés. Avant chacune de ces fusions, rafraîchir la branche depuis `main`, résoudre tout conflit sur README et relancer les tests.
+## Intégration incrémentale — état au 23/11/2026
+
+**Les numéros de PR ne sont pas un ordre chronologique d'intégration.** La PR #1 prépare le socle commun ; d'autres PR indépendantes ou empilées ont été ouvertes depuis. Avant de fusionner, consulter la liste **à jour** : https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pulls (ouvertes, brouillons, fermées et fusionnées). Le nombre de PR change quotidiennement ; ne pas figer une plage « #2 à #4 ».
+
+1. **PR #1 (socle)** : résoudre les remarques de revue, vérifier CI et obtenir l'approbation GitHub formelle d'un **autre membre** (un commentaire positif ne constitue pas `Approve`). Fusion `Squash and merge` recommandée après satisfaction des règles.
+2. **GitHub Pages** : `gh-pages` est la branche de publication du site vitrine, séparée de `main`. Ne pas publier le même site depuis `docs/` de `main`. Les fichiers SVG dans `docs/assets/` peuvent rester des illustrations utilisées par `README.md` ; éviter de modifier en parallèle le contenu du site dans deux branches. Vérifier la source de publication dans Settings → Pages.
+3. **Architecture RCS-43 (Ayoub)** : consulter sa PR dédiée avant de décider des API et du modèle d'intégration. L'architecture est proposée, non encore approuvée ; la famille pilote reste soumise au vote RCS-19.
+4. **Contrat SQL/SQLite** : réconcilier les branches et PR RCS-40/42/49/50/52 avant fusion de fichiers communs tels que `sql/001_init_schema.sql` et `src/rcs/db.py` ; tests d'intégration sur un schéma partagé obligatoires.
+5. **Monitoring** : rebaser et relire PR #8 (démo fictive), puis PR #22 (export industriel non médical, lecture seule) ; PR #23 apporte un contrôle de compatibilité croisé et ne doit pas être fusionnée isolément sans la base correspondante.
+6. **Recherche et coûts** : garder distinctes les preuves de simulation, de benchmark LLM local et de données médicales ; le gel des cas et la décision GO/NO-GO restent des validations humaines.
+
+**Règles bloquantes** : une approbation par un autre membre, contrôle GitHub Actions obligatoire, fils de revue résolus ; ne pas contourner `main` ni utiliser un commentaire comme approbation. Après chaque fusion, relancer les tests des PR dépendantes et mettre à jour Jira avec commit, revue et résultat.
