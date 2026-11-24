@@ -27,7 +27,7 @@ import re
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 from .model_config import BenchmarkPolicy, CostLedger, ModelSpec, validate_pair
 
@@ -37,7 +37,9 @@ class LLMClient(Protocol):
     provider: str
     version: str
 
-    def generate(self, prompt: str, *, timeout_s: float) -> "LLMResponse": ...
+    def generate(
+        self, prompt: str, *, timeout_s: float, max_output_tokens: Optional[int] = None
+    ) -> "LLMResponse": ...
 
 
 @dataclass
@@ -102,6 +104,21 @@ def _hash_text(text: str) -> str:
 
 def _contains_secret(text: str) -> bool:
     return any(pattern.search(text or "") for pattern in SECRET_PATTERNS)
+
+
+def _bounded_prompt(case: CaseInput, max_input_tokens: int) -> Tuple[str, bool]:
+    """Construit le prompt et le borne en octets UTF-8 avant l'appel réseau.
+
+    Un token ne peut pas couvrir moins d'un octet UTF-8 : limiter les octets
+    donne donc une borne supérieure du nombre de tokens d'entrée, sans dépendre
+    du tokeniseur du fournisseur.
+    """
+    prompt = f"[case_id={case.case_id}][category={case.category}]\nTASK: {case.task}\nINPUT: {case.input}\nCONTEXT: {case.context}"
+    if len(prompt.encode("utf-8")) <= max_input_tokens:
+        return prompt, False
+    while len(prompt.encode("utf-8")) > max_input_tokens:
+        prompt = prompt[:-1]
+    return prompt, True
 
 
 def valid_schema(response: LLMResponse) -> bool:
@@ -186,7 +203,9 @@ class DemoClient:
             is_demo=True, data_transfer_authorized=True,
         )
 
-    def generate(self, prompt: str, *, timeout_s: float) -> LLMResponse:
+    def generate(
+        self, prompt: str, *, timeout_s: float, max_output_tokens: Optional[int] = None
+    ) -> LLMResponse:
         mode = "ok"
         for key, val in self.behavior.items():
             if key in prompt:
@@ -199,9 +218,11 @@ class DemoClient:
             return LLMResponse(text="", status="error", error_type="InvalidSchema")
         if mode == "refuse":
             return LLMResponse(text="ABSTAIN: human review required", status="ok")
+        output_tokens = 20 if max_output_tokens is None else min(20, max_output_tokens)
         return LLMResponse(
             text=f"[{self.model_name}] demo response", status="ok",
-            input_tokens=50, output_tokens=20, cost_eur=None,
+            input_tokens=len(prompt.encode("utf-8")), output_tokens=output_tokens,
+            cost_eur=None,
         )
 
 
@@ -224,7 +245,9 @@ class OpenAICompatibleClient:
         self.api_key_env = api_key_env
         self.spec = spec
 
-    def generate(self, prompt: str, *, timeout_s: float) -> LLMResponse:
+    def generate(
+        self, prompt: str, *, timeout_s: float, max_output_tokens: Optional[int] = None
+    ) -> LLMResponse:
         api_key = os.getenv(self.api_key_env)
         if not api_key:
             return LLMResponse(text="", status="error", error_type="MissingAPIKey")
@@ -238,6 +261,8 @@ class OpenAICompatibleClient:
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0,
         }
+        if max_output_tokens is not None:
+            payload["max_tokens"] = max_output_tokens
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         try:
             resp = requests.post(f"{self.base_url}/chat/completions", json=payload, headers=headers, timeout=timeout_s)
@@ -318,6 +343,39 @@ class Orchestrator:
             notes="blocked_before_call",
         )
 
+    def _preflight(
+        self,
+        case: CaseInput,
+        strategy: str,
+        decision: str,
+        spec: ModelSpec,
+        ledger: CostLedger,
+    ) -> Tuple[Optional[TraceRecord], Optional[float]]:
+        """Bloque avant le réseau : limite d'appels, arrêt d'urgence, solde et montant prévisionnel."""
+        if ledger.calls >= self.policy.max_calls_per_case:
+            trace = self._blocked_trace(
+                case, strategy, decision, spec, "abstain", "max_calls_per_case_reached"
+            )
+            return trace, None
+        if budget_exceeded():
+            trace = self._blocked_trace(case, strategy, decision, spec, "abstain", "budget_exceeded")
+            return trace, None
+        allowed, reason = ledger.can_spend()
+        if not allowed:
+            trace = self._blocked_trace(case, strategy, decision, spec, "abstain", reason or "budget_exceeded")
+            return trace, None
+        allowed, reason, reserved = ledger.reserve(
+            spec,
+            self.policy.max_input_tokens_per_call + self.policy.input_token_overhead,
+            self.policy.max_output_tokens_per_call,
+        )
+        if not allowed:
+            trace = self._blocked_trace(
+                case, strategy, decision, spec, "abstain", reason or "budget_exceeded_forecast"
+            )
+            return trace, None
+        return None, reserved
+
     def _call(
         self,
         case: CaseInput,
@@ -327,16 +385,23 @@ class Orchestrator:
         decision: str,
         timeout_s: float,
         ledger: CostLedger,
+        reserved_cost: Optional[float] = None,
     ):
         trace_id = str(uuid.uuid4())
         # expected_behavior est volontairement exclu : il ne doit pas influencer la réponse.
-        prompt = f"[case_id={case.case_id}][category={case.category}]\nTASK: {case.task}\nINPUT: {case.input}\nCONTEXT: {case.context}"
+        prompt, prompt_truncated = _bounded_prompt(case, self.policy.max_input_tokens_per_call)
         prompt_hash = _hash_text(prompt)
         started = time.perf_counter()
-        response = model.generate(prompt, timeout_s=timeout_s)
+        response = model.generate(
+            prompt,
+            timeout_s=timeout_s,
+            max_output_tokens=self.policy.max_output_tokens_per_call,
+        )
         latency_ms = int((time.perf_counter() - started) * 1000)
 
         notes: List[str] = []
+        if prompt_truncated:
+            notes.append("prompt_truncated_to_token_budget")
         if response.status in {"refused", "abstain"}:
             status, error_type = "abstain", response.error_type or "ModelRefused"
         elif response.status != "ok":
@@ -349,7 +414,9 @@ class Orchestrator:
         else:
             status, error_type = "ok", None
 
-        cost, cost_note = ledger.record(spec, response.input_tokens, response.output_tokens)
+        cost, cost_note = ledger.record(
+            spec, response.input_tokens, response.output_tokens, reserved_cost
+        )
         if cost_note:
             notes.append(cost_note)
         if status != "ok" and "response not validated" not in notes:
@@ -391,15 +458,15 @@ class Orchestrator:
             return OrchestratorResult("refused", None, "transfer_blocked", spec.model_name, spec.version, strategy, [trace])
 
         ledger = CostLedger(self.policy.max_cost_eur_per_case)
-        allowed, reason = ledger.can_spend()
-        if not allowed or budget_exceeded():
-            trace = self._blocked_trace(case, strategy, "blocked_before_call", spec, "abstain", reason or "budget_exceeded")
-            return OrchestratorResult("abstain", None, reason or "budget_exceeded", spec.model_name, spec.version, strategy, [trace])
+        blocked, reserved = self._preflight(case, strategy, strategy, spec, ledger)
+        if blocked is not None:
+            reason = blocked.error_type or "budget_exceeded"
+            return OrchestratorResult("abstain", None, reason, spec.model_name, spec.version, strategy, [blocked])
 
         effective_timeout = timeout_s if timeout_s is not None else (
             self.policy.timeout_a_s if label == "A" else self.policy.timeout_b_s
         )
-        trace, response = self._call(case, model, spec, strategy, strategy, effective_timeout, ledger)
+        trace, response = self._call(case, model, spec, strategy, strategy, effective_timeout, ledger, reserved)
         answer = response.text if trace.status == "ok" else None
         reason = "validated" if trace.status == "ok" else (trace.error_type or "not_validated")
         return OrchestratorResult(trace.status, answer, reason, spec.model_name, spec.version, strategy, [trace])
@@ -419,7 +486,13 @@ class Orchestrator:
             trace = self._blocked_trace(case, strategy, "try_a", self.spec_a, "refused", "transfer_blocked")
             return OrchestratorResult("refused", None, "transfer_blocked", self.spec_a.model_name, self.spec_a.version, strategy, [trace])
 
-        trace_a, resp_a = self._call(case, self.model_a, self.spec_a, strategy, "try_a", timeout_a, ledger)
+        # Le garde-fou budget s'applique au premier appel A, avant tout réseau.
+        blocked_a, reserved_a = self._preflight(case, strategy, "try_a", self.spec_a, ledger)
+        if blocked_a is not None:
+            reason = blocked_a.error_type or "budget_exceeded"
+            return OrchestratorResult("abstain", None, reason, self.spec_a.model_name, self.spec_a.version, strategy, [blocked_a])
+
+        trace_a, resp_a = self._call(case, self.model_a, self.spec_a, strategy, "try_a", timeout_a, ledger, reserved_a)
         traces = [trace_a]
         if trace_a.status == "ok":
             return OrchestratorResult("ok", resp_a.text, "validated_by_a", self.spec_a.model_name, self.spec_a.version, strategy, traces)
@@ -428,14 +501,19 @@ class Orchestrator:
             traces[0].notes += "; model_b_missing"
             return OrchestratorResult("abstain", None, "model_b_missing", trace_a.model, trace_a.model_version, strategy, traces)
 
-        allowed, reason = ledger.can_spend()
         # Compatibilité : le garde-fou historique ALLOW_B_DATA reste actif en démo.
         demo_consent = not self.spec_b.is_demo or privacy_authorizes(case, "B")
-        if not _transfer_allowed(case, self.spec_b) or not demo_consent or not allowed or budget_exceeded():
+        if not _transfer_allowed(case, self.spec_b) or not demo_consent:
             traces[0].notes += "; fallback_blocked"
             return OrchestratorResult("abstain", None, "fallback_blocked", trace_a.model, trace_a.model_version, strategy, traces)
 
-        trace_b, resp_b = self._call(case, self.model_b, self.spec_b, strategy, "fallback_to_b", timeout_b, ledger)
+        blocked_b, reserved_b = self._preflight(case, strategy, "fallback_to_b", self.spec_b, ledger)
+        if blocked_b is not None:
+            traces[0].notes += "; fallback_blocked"
+            reason = blocked_b.error_type or "budget_exceeded"
+            return OrchestratorResult("abstain", None, reason, trace_a.model, trace_a.model_version, strategy, traces)
+
+        trace_b, resp_b = self._call(case, self.model_b, self.spec_b, strategy, "fallback_to_b", timeout_b, ledger, reserved_b)
         traces.append(trace_b)
         if trace_b.status == "ok":
             return OrchestratorResult("ok", resp_b.text, "validated_by_b", self.spec_b.model_name, self.spec_b.version, strategy, traces)
@@ -460,13 +538,14 @@ class Orchestrator:
             return OrchestratorResult("refused", None, "transfer_blocked", spec.model_name, spec.version, strategy, [trace])
 
         ledger = CostLedger(self.policy.max_cost_eur_per_case)
-        allowed, reason = ledger.can_spend()
-        if not allowed or budget_exceeded():
-            trace = self._blocked_trace(case, strategy, f"route_to_{route.lower()}", spec, "abstain", reason or "budget_exceeded")
-            return OrchestratorResult("abstain", None, reason or "budget_exceeded", spec.model_name, spec.version, strategy, [trace])
+        decision = f"route_to_{route.lower()}"
+        blocked, reserved = self._preflight(case, strategy, decision, spec, ledger)
+        if blocked is not None:
+            reason = blocked.error_type or "budget_exceeded"
+            return OrchestratorResult("abstain", None, reason, spec.model_name, spec.version, strategy, [blocked])
 
         timeout = self.policy.timeout_a_s if route == "A" else self.policy.timeout_b_s
-        trace, response = self._call(case, model, spec, strategy, f"route_to_{route.lower()}", timeout, ledger)
+        trace, response = self._call(case, model, spec, strategy, decision, timeout, ledger, reserved)
         answer = response.text if trace.status == "ok" else None
         reason = "validated" if trace.status == "ok" else (trace.error_type or "not_validated")
         return OrchestratorResult(trace.status, answer, reason, spec.model_name, spec.version, strategy, [trace])

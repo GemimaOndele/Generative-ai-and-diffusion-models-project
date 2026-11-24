@@ -101,6 +101,13 @@ class BenchmarkPolicy:
     max_cost_eur_per_case: Optional[float] = None
     v2_pattern: str = "cascade"  # "cascade" ou "routing"
     allow_paid_calls: bool = False
+    # Bornes utilisées pour le montant prévisionnel : le prompt est tronqué à
+    # `max_input_tokens_per_call` octets UTF-8 (le nombre de tokens est au plus
+    # égal au nombre d'octets) et le client reçoit `max_output_tokens_per_call`.
+    max_input_tokens_per_call: int = 2000
+    max_output_tokens_per_call: int = 500
+    # Marge prudentielle pour les tokens de cadre ajoutés par le fournisseur.
+    input_token_overhead: int = 16
 
     def validate(self, *, live: bool) -> None:
         if self.v2_pattern not in {"cascade", "routing"}:
@@ -111,6 +118,10 @@ class BenchmarkPolicy:
             raise ValueError("Les timeouts doivent être positifs")
         if self.max_cost_eur_per_case is not None and self.max_cost_eur_per_case < 0:
             raise ValueError("max_cost_eur_per_case ne peut pas être négatif")
+        if self.max_input_tokens_per_call < 1 or self.max_output_tokens_per_call < 1:
+            raise ValueError("Les bornes de tokens par appel doivent être >= 1")
+        if self.input_token_overhead < 0:
+            raise ValueError("input_token_overhead ne peut pas être négatif")
         if live and not self.allow_paid_calls:
             raise ValueError("Appels payants interdits: allow_paid_calls doit être vrai en mode live")
 
@@ -129,11 +140,17 @@ def validate_pair(spec_a: ModelSpec, spec_b: ModelSpec, *, live: bool = False) -
 
 
 class CostLedger:
-    """Budget par cas. Un coût inconnu reste ND et bloque tout plafond configuré."""
+    """Budget par cas, réservé avant l'appel puis réglé sur le coût réel.
+
+    Un coût inconnu reste ND et bloque tout plafond configuré. Le plafond n'est
+    pas seulement post factum : `reserve()` borne le montant prévisionnel à
+    partir de tarifs connus et de bornes de tokens, avant toute requête réseau.
+    """
 
     def __init__(self, max_cost_eur: Optional[float] = None):
         self.max_cost_eur = max_cost_eur
         self.spent_eur = 0.0
+        self.reserved_eur = 0.0
         self.cost_known = True
         self.calls = 0
 
@@ -146,22 +163,62 @@ class CostLedger:
             output_tokens / 1000.0 * spec.price_in_eur_per_1k_output
         )
 
+    def forecast(
+        self, spec: ModelSpec, max_input_tokens: Optional[int], max_output_tokens: Optional[int]
+    ) -> Optional[float]:
+        """Montant prévisionnel maximal, ou None si tarifs/bornes ND."""
+        if max_input_tokens is None or max_output_tokens is None:
+            return None
+        if max_input_tokens < 0 or max_output_tokens < 0:
+            return None
+        return self.estimate(spec, max_input_tokens, max_output_tokens)
+
     def can_spend(self) -> Tuple[bool, Optional[str]]:
         if self.max_cost_eur is None:
             return True, None
         if not self.cost_known:
             return False, "cost_nd_with_cap"
-        if self.spent_eur >= self.max_cost_eur:
+        if self.spent_eur + self.reserved_eur >= self.max_cost_eur:
             return False, "budget_exceeded"
         return True, None
 
-    def record(self, spec: ModelSpec, input_tokens: Optional[int], output_tokens: Optional[int]) -> Tuple[Optional[float], Optional[str]]:
+    def reserve(
+        self, spec: ModelSpec, max_input_tokens: int, max_output_tokens: int
+    ) -> Tuple[bool, Optional[str], Optional[float]]:
+        """Réserve le pire cas avant l'appel ; bloque si le plafond ne le couvre pas."""
+        if self.max_cost_eur is None:
+            return True, None, None
+        worst_case = self.forecast(spec, max_input_tokens, max_output_tokens)
+        if worst_case is None:
+            self.cost_known = False
+            return False, "cost_nd_with_cap", None
+        if self.spent_eur + self.reserved_eur + worst_case > self.max_cost_eur:
+            return False, "budget_exceeded_forecast", worst_case
+        self.reserved_eur += worst_case
+        return True, None, worst_case
+
+    def record(
+        self,
+        spec: ModelSpec,
+        input_tokens: Optional[int],
+        output_tokens: Optional[int],
+        reserved_cost: Optional[float] = None,
+    ) -> Tuple[Optional[float], Optional[str]]:
+        """Règle la réservation sur le coût réel une fois la réponse reçue."""
         self.calls += 1
         cost = self.estimate(spec, input_tokens, output_tokens)
+        if reserved_cost is not None:
+            self.reserved_eur = max(0.0, self.reserved_eur - reserved_cost)
         if cost is None:
             self.cost_known = False
+            if reserved_cost is not None:
+                # Le pire cas reste compté : on ne peut pas sous-estimer après coup.
+                self.spent_eur += reserved_cost
+                return None, "cost_nd_after_call"
             return None, "cost_nd"
         self.spent_eur += cost
+        if reserved_cost is not None and cost > reserved_cost + 1e-12:
+            return cost, "cost_above_forecast"
         return cost, None
 
 
@@ -209,6 +266,9 @@ def load_config_from_env() -> Tuple[ModelSpec, ModelSpec, BenchmarkPolicy]:
         max_cost_eur_per_case=_as_float(os.getenv("TP04_MAX_COST_EUR_PER_CASE")),
         v2_pattern=os.getenv("TP04_V2_PATTERN", "cascade"),
         allow_paid_calls=_as_bool(os.getenv("TP04_ALLOW_PAID_CALLS")),
+        max_input_tokens_per_call=int(os.getenv("TP04_MAX_INPUT_TOKENS_PER_CALL", "2000")),
+        max_output_tokens_per_call=int(os.getenv("TP04_MAX_OUTPUT_TOKENS_PER_CALL", "500")),
+        input_token_overhead=int(os.getenv("TP04_INPUT_TOKEN_OVERHEAD", "16")),
     )
     validate_pair(spec_a, spec_b, live=True)
     policy.validate(live=True)
