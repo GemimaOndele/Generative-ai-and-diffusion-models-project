@@ -1,0 +1,22 @@
+name: RCS — validation du protocole préparatoire TP04
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  protocol:
+    name: Vérifier les 10 cas brouillon (sans appel LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Vérifier la syntaxe des tests
+        run: python -m compileall -q tests
+      - name: Vérifier la structure de préparation
+        run: python -m unittest discover -s tests -p 'test_tp04_draft.py' -v
+      - name: Préciser la portée
+        run: echo "Tests de données pédagogiques fictives uniquement ; aucun benchmark Multi-LLM."
