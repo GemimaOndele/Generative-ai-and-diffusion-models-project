@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'experiments/baseline_rules_ml.py'
+      - 'experiments/replay_baseline_notebook.py'
       - 'experiments/baseline_rules_ml.ipynb'
       - 'experiments/results/rcs55_baseline_rules_ml.json'
       - 'tests/test_baseline_rules_ml.py'
@@ -17,7 +18,7 @@ permissions:
 
 jobs:
   baseline:
-    name: Dépendances installées, tests exécutés et artefact rejoué
+    name: Dépendances installées, tests, notebook et artefact rejoués
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +35,8 @@ jobs:
           print('numpy/pandas/sklearn disponibles')"
       - name: Tests RCS-55
         run: python -m unittest discover -s tests -p 'test_baseline_rules_ml.py' -v
-      - name: Notebook valide
-        run: >-
-          python -c "import json; nb=json.load(open('experiments/baseline_rules_ml.ipynb', encoding='utf-8'));
-          assert nb['nbformat'] == 4 and any(c['cell_type'] == 'code' for c in nb['cells']);
-          print('notebook nbformat 4 valide')"
+      - name: Rejeu du notebook et comparaison à l'artefact
+        run: python experiments/replay_baseline_notebook.py --out "$RUNNER_TEMP/rcs55_notebook_replay.json"
       - name: Rejeu de l'artefact synthétique
         run: |
           python experiments/baseline_rules_ml.py --synthetic --out "$RUNNER_TEMP/rcs55_rejeu.json"

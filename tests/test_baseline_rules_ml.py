@@ -15,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "experiments" / "baseline_rules_ml.py"
 NOTEBOOK_PATH = ROOT / "experiments" / "baseline_rules_ml.ipynb"
+REPLAY_PATH = ROOT / "experiments" / "replay_baseline_notebook.py"
 ARTIFACT_PATH = ROOT / "experiments" / "results" / "rcs55_baseline_rules_ml.json"
 
 DEPENDANCES = ("numpy", "pandas", "sklearn")
@@ -66,6 +67,7 @@ class ArtefactEtNotebookTests(unittest.TestCase):
 
     def test_notebook_json_et_protocol(self):
         self.assertTrue(NOTEBOOK_PATH.exists(), f"Notebook absent : {NOTEBOOK_PATH}")
+        self.assertTrue(REPLAY_PATH.exists(), f"Rejeu du notebook absent : {REPLAY_PATH}")
         nb = json.loads(NOTEBOOK_PATH.read_text(encoding="utf-8"))
         self.assertEqual(nb["nbformat"], 4)
         self.assertGreaterEqual(nb["nbformat_minor"], 4)
@@ -157,6 +159,22 @@ class BaselineTests(unittest.TestCase):
                 resultats["dataset"]["test_rows"],
             )
             self.assertIsInstance(resultats[cle]["report"], str)
+
+    def test_rejeu_notebook_conforme_artefact(self):
+        """Le notebook doit être rejouable et reproduire l'artefact conservé."""
+        spec = importlib.util.spec_from_file_location("rcs55_replay_notebook", REPLAY_PATH)
+        replay = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(replay)
+
+        execution = replay.replay_notebook()
+        self.assertGreaterEqual(execution["cells_executed"], 6)
+        self.assertTrue(all(sortie["stdout"] for sortie in execution["outputs"]))
+
+        artefact = json.loads(ARTIFACT_PATH.read_text(encoding="utf-8"))
+        differences, observe = replay.comparer_artefact(execution, artefact)
+        self.assertEqual(differences, [], f"Écarts notebook/artefact : {differences}")
+        self.assertEqual(observe["rules_calibration"]["fitted_on"], "train_only")
+        self.assertEqual(observe["config"]["seed"], 42)
 
 
 if __name__ == "__main__":
