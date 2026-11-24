@@ -23,7 +23,7 @@
 | Refuser les résultats non étayés | `validate_no_results()` interdit F1/%/ms/€ inventés et tout GO final | Vérifié par tests |
 | Documenter les limites et sources | Preuve par approche, source par axe, registre RCS-18 | Traçable |
 
-L'analyse scientifique est donc **méthodologique** ici : elle ne revendique aucune mesure métier tant que le jeu gelé RCS-81 n'existe pas.
+L'analyse scientifique est **méthodologique** : aucune mesure métier validée. Les résultats J1 exploratoires existants sont documentés ci-dessous, indépendamment du gel J2 RCS-81.
 
 ## Question
 
@@ -75,7 +75,7 @@ Tant que RCS‑81 n'a pas figé collectivement les cas et les seuils d'évaluati
 Le choix retenu **pour la phase actuelle** est : **B. règles/ML comme référence**, avec **C. diffusion comme POC cadré** et **V2 routage comme optimisation à mesurer**, pour trois raisons :
 
 1. **Falsifiabilité** : H1/H2/H4 définissent des conditions explicites de rejet ; aucune d'elles n'est encore confirmée (critères `ND`).
-2. **Reproductibilité** : B est la seule approche dont la preuve (notebook, split, métriques) est immédiatement comparable sur les mêmes cas ; C et V2 exigent données/GPU ou appels validés.
+2. **Reproductibilité** : B et C disposent de comparaisons exploratoires sur AI4I dans #25 ; leur validation confirmatoire nécessite un protocole gelé J1. V2 nécessite un protocole J2 distinct.
 3. **Risque maîtrisé** : H3 impose le retour à B si le gain n'est pas mesuré ou si coût/latence dépassent le seuil ; les risques R-002/R-004/R-007 du registre RCS-18 restent ouverts.
 
 Ce choix n'est **pas** un GO final : il sera confirmé, infirmé ou remplacé après benchmark sur cas figés RCS‑81. Aucun modèle, version, fournisseur ou licences exacts ne sont supposés.
@@ -89,7 +89,7 @@ Ce choix n'est **pas** un GO final : il sera confirmé, infirmé ou remplacé ap
 | H4 confirmée (coût réduit sans perte de qualité) | V2 devient optimisation retenue derrière la référence | Mêmes cas, identité A/B validée, traces comparables |
 | Aucune hypothèse confirmée ou seuil non atteint | Maintien de B, GO/NO-GO `ND` | Résultat négatif consigné, pas de revendication de performance |
 
-Aucune de ces conditions n'est déclenchée aujourd'hui : elles sont des règles de décision, pas des résultats.
+Aucune de ces conditions confirmatoires n'est déclenchée aujourd'hui : elles sont des règles de décision, pas des résultats.
 
 ## Protocole minimal pour trancher
 
@@ -164,3 +164,8 @@ Les contrôles d'acceptation automatisés sont une preuve de **complétude méth
 - Socle TP04 synchronisé avec **#30** ; garde-fous budgétaires conservés : preflight, `max_calls_per_case`, ledger.
 - Base temporaire de la PR #36 : **#30** (PR #30 d'abord), puis **retargeter #36 vers main** après intégration de #30.
 - CI vérifiée sur `c36b94a` : 4 contrôles au vert ([check-runs](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs)) ; ne pas intégrer avant ce feu vert.
+
+
+## Retour exploratoire RCS-71 — 24/11/2026
+
+Sources : PR #25, commit b638aea8c8f566a7fac8557e5c8ec655519821f0, `experiments/results/j1_summary.csv` et `experiments/results/j1_reproduction_2026-11-24.json`. Sur AI4I industriel non médical : PR-AUC du z-score sur variables brutes 0,1524, du DDPM G1-A 0,2356 (écart-type 0,0278). Avec variables physiques dérivées : z-score 0,2488, DDPM G1-A 0,1811 (écart-type 0,0179). Omar rapporte une reproduction CPU sur Windows des métriques de qualité à l'identique et un fichier de cas identique. Ce résultat est compatible avec un avantage contextuel de la diffusion et avec H3 lorsque les variables physiques favorisent la baseline. Il ne confirme ni ne réfute formellement H2 : gain minimal de rappel, budget/latence, seuil et gel préalable ne sont pas ratifiés. Le manifeste indique encore freeze_commit null. Les axes confirmatoires restent ND ; aucune extrapolation médicale.

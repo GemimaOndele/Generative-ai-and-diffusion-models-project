@@ -70,6 +70,16 @@ python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --o
 
 Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
 
+### 🧭 Gouvernance — registres ADR et risques (RCS-18)
+
+Le [registre documentaire](docs/registre_decisions_risques.md) est la source unique : décisions ADR (statut, propriétaire, date réelle) et risques cotés probabilité × gravité avec exposition initiale/résiduelle, déclencheurs, mitigation, propriétaire, reviewer, ticket et revue. La CLI valide le registre, exporte les deux vues opérationnelles et affiche la revue Sprint (escalades ≥ 12 ou gravité 5) :
+
+```bash
+python -m src.governance docs/registre_decisions_risques.md --export-dir governance --sprint-review --sprint S0
+```
+
+Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. La preuve [acceptance_rcs18.json](governance/acceptance_rcs18.json) vérifie les neuf critères Jira sur pièces : `python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance`. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
+
 ### 📊 Comparaison des approches (RCS-22)
 
 La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La clarification J1/J2 impose des workloads et métriques séparés, des seuils gelés avant chaque campagne et rappelle que V2 n'est pas une optimisation directe du DDPM. La preuve d'acceptation vérifie **13 critères** (dont les champs du ticket Jira, la séparation J1/J2, le périmètre V2, la portée méthodologique et la séquence d'intégration #30/#36) et est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
