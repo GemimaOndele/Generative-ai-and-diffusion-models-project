@@ -1,0 +1,18 @@
+name: RCS-81 — protocole TP04/TP05 comparateur
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  evaluation-contract:
+    name: Tester le comparateur et les garde-fous
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m unittest discover -s tests -p 'test_rcs81_tp05.py' -v
+      - run: python -m tools.rcs81_evaluate --manifest planning/rcs81_case_manifest.csv --results planning/rcs81_runs_template.csv
