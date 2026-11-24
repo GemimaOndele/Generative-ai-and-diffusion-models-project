@@ -8,7 +8,7 @@
 | `templates/risk_register_template.csv` | Événement, personnes, vraisemblance, impact, mesure, preuve et risque résiduel | Sprint, incident, changement de version |
 | `cost_register.csv` | Dépenses/sources, unités, coût estimé/réel, matériel et temps | Cadrage, Sprint et fin de lot |
 | `worklog_register.csv` | Effort humain estimé/réel (heures) sans prétendre à une rémunération | Chaque tâche/point Sprint |
-| `decision_register.csv` | Décision, alternatives, raisons, personnes consultées, approbation et révision | Dès qu'un arbitrage change le projet |
+| `templates/decision_register_template.csv` | Gabarit historique vide : décision, alternatives, raisons, personnes consultées, approbation et révision | Dès qu'un arbitrage change le projet |
 | `monitoring_catalog.csv` | KPI, unité, frontière, mode calcul, statut, seuil et réponse à l'alerte | Cadrage puis revue de suivi |
 | `templates/trace_event_draft.schema.json` | Contrat minimal de logs end-to-end avec IDs non sensibles | Toute modification de télémétrie |
 | `model_card_template.md` / `dataset_card_template.md` | Finalité, données, limites, biais, tests, versions et suivi | Après chaque version utile |
@@ -21,3 +21,6 @@ Voir : `docs/10_cartographie_versionnement_modeles_solutions.md`, `docs/11_carto
 
 
 Utiliser RCS-90 (#5) pour la saisie exécutable des coûts/temps ; les registres génériques ne doivent pas créer une seconde comptabilité. Le schéma de trace historique n'est pas déployable.
+
+
+Le registre de décisions opérationnel est `governance/adr_register.csv` (RCS-18, #35) ; le modèle CSV historique ne doit pas être alimenté en parallèle.

@@ -31,3 +31,12 @@ class TestGovernanceTemplates(unittest.TestCase):
 
 if __name__=="__main__":
     unittest.main()
+
+
+def test_decision_template_not_parallel_register():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1] / "governance"
+    template = root / "templates" / "decision_register_template.csv"
+    assert template.is_file()
+    assert len(template.read_text(encoding="utf-8").strip().splitlines()) == 1
+    assert not (root / "decision_register.csv").exists()
