@@ -1,7 +1,12 @@
 """Contrôles unitaires d'une diffusion vraiment entraînée — synthétique seulement."""
 import math
 import unittest
-import numpy as np
+try:
+    import numpy as np
+except ModuleNotFoundError as exc:
+    if exc.name != 'numpy':
+        raise
+    raise unittest.SkipTest('Tests de diffusion exécutés dans la CI dédiée avec NumPy') from exc
 
 from experiments.rcs69_diffusion_numpy import (
     ALPHA_BAR, D, T, Denoiser, experiment, synthetic_signals, mad_scores
