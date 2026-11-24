@@ -41,3 +41,12 @@ test('site filter applies to all four fixture collections', () => {
     }
   }
 });
+
+
+test('decision history displays and escapes the simulated actor role', () => {
+  const run = renderer();
+  const html = run('chosenSite="all"; data.events=[{trace_id:"trc123456",action_id:"ACT-DEMO-01",after_state:"approved",reason_code:"controle_confirme",actor_role:"<b>technicien-demo</b>",created_at:"2026-11-24T09:00:00Z"}]; maintenance()');
+  assert.ok(html.includes('Rôle simulé'));
+  assert.ok(html.includes('&lt;b&gt;technicien-demo&lt;/b&gt;'));
+  assert.ok(!html.includes('<b>technicien-demo</b>'));
+});
