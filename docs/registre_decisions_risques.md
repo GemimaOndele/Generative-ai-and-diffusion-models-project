@@ -81,9 +81,27 @@
 - Références socle (2026-11-23) : `docs/05_tp04_architecture_v2.md`, `docs/05_tp04_benchmark.md`, `.github/workflows/tp04-tests.yml`. Les contrôles logiciels locaux valident le code ; ils ne constituent pas une évaluation RCS‑81 figée collectivement.
 - À chaque sprint : réexaminer exposition initiale **et** résiduelle, réviser le GO/NO-GO, et consigner la date de revue réelle (jamais anticipée).
 
-## 4. Outil de validation du registre
+## 4. Outil de validation du registre (RCS-18)
 
-- src/governance.py : calcul d'exposition, matrice 5×5, analyse des tables ADR/risques et contrôle « aucune exposition résiduelle inventée ».
-- CLI : python -m src.governance docs/registre_decisions_risques.md (code 0 si le registre est cohérent).
-- Tests : 	ests/test_governance_register.py, exécutés avec la suite python -m unittest discover -s tests -p 'test_*.py'.
-- Le script ne remplace pas la revue humaine : il garantit la cohérence formelle, pas la vérité des décisions.
+- `src/governance.py` : exposition = probabilité × gravité, matrice 5×5, analyse des tables **par libellé de colonne** (ordre des colonnes libre), contrôle « aucune exposition résiduelle inventée », champs obligatoires (dont propriétaire et mitigation), identifiants uniques, dates ISO ou `ND`, et date réelle exigée pour un risque `Mitigé`/`Fermé`.
+- Le présent Markdown reste l'unique source de vérité. La CLI génère les **deux registres opérationnels** `governance/adr_register.csv` et `governance/risk_register.csv` (vues dérivées, triées par ID, jamais ressaisies) :
+
+```bash
+python -m src.governance docs/registre_decisions_risques.md
+python -m src.governance docs/registre_decisions_risques.md --export-dir governance --sprint-review --sprint S0
+python -m src.governance docs/registre_decisions_risques.md --json
+```
+
+- `--sprint-review` affiche les escalades (exposition ≥ 12 ou gravité 5), les statuts, les risques sans date de revue, les décisions encore ouvertes, les liens RCS-88/RCS-89/RCS-90 et un `go_no_go` à `ND` : aucun GO/NO-GO n'est déduit d'un contrôle logiciel.
+- `--json` retourne `{"ok", "errors", "adrs", "risks"}` avec un code de sortie 1 si le registre est invalide ; les erreurs de lecture/analyse sont aussi renvoyées proprement, sans trace brute.
+- Tests : `tests/test_governance_register.py` (exposition, ADR, risques, rejet des valeurs inventées, export des deux registres, revue Sprint sans décision fabriquée), exécutés avec `python -m unittest discover -s tests -p 'test_*.py'`.
+- Le script ne remplace pas la revue humaine : il garantit la cohérence formelle, pas la vérité des décisions. Les dates et cotations ne sont renseignées que sur preuve et revue Sprint.
+
+## 5. Correspondance avec les critères Jira RCS-18
+
+| Critère Jira | Preuve dans ce dépôt | Limite |
+|---|---|---|
+| Décisions ADR avec propriétaire, justification, date réelle | Registre ADR (§1), `validate_adrs`, `adr_register.csv` exporté | `ND` tant que la décision n'est pas entérinée ; aucune date supposée |
+| Risques probabilité-impact, propriétaire et mitigation | Registre risques (§2), `validate_risks`, `risk_register.csv` exporté | Exposition résiduelle `ND` sans preuve de réduction |
+| Matrice et escalade, revue à chaque Sprint | Matrice 5×5 (§2), `sprint_review`, règle exposition ≥ 12 ou gravité 5 | GO/NO-GO `ND`, arbitrage humain à consigner |
+| Registre lié à RCS-88 / RCS-89 / RCS-90 | Champ `linked_tickets` de la revue, lignes R-003/R-005/R-006 | Liens de gouvernance, pas des mesures de ces tickets |
