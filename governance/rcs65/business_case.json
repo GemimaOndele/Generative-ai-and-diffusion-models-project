@@ -1,0 +1,312 @@
+{
+  "blocking_reasons": [
+    "Hypothèses toutes ND : volume, taux de réussite, tarifs et effort restent à sourcer.",
+    "Tant que les scénarios ne sont pas sourcés et relus, aucune projection n'est une mesure.",
+    "Le temps étudiant est une valorisation hypothétique, pas une dépense facturée.",
+    "Le double comptage infrastructure/tarif API doit être explicitement écarté."
+  ],
+  "claim_ready": false,
+  "decision": "ND",
+  "devise": "EUR",
+  "financial_claim": false,
+  "formules": {
+    "benefice_annuel_brut_valorise": "volume * horizon * delta_taux_reussite * (gain_minutes/60) * cout_horaire_hypothetique",
+    "cout_total_annuel": "mise_en_place + horizon * cout_total_mensuel",
+    "cout_total_mensuel": "couts_fixes_non_inclus_API + cout_variable_mensuel",
+    "cout_variable_mensuel": "volume * cout_variable_par_tache",
+    "gain_net_annuel": "benefice_annuel_brut_valorise - cout_total_annuel",
+    "payback_mois": "mise_en_place / (benefice_mensuel - cout_total_mensuel) (ND si net mensuel <= 0)",
+    "roi": "gain_net_annuel / cout_total_annuel (ND si dénominateur nul)"
+  },
+  "issue": "RCS-65",
+  "note": "Aucun GO automatique : la décision financière appartient à l'équipe après revue humaine.",
+  "reviewer": "ND",
+  "scenarios": {
+    "central": {
+      "hypotheses": {
+        "H-01": {
+          "label": "volume tâches / mois",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-02": {
+          "label": "delta taux de réussite (fraction)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-03": {
+          "label": "gain de temps / tâche réussie (minutes)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-04": {
+          "label": "coût horaire valorisé (EUR/h, hypothétique)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-05": {
+          "label": "coût variable / tâche (EUR, hors postes déjà inclus dans l'API)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-06": {
+          "label": "coûts fixes mensuels non inclus dans le tarif API (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-07": {
+          "label": "mise en place initiale (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-08": {
+          "label": "horizon (mois)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-09": {
+          "label": "confirmation absence de double comptage API/infrastructure",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        }
+      },
+      "result": {
+        "benefice_annuel_brut_valorise_eur": "ND",
+        "cout_total_annuel_eur": "ND",
+        "cout_total_mensuel_eur": "ND",
+        "cout_variable_mensuel_eur": "ND",
+        "gain_net_annuel_eur": "ND",
+        "payback_mois": "ND",
+        "raison": "hypothèses incomplètes, non sourcées ou double comptage non écarté",
+        "roi": "ND"
+      }
+    },
+    "optimiste": {
+      "hypotheses": {
+        "H-01": {
+          "label": "volume tâches / mois",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-02": {
+          "label": "delta taux de réussite (fraction)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-03": {
+          "label": "gain de temps / tâche réussie (minutes)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-04": {
+          "label": "coût horaire valorisé (EUR/h, hypothétique)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-05": {
+          "label": "coût variable / tâche (EUR, hors postes déjà inclus dans l'API)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-06": {
+          "label": "coûts fixes mensuels non inclus dans le tarif API (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-07": {
+          "label": "mise en place initiale (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-08": {
+          "label": "horizon (mois)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-09": {
+          "label": "confirmation absence de double comptage API/infrastructure",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        }
+      },
+      "result": {
+        "benefice_annuel_brut_valorise_eur": "ND",
+        "cout_total_annuel_eur": "ND",
+        "cout_total_mensuel_eur": "ND",
+        "cout_variable_mensuel_eur": "ND",
+        "gain_net_annuel_eur": "ND",
+        "payback_mois": "ND",
+        "raison": "hypothèses incomplètes, non sourcées ou double comptage non écarté",
+        "roi": "ND"
+      }
+    },
+    "pessimiste": {
+      "hypotheses": {
+        "H-01": {
+          "label": "volume tâches / mois",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-02": {
+          "label": "delta taux de réussite (fraction)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-03": {
+          "label": "gain de temps / tâche réussie (minutes)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-04": {
+          "label": "coût horaire valorisé (EUR/h, hypothétique)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-05": {
+          "label": "coût variable / tâche (EUR, hors postes déjà inclus dans l'API)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-06": {
+          "label": "coûts fixes mensuels non inclus dans le tarif API (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-07": {
+          "label": "mise en place initiale (EUR)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-08": {
+          "label": "horizon (mois)",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        },
+        "H-09": {
+          "label": "confirmation absence de double comptage API/infrastructure",
+          "owner": "Équipe",
+          "source": "ND",
+          "source_date": "ND",
+          "status": "ND",
+          "unit": "",
+          "value": "ND"
+        }
+      },
+      "result": {
+        "benefice_annuel_brut_valorise_eur": "ND",
+        "cout_total_annuel_eur": "ND",
+        "cout_total_mensuel_eur": "ND",
+        "cout_variable_mensuel_eur": "ND",
+        "gain_net_annuel_eur": "ND",
+        "payback_mois": "ND",
+        "raison": "hypothèses incomplètes, non sourcées ou double comptage non écarté",
+        "roi": "ND"
+      }
+    }
+  },
+  "schema": "rcs65_business_case/v1"
+}
