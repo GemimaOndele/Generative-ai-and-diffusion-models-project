@@ -20,7 +20,8 @@
 | preuves_manifeste_config_run | BLOQUÉ |
 | seuils_approuves_avant_resultats | BLOQUÉ |
 | declaration_revue_independante | BLOQUÉ |
-| commit_reference | BLOQUÉ |
+| reference_commit_declaree | BLOQUÉ |
+| authentification_references_externes | BLOQUÉ |
 | verification_humaine_externe_signature | BLOQUÉ |
 | autorisation_collective | BLOQUÉ |
 | qualite_v2_superieure | BLOQUÉ |
@@ -34,7 +35,7 @@
 
 - Résultats : `rcs79_live_results/v1` ; modèles : `rcs79_models/v1` ; revue : `rcs79_independent_review_declaration/v2`.
 - Numériques : types JSON uniquement, booléens refusés, finis, ≥ 0 et bornés (qualité et delta ∈ [0, 1] ; p95 ≤ 86 400 000 ms).
-- Preuves : hash du manifeste, hash de config, `run_id`, commit complet, dix `case_id`/`freeze_commit`, approbation des seuils avant `executed_at` et déclaration de revue indépendante (relecteur absent des auteurs). Le champ `declaration` n'est pas vérifié cryptographiquement : une signature textuelle ne lève pas la porte `verification_humaine_externe_signature`.
+- Preuves : hash du manifeste, hash de config, `run_id`, commit complet, dix `case_id`/`freeze_commit`, approbation des seuils avant `executed_at` et déclaration de revue indépendante (relecteur absent des auteurs). Le champ `declaration` n'est pas vérifié cryptographiquement : une signature textuelle ne lève pas la porte `verification_humaine_externe_signature`. De même, `reference_commit_declaree` n'atteste pas l'origine du commit, du hash de config ou du run : `authentification_references_externes` reste BLOQUÉ.
 
 ## Limites et bloquants
 
@@ -45,7 +46,8 @@
 - Seuils approuvés absents, non sourcés ou approuvés après l'exécution.
 - Déclaration de revue indépendante absente ou non conforme : rôle indépendant, relecteur absent des auteurs, date et commit requis.
 - Vérification humaine externe de la revue non documentée : une déclaration ou une chaîne de signature textuelle n'est pas une preuve vérifiable.
-- Commit de référence absent, tronqué ou différent de celui du run.
+- Référence commit absente, tronquée ou différente de celle déclarée par le run.
+- Authentification externe des références non documentée : la cohérence interne entre commit, hash de config et run n'atteste ni identité ni origine.
 - Gain V2 inférieur au seuil approuvé ou donnée invalide.
 - p95 V2 supérieure au seuil approuvé ou donnée invalide.
 - Coût V2 supérieur au seuil approuvé ou donnée invalide.
@@ -53,7 +55,7 @@
 - Autorisation collective non vérifiée : l'outil ne peut émettre qu'une recommandation à ratifier par l'équipe, jamais un GO.
 - T01: non gelé
 - T01: référence de gel absente ou SHA complet invalide
-- Aucune décision GO automatisée. Une déclaration de revue n'est pas une signature vérifiée : la vérification humaine externe et l'autorisation collective restent à documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode démo ne peut jamais étayer une recommandation.
+- Aucune décision GO automatisée. Une déclaration de revue n'est pas une signature vérifiée, et la cohérence interne des références (commit, config, run) n'est pas une authentification : la vérification humaine externe et l'autorisation collective restent à documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode démo ne peut jamais étayer une recommandation.
 
 ## Preuves et reproduction
 

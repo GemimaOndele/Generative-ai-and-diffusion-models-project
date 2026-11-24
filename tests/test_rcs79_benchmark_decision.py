@@ -192,7 +192,11 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
 
     def test_all_valid_inputs_require_human_verification(self) -> None:
         report = self.report()
-        deferred = {"autorisation_collective", "verification_humaine_externe_signature"}
+        deferred = {
+            "autorisation_collective",
+            "verification_humaine_externe_signature",
+            "authentification_references_externes",
+        }
         for name, value in report["gates"].items():
             if name not in deferred:
                 self.assertTrue(value, name)
@@ -377,14 +381,34 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertNotIn("revue_independante_attestee", json.dumps(forged, ensure_ascii=False))
 
     # --- Commit et ratification ---------------------------------------------
-    def test_commit_reference_requires_full_sha_and_run_match(self) -> None:
+    def test_commit_reference_is_declared_and_never_authenticated(self) -> None:
         short = self.report(commit="abcdef0")
         self.assertEqual(short["commit"], ND)
-        self.assertFalse(short["gates"]["commit_reference"])
+        self.assertFalse(short["gates"]["reference_commit_declaree"])
+        self.assertNotIn("commit_reference", short["gates"])
+        self.assertFalse(short["gates"]["authentification_references_externes"])
         self.assertNotEqual(short["decision"], "RECOMMANDATION_A_RATIFIER")
         mismatched = self.report(commit="d" * 40)
-        self.assertFalse(mismatched["gates"]["commit_reference"])
+        self.assertFalse(mismatched["gates"]["reference_commit_declaree"])
         self.assertEqual(mismatched["decision"], "A_TESTER")
+        report = self.report()
+        self.assertFalse(report["gates"]["authentification_references_externes"])
+        self.assertTrue(any(
+            "Authentification externe des références" in reason
+            for reason in report["blocking_reasons"]
+        ))
+
+    def test_forged_external_authentication_cannot_be_tampered(self) -> None:
+        report = self.report()
+        write_outputs(self.root, report)
+        forged = deepcopy(report)
+        forged["gates"]["authentification_references_externes"] = True
+        forged["gates"]["verification_humaine_externe_signature"] = True
+        forged["gates"]["autorisation_collective"] = True
+        write_outputs(self.root, forged)
+        ok, reasons = check_outputs(self.root, forged)
+        self.assertFalse(ok)
+        self.assertTrue(any("authentification externe" in reason for reason in reasons))
 
     def test_go_is_never_emitted_and_tampering_is_detected(self) -> None:
         report = self.report()
@@ -415,7 +439,9 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertEqual(first, serialize(report))
         self.assertIn("A_TESTER", doc)
         self.assertIn("verification_humaine_externe_signature", doc)
+        self.assertIn("authentification_references_externes", doc)
         self.assertNotIn("revue_independante_attestee", doc)
+        self.assertNotIn("| commit_reference |", doc)
         write_outputs(self.root, self.report())
         self.assertEqual(first, (self.root / ACCEPTANCE_REL).read_text(encoding="utf-8"))
         self.assertEqual(doc, (self.root / DOC_REL).read_text(encoding="utf-8"))

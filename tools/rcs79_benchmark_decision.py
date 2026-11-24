@@ -5,7 +5,9 @@ Durcissement appliqué à la suite de la relecture de ``5a1cf06`` :
 - valeurs numériques finies, non booléennes, bornées selon leur unité ;
 - identités de modèles canoniques (ni ``ND``/``None``, ni espaces) ;
 - résultats liés au manifeste RCS-81 (dix identifiants et empreintes), à la config,
-  au run et au commit réels ; approbation des seuils antérieure à l'exécution ;
+  au run et au commit déclarés ; cohérence interne distincte de l'authentification
+  externe des références, toujours bloquée hors ligne ; approbation des seuils
+  antérieure à l'exécution ;
 - revue indépendante **déclarée** (rôle, auteurs, date et commit cohérents),
   sans qualifier une chaîne textuelle de signature vérifiée ;
 - porte bloquée sur la vérification humaine externe de la revue et sur
@@ -395,8 +397,11 @@ def build_report(
         "preuves_manifeste_config_run": linked_cases and linked_run,
         "seuils_approuves_avant_resultats": approved_thresholds,
         "declaration_revue_independante": declared_review,  # présence seulement, pas une preuve
-        "commit_reference": bool(commit != ND and linked_run and results_payload
-                                 and results_payload.get("commit") == commit),
+        "reference_commit_declaree": bool(commit != ND and linked_run and results_payload
+                                          and results_payload.get("commit") == commit),
+        # Cohérence interne des chaînes seulement : sans vérification humaine
+        # externe, ni le commit, ni le hash de config, ni le run ne sont authentifiés.
+        "authentification_references_externes": False,
         # Une chaîne textuelle n'est pas une signature vérifiable : la porte
         # reste bloquée jusqu'à une vérification humaine externe documentée.
         "verification_humaine_externe_signature": False,
@@ -455,8 +460,15 @@ def build_report(
             "Vérification humaine externe de la revue non documentée : une déclaration ou une "
             "chaîne de signature textuelle n'est pas une preuve vérifiable."
         )
-    if not gates["commit_reference"]:
-        blocking_reasons.append("Commit de référence absent, tronqué ou différent de celui du run.")
+    if not gates["reference_commit_declaree"]:
+        blocking_reasons.append(
+            "Référence commit absente, tronquée ou différente de celle déclarée par le run."
+        )
+    if not gates["authentification_references_externes"]:
+        blocking_reasons.append(
+            "Authentification externe des références non documentée : la cohérence interne entre "
+            "commit, hash de config et run n'atteste ni identité ni origine."
+        )
     for key, reason in (
         ("qualite_v2_superieure", "Gain V2 inférieur au seuil approuvé ou donnée invalide."),
         ("latence_conforme", "p95 V2 supérieure au seuil approuvé ou donnée invalide."),
@@ -496,9 +508,10 @@ def build_report(
         ],
         "note": (
             "Aucune décision GO automatisée. Une déclaration de revue n'est pas une signature "
-            "vérifiée : la vérification humaine externe et l'autorisation collective restent à "
-            "documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode démo ne peut "
-            "jamais étayer une recommandation."
+            "vérifiée, et la cohérence interne des références (commit, config, run) n'est pas une "
+            "authentification : la vérification humaine externe et l'autorisation collective "
+            "restent à documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode "
+            "démo ne peut jamais étayer une recommandation."
         ),
     }
 
@@ -553,7 +566,9 @@ def render_doc(report: Dict[str, Any]) -> str:
         "dix `case_id`/`freeze_commit`, approbation des seuils avant `executed_at` et "
         "déclaration de revue indépendante (relecteur absent des auteurs). "
         "Le champ `declaration` n'est pas vérifié cryptographiquement : une signature "
-        "textuelle ne lève pas la porte `verification_humaine_externe_signature`.",
+        "textuelle ne lève pas la porte `verification_humaine_externe_signature`. "
+        "De même, `reference_commit_declaree` n'atteste pas l'origine du commit, du hash "
+        "de config ou du run : `authentification_references_externes` reste BLOQUÉ.",
         "",
         "## Limites et bloquants",
         "",
@@ -614,6 +629,10 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
         reasons.append("porte « revue attestée » supprimée : la revue n'est qu'une déclaration")
     if gates.get("verification_humaine_externe_signature") is not False:
         reasons.append("vérification humaine externe non vérifiable hors ligne : porte bloquée obligatoire")
+    if gates.get("authentification_references_externes") is not False:
+        reasons.append("authentification externe des références non vérifiable hors ligne : porte bloquée obligatoire")
+    if gates.get("commit_reference") is not None:
+        reasons.append("porte « commit_reference » supprimée : la référence n'est que déclarée")
     if report["decision"] == "RECOMMANDATION_A_RATIFIER" and not recommendation_ready(gates):
         reasons.append("recommandation sans toutes les portes ou avec vérification/ratification simulée")
     if report["decision"] == "A_TESTER" and recommendation_ready(gates):
