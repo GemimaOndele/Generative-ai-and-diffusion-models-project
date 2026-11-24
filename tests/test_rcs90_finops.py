@@ -61,6 +61,19 @@ class TestFinops(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "dupliqué"):
             self.run_summary([cost("same", "1"), cost("same", "2")])
 
+    def test_incomplete_csv_rejected(self):
+        a = self.root / "cost.csv"
+        a.write_text(",".join(sorted(COST_REQUIRED)) + "\nshort\n", encoding="utf-8")
+        b = csv_data(self.root, "hours.csv", WORKLOG_REQUIRED, [])
+        with self.assertRaisesRegex(ValueError, "incomplète"):
+            summarize(a, b)
+
+    def test_ticket_required_for_cost(self):
+        x = cost("x", "1")
+        x["jira_ticket"] = ""
+        with self.assertRaisesRegex(ValueError, "ticket"):
+            self.run_summary([x])
+
     def test_eur_only(self):
         x = cost("usd", "5")
         x["currency"] = "USD"

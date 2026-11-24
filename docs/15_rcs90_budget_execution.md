@@ -65,3 +65,6 @@ coût par succès. Les registres demeurent vierges : aucun temps, coût ou nombr
 de succès n'a été imputé. Le fonctionnement du calculateur est vérifié ; le
 budget complet, les preuves de factures/temps et la validation collective restent
 à fournir. Aucun changement du calcul n'a été nécessaire sur ce parcours.
+
+
+RCS-90 est la référence exécutable coûts/temps ; les gabarits génériques #4 ne sont pas une comptabilité parallèle. Les entrées doivent être reliées aux tickets, avec sources et périmètre identiques aux succès ; les estimations électriques historiques #11/#26 ne sont pas des décaissements. Les coûts complets restent ND si les postes ou les preuves manquent.

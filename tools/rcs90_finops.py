@@ -28,12 +28,16 @@ MONEY_CATEGORIES = {"fixed", "variable"}
 def _read_csv(path: str | Path, required: set[str]) -> list[dict[str, str]]:
     with Path(path).open(encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
+        if reader.fieldnames and len(set(reader.fieldnames)) != len(reader.fieldnames):
+            raise ValueError("Colonnes CSV dupliquées")
         if not reader.fieldnames or not required.issubset(set(reader.fieldnames)):
             missing = sorted(required - set(reader.fieldnames or []))
             raise ValueError("Colonnes CSV manquantes : " + ", ".join(missing))
         rows = list(reader)
     if any(None in row for row in rows):
         raise ValueError("Trop de colonnes dans une ligne CSV")
+    if any(any(value is None for value in row.values()) for row in rows):
+        raise ValueError("Ligne CSV incomplète")
     keys = [r["entry_id"].strip() for r in rows]
     if any(not key for key in keys):
         raise ValueError("Chaque ligne doit avoir un entry_id non vide")
@@ -90,6 +94,8 @@ def summarize(
     priced_labor = Decimal("0")
     labor_priced_count = 0
     for row in costs:
+        if not row["jira_ticket"].strip():
+            raise ValueError("Une dépense doit être reliée à un ticket")
         status = row["status"].strip().lower()
         category = row["category"].strip().lower()
         cost_class = row["cost_class"].strip().lower()
