@@ -209,7 +209,8 @@ def build_report(assumptions_path: Optional[str] = None, reviewer: Optional[str]
         }
         for name, data in hypotheses.items()
     }
-    claim_ready = all(scenario_ready(data) for data in hypotheses.values())
+    claim_ready = all(scenario_ready(data) and data["H-08"].value == Decimal("12")
+                      for data in hypotheses.values())
     return {
         "schema": "rcs65_business_case/v1",
         "issue": ISSUE,
