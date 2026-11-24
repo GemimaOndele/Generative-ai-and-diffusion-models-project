@@ -18,6 +18,7 @@
     "indices_textuels_sampler": true,
     "indices_textuels_train": true,
     "perimetre_synthetique_declare": false,
+    "schema_artefact_strict": true,
     "seed_explicite": true,
     "structure_textuelle_presente": true
   },
@@ -29,7 +30,7 @@
     "baseline_MAD": "ND",
     "learned_diffusion_denoiser": "ND"
   },
-  "note": "Contrôles structurels uniquement : le hash du fichier ne prouve pas son exécution ni une validation clinique.",
+  "note": "Contrôles structurels uniquement : le schéma strict rejette les clés inattendues et les marqueurs sensibles imbriqués, mais le hash du fichier ne prouve ni son exécution, ni l'authenticité de l'expérience, ni une validation clinique.",
   "preuves": {
     "dataset_sha256": "ND",
     "diffusion_timesteps": "ND",

@@ -42,6 +42,7 @@
 | indices_textuels_reverse | OK |
 | structure_textuelle_presente | OK |
 | artefact_present | ÉCHEC / ND |
+| schema_artefact_strict | OK |
 | artefact_complet | ÉCHEC / ND |
 | perimetre_synthetique_declare | ÉCHEC / ND |
 | champs_exportes_autorises | OK |

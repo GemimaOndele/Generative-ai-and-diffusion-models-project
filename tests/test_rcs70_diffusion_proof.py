@@ -85,6 +85,7 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
         report = build_report(self.root)
         self.assertEqual(report["proof_status"], "ND")
         self.assertTrue(report["checks"]["structure_textuelle_presente"])
+        self.assertTrue(report["checks"]["schema_artefact_strict"])
         self.assertFalse(report["checks"]["artefact_present"])
         for value in report["preuves"].values():
             self.assertEqual(value, "ND")
@@ -117,6 +118,32 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
                 report = build_report(self.root, str(path))
                 self.assertEqual(report["proof_status"], "INCOMPLET")
                 self.assertFalse(report["checks"]["artefact_complet"])
+
+    def test_unexpected_and_nested_sensitive_fields_are_rejected(self) -> None:
+        """Relecture #45 : schéma strict, y compris données imbriquées."""
+        path = self.root / "sensitive.json"
+        mutations = (
+            {"commentaire_libre": "valeur inattendue"},
+            {"patient_id": "sujet-a-ne-pas-exporter"},
+            {"evidence": {"diagnostic": "confidentiel"}},
+            {"baseline_MAD": {**metric_fixture(), "patient": "confidentiel"}},
+            {"notes": ["diagnostic", {"surname": "X"}]},
+        )
+        for mutation in mutations:
+            with self.subTest(mutation=sorted(mutation)):
+                payload = artifact_payload()
+                payload.update(mutation)
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                report = build_report(self.root, str(path))
+                self.assertFalse(report["checks"]["schema_artefact_strict"])
+                self.assertFalse(report["checks"]["artefact_complet"])
+                self.assertEqual(report["proof_status"], "INCOMPLET")
+                text = serialize(report)
+                self.assertNotIn("sujet-a-ne-pas-exporter", text)
+                self.assertNotIn("confidentiel", text)
+                ok, reasons = check_outputs(self.root, report)
+                self.assertFalse(ok)
+                self.assertTrue(any("schéma d'artefact" in reason for reason in reasons))
 
     def test_incomplete_artifact_stays_incomplete(self) -> None:
         path = self.root / "partial.json"

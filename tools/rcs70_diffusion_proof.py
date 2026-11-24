@@ -33,6 +33,7 @@ EVIDENCE_KEYS = (
     "train_loss_start", "train_loss_end",
 )
 METRIC_KEYS = ("baseline_MAD", "learned_diffusion_denoiser")
+ALLOWED_PAYLOAD_KEYS = frozenset(EVIDENCE_KEYS) | frozenset(METRIC_KEYS)
 FORBIDDEN_KEYS = ("patient", "diagnostic", "identifier", "nom", "surname")
 
 
@@ -83,6 +84,23 @@ def _valid_metrics(value: Any) -> bool:
             and _finite(value[threshold]))
 
 
+def forbidden_markers(node: Any) -> List[str]:
+    """Cherche récursivement les marqueurs sensibles dans clés et valeurs."""
+    found: List[str] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            label = str(key).lower()
+            found.extend(marker for marker in FORBIDDEN_KEYS if marker in label)
+            found.extend(forbidden_markers(value))
+    elif isinstance(node, list):
+        for value in node:
+            found.extend(forbidden_markers(value))
+    elif isinstance(node, str):
+        lowered = node.lower()
+        found.extend(marker for marker in FORBIDDEN_KEYS if marker in lowered)
+    return found
+
+
 def read_artifact(path: Path) -> Dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -99,6 +117,7 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
     artifact_info: Dict[str, Any] = {
         "path": ND, "sha256": ND, "present": False,
     }
+    payload: Dict[str, Any] | None = None
     if artifact is not None:
         artifact_path = Path(artifact)
         if not artifact_path.is_absolute():
@@ -118,13 +137,14 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
             if key in payload and _valid_metrics(payload[key]):
                 metrics[key] = payload[key]
 
-    forbidden = [
-        key for key in evidence if any(marker in key.lower() for marker in FORBIDDEN_KEYS)
-    ]
+    forbidden = forbidden_markers(payload) if payload is not None else []
+    unexpected = sorted(set(payload) - ALLOWED_PAYLOAD_KEYS) if payload is not None else []
+    strict_schema = not artifact_info["present"] or (not unexpected and not forbidden)
     checks.update({
         "structure_textuelle_presente": all(structure_checks(source).values()),
         "artefact_present": artifact_info["present"],
-        "artefact_complet": artifact_info["present"] and all(
+        "schema_artefact_strict": strict_schema,
+        "artefact_complet": artifact_info["present"] and strict_schema and all(
             evidence[key] not in (ND, None, "") for key in EVIDENCE_KEYS
         ) and all(metrics[key] != ND for key in METRIC_KEYS),
         "perimetre_synthetique_declare": str(evidence["scope"]).startswith("synthetic")
@@ -157,7 +177,11 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
             "Le démonstrateur porte sur des signaux synthétiques, sans dispositif ni patient.",
             "Artefact d'exécution à fournir par un humain : aucun résultat n'est généré ici.",
         ],
-        "note": "Contrôles structurels uniquement : le hash du fichier ne prouve pas son exécution ni une validation clinique.",
+        "note": (
+            "Contrôles structurels uniquement : le schéma strict rejette les clés inattendues "
+            "et les marqueurs sensibles imbriqués, mais le hash du fichier ne prouve ni son "
+            "exécution, ni l'authenticité de l'expérience, ni une validation clinique."
+        ),
     }
 
 
@@ -242,6 +266,8 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
             reasons.append(f"{rel.as_posix()} obsolète : relancer --write")
     if not report["checks"]["structure_textuelle_presente"]:
         reasons.append("structure textuelle de débruitage absente")
+    if not report["checks"]["schema_artefact_strict"]:
+        reasons.append("schéma d'artefact non strict : clé inattendue ou donnée sensible détectée")
     if report["medical_claim"] or report["clinical_validation"]:
         reasons.append("aucune revendication médicale n'est autorisée")
     if report["decision"] != "A_TESTER":
