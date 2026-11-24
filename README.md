@@ -70,6 +70,10 @@ python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --o
 
 Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
 
+### 🔬 Diffusion J1 — deux variantes contrôlées (RCS-57)
+
+[`src/diffusion_adapter.py`](src/diffusion_adapter.py) fournit un mini-DDPM 1D déterministe (bibliothèque standard, ni GPU ni réseau) avec deux variantes ne différant que par le conditionnement temporel du débruiteur : `base` et `adapte`. Seeds, hyperparamètres, pertes par époque et mesures sont conservés dans [`experiments/results/rcs57_diffusion_variants.json`](experiments/results/rcs57_diffusion_variants.json) ; la preuve de reproductibilité est dans [`governance/rcs57_acceptance.json`](governance/rcs57_acceptance.json). Détails et commandes dans [la fiche RCS-57](docs/10_rcs57_diffusion_j1.md). Il s'agit d'un **smoke test synthétique** : aucun seuil de détection n'est gelé, aucune performance clinique n'est revendiquée, et le « V2 » TP04 reste une orchestration J2 sans lien avec ce DDPM.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
