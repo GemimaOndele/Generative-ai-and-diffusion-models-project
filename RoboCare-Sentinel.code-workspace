@@ -1,0 +1,8 @@
+{
+  "folders": [{"path": "."}],
+  "settings": {
+    "python.defaultInterpreterPath": "python",
+    "files.exclude": {"**/__pycache__": true},
+    "editor.wordWrap": "on"
+  }
+}
