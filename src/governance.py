@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import re
+import tempfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -71,6 +72,23 @@ ADR_ALIASES = {
     "reviewer": ("Relecteur",),
     "links": ("Liens/preuves", "Liens"),
 }
+
+# Thèmes explicitement demandés par le complément Jira RCS-18 (20/11/2026).
+RISK_THEME_CATEGORIES = {
+    "projet": {"Organisation/Code"},
+    "IA": {"IA/Qualité"},
+    "biais": {"Biais/Robustesse"},
+    "sécurité": {"Sécurité"},
+    "RGPD": {"Données/RGPD"},
+    "usage biomédical": {"Usage biomédical", "Diffusion"},
+    "fournisseur": {"Fournisseur/API"},
+    "budget": {"Budget/FinOps"},
+    "dette technique": {"Dette technique", "Organisation/Code"},
+}
+REQUIRED_RISK_FIELDS = (
+    "cause_event", "impact", "probability", "severity", "exposure", "residual",
+    "triggers", "mitigation", "owner", "reviewer", "ticket", "review_date",
+)
 
 
 @dataclass(frozen=True)
@@ -396,6 +414,117 @@ def sprint_review(
     }
 
 
+def _normalised_csv(path: Path) -> str:
+    """Comparaison indépendante des fins de ligne (Windows/Linux)."""
+    return path.read_text(encoding="utf-8").replace("\r\n", "\n")
+
+
+def _generated_registers_match(path: str | Path, out_dir: str | Path) -> bool:
+    """Les deux CSV livrés doivent rester identiques au registre Markdown."""
+    out = Path(out_dir)
+    expected = [out / "adr_register.csv", out / "risk_register.csv"]
+    with tempfile.TemporaryDirectory() as directory:
+        generated = export_registers(path, directory)
+        for fresh, committed in zip(generated, expected):
+            if not committed.exists():
+                return False
+            if _normalised_csv(fresh) != _normalised_csv(committed):
+                return False
+    return True
+
+
+def acceptance_check(
+    register_path: str | Path = DEFAULT_REGISTER,
+    csv_dir: str | Path = DEFAULT_EXPORT_DIR,
+) -> dict:
+    """Preuve d'acceptation RCS-18 : chaque critère Jira est vérifié sur pièces.
+
+    Aucun critère n'est déduit d'une simple présence de fichier : les deux
+    registres livrés sont comparés au Markdown source, et les thèmes demandés
+    par le ticket doivent être couverts.
+    """
+    path = Path(register_path)
+    text = path.read_text(encoding="utf-8")
+    report = build_report(text)
+    adrs = parse_adr_table(text)
+    risks = parse_risk_table(text)
+    review = sprint_review(risks, adrs=adrs)
+    categories = {risk.category for risk in risks}
+
+    coverage = {
+        theme: sorted(categories & expected)
+        for theme, expected in RISK_THEME_CATEGORIES.items()
+    }
+    matrix = exposure_matrix()
+
+    criteria = [
+        {
+            "id": "ADR_REGISTER",
+            "ok": report["ok"] and bool(adrs),
+            "evidence": f"{DEFAULT_REGISTER.as_posix()} §1 + governance/adr_register.csv ({report['adrs']} ADR)",
+        },
+        {
+            "id": "RISK_REGISTER",
+            "ok": report["ok"] and bool(risks),
+            "evidence": f"{DEFAULT_REGISTER.as_posix()} §2 + governance/risk_register.csv ({report['risks']} risques)",
+        },
+        {
+            "id": "RISK_REQUIRED_FIELDS",
+            "ok": all(
+                getattr(risk, name) not in (None, "")
+                for risk in risks
+                for name in REQUIRED_RISK_FIELDS
+            ),
+            "evidence": ", ".join(REQUIRED_RISK_FIELDS),
+        },
+        {
+            "id": "PROBABILITY_IMPACT_SCORING",
+            "ok": all(
+                SCALE_MIN <= risk.probability <= SCALE_MAX
+                and SCALE_MIN <= risk.severity <= SCALE_MAX
+                and risk.exposure == risk.probability * risk.severity
+                for risk in risks
+            ),
+            "evidence": "exposition = probabilité × gravité, échelle 1..5",
+        },
+        {
+            "id": "MATRIX_AND_ESCALATION",
+            "ok": len(matrix) == SCALE_MAX
+            and len(matrix[0]) == SCALE_MAX
+            and matrix[2][3] == ESCALATION_EXPOSURE
+            and any(risk.escalation for risk in risks),
+            "evidence": review["escalation_rule"],
+        },
+        {
+            "id": "RISK_THEME_COVERAGE",
+            "ok": all(coverage.values()),
+            "evidence": coverage,
+        },
+        {
+            "id": "SPRINT_REVIEW_GO_NO_GO",
+            "ok": review["go_no_go"] == "ND" and bool(review["escalations"]),
+            "evidence": "GO/NO-GO ND tant que la revue humaine n'a pas arbitré",
+        },
+        {
+            "id": "LINKED_TICKETS",
+            "ok": set(LINKED_TICKETS).issubset(set(review["linked_tickets"])),
+            "evidence": ", ".join(LINKED_TICKETS),
+        },
+        {
+            "id": "GENERATED_REGISTERS_UP_TO_DATE",
+            "ok": _generated_registers_match(path, csv_dir),
+            "evidence": "governance/adr_register.csv, governance/risk_register.csv",
+        },
+    ]
+    return {
+        "ok": all(criterion["ok"] for criterion in criteria),
+        "ticket": "RCS-18",
+        "validation": report,
+        "coverage": coverage,
+        "criteria": criteria,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Validation du registre ADR/risques (RCS-18)")
     parser.add_argument("path", nargs="?", default=str(DEFAULT_REGISTER))
@@ -416,6 +545,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="rapport de validation machine (code 1 si le registre est invalide)",
     )
+    parser.add_argument(
+        "--acceptance",
+        action="store_true",
+        help="vérifier les critères d'acceptation Jira RCS-18 sur pièces (JSON, code 1 si échec)",
+    )
     args = parser.parse_args(argv)
 
     path = Path(args.path)
@@ -428,6 +562,11 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(f"ERREUR: {exc}")
         return 1
+
+    if args.acceptance:
+        result = acceptance_check(path, args.export_dir or DEFAULT_EXPORT_DIR)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result["ok"] else 1
 
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))

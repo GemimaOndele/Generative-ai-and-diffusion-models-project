@@ -78,7 +78,7 @@ Le [registre documentaire](docs/registre_decisions_risques.md) est la source uni
 python -m src.governance docs/registre_decisions_risques.md --export-dir governance --sprint-review --sprint S0
 ```
 
-Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
+Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. La preuve [acceptance_rcs18.json](governance/acceptance_rcs18.json) vérifie les neuf critères Jira sur pièces : `python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance`. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
 
 ## 👥 L'équipe
 

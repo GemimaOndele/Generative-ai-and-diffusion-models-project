@@ -115,7 +115,7 @@ class GovernanceRegisterTest(unittest.TestCase):
         self.assertEqual(risk_path.name, "risk_register.csv")
         self.assertEqual(tuple(adr_rows[0].keys()), ADR_CSV_COLUMNS)
         self.assertEqual(len(adr_rows), 10)
-        self.assertEqual(len(risk_rows), 8)
+        self.assertEqual(len(risk_rows), 10)
         self.assertEqual(adr_rows[0]["id"], "ADR-001")
         self.assertEqual(risk_rows[0]["id"], "R-001")
         self.assertTrue(risk_rows[0]["mitigation"])
@@ -191,7 +191,7 @@ class GovernanceRegisterTest(unittest.TestCase):
             code = main([str(self._register_path()), "--json"])
         self.assertEqual(code, 0)
         payload = json.loads(valid.getvalue())
-        self.assertEqual(payload, {"ok": True, "errors": [], "adrs": 10, "risks": 8})
+        self.assertEqual(payload, {"ok": True, "errors": [], "adrs": 10, "risks": 10})
 
         with tempfile.TemporaryDirectory() as directory:
             invalid = Path(directory) / "invalid.md"

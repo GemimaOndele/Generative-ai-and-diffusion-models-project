@@ -71,6 +71,10 @@
 | R-006 | Sécurité | Prompt injection via source RAG/document → action non autorisée/fuite | Personnes : fuite/action non autorisée ; Métier : incident ; Système : injection via source RAG | 3 | 4 | 12 | ND | Source non fiable | Filtrage, allowlist outils, tests injection, revue humaine | Désactiver outil, audit traces | Elias | Ayoub | RCS-62 | ND | Ouvert |
 | R-007 | Diffusion | Interprétation abusive d'un smoke test synthétique → fausse preuve J1 | Personnes : décision J1 invalide ; Métier : fausse preuve ; Système : surinterprétation du smoke test | 3 | 4 | 12 | ND | Absence dataset réel | Étiqueter synthétique, protocole J1, preuves reproductibles | Retirer revendication, refaire essai | Elias | Gémima | RCS-57/70 | ND | Ouvert |
 | R-008 | Organisation/Code | Arborescences dupliquées → imports cassés/PR non mergeable | Personnes : perte de temps revue ; Métier : PR non mergeable ; Système : imports cassés par doublons | 3 | 3 | 9 | ND | Deux copies du même module | CI duplicate-dir check, socle unique, revue PR #30 | Rebase sur `3b70661`, suppression des doublons | Elias | Omar/Gémima | RCS-75, PR #30 | 2026-11-23 | Mitigé |
+| R-009 | Usage biomédical | Demande de diagnostic/thérapie sans validation clinique → usage abusif d'une sortie pédagogique | Personnes : décision de santé incorrecte ; Métier : responsabilité engagée ; Système : sortie non certifiée | 2 | 5 | 10 | ND | Question clinique ou demande de prescription | Périmètre pédagogique explicite, refus/abstention, revue humaine, mention « ne remplace pas un avis médical » | Suspendre la réponse, escalade métier | Elias | Aminata/Omar | RCS-18, RCS-88 | ND | Ouvert |
+| R-010 | Dette technique | Dépendances/CI non figées → environnement non reproductible | Personnes : perte de temps ; Métier : résultat non rejouable ; Système : dérive des versions/outils | 3 | 3 | 9 | ND | `requirements.txt` ou CI modifiés sans revue | Figer dépendances, consigner SHA/version, CI dédiée, revue PR | Revenir au SHA connu, régénérer les preuves | Elias | Ayoub | RCS-18, RCS-75 | ND | Ouvert |
+
+R-009 et R-010 sont des **propositions à ratifier** en revue Sprint : leurs cotations suivent les échelles proposées ci-dessus et ne constituent pas une décision entérinée. L'exposition résiduelle reste `ND`.
 
 ## 3. Gouvernance de revue
 
@@ -105,3 +109,15 @@ python -m src.governance docs/registre_decisions_risques.md --json
 | Risques probabilité-impact, propriétaire et mitigation | Registre risques (§2), `validate_risks`, `risk_register.csv` exporté | Exposition résiduelle `ND` sans preuve de réduction |
 | Matrice et escalade, revue à chaque Sprint | Matrice 5×5 (§2), `sprint_review`, règle exposition ≥ 12 ou gravité 5 | GO/NO-GO `ND`, arbitrage humain à consigner |
 | Registre lié à RCS-88 / RCS-89 / RCS-90 | Champ `linked_tickets` de la revue, lignes R-003/R-005/R-006 | Liens de gouvernance, pas des mesures de ces tickets |
+
+### Preuve d'acceptation exécutable
+
+Les deux registres opérationnels et la preuve sont **versionnés** (jamais ressaisis) : `governance/adr_register.csv`, `governance/risk_register.csv`, `governance/acceptance_rcs18.json`.
+
+```bash
+python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance
+```
+
+`--acceptance` vérifie neuf critères sur pièces : registres ADR/risques non vides, champs Jira obligatoires, cotation probabilité × gravité cohérente, matrice et escalade, couverture des neuf thèmes du complément Jira, revue Sprint avec GO/NO-GO `ND`, liens RCS-88/89/90 et absence de dérive entre le Markdown et les deux CSV livrés. Le test `tests/test_rcs18_acceptance.py` échoue si un critère tombe ou si un CSV livré n'est plus à jour.
+
+Les risques R-009 (usage biomédical) et R-010 (dette technique) complètent la cartographie demandée ; leurs cotations sont des **propositions à ratifier**, pas des décisions entérinées.
