@@ -70,6 +70,43 @@ class ModelConfigTests(unittest.TestCase):
         self.assertFalse(allowed)
         self.assertEqual(reason, "cost_nd_with_cap")
 
+    def test_cost_ledger_reserves_forecast_then_settles_actual(self):
+        ledger = CostLedger(max_cost_eur=1.0)
+        spec = live_spec("A", "a")
+        allowed, reason, reserved = ledger.reserve(spec, 1000, 500)
+        self.assertTrue(allowed)
+        self.assertIsNone(reason)
+        self.assertAlmostEqual(reserved, 0.002)
+        self.assertAlmostEqual(ledger.reserved_eur, 0.002)
+        allowed, _ = ledger.can_spend()
+        self.assertTrue(allowed)
+        cost, note = ledger.record(spec, 500, 250, reserved)
+        self.assertAlmostEqual(cost, 0.001)
+        self.assertIsNone(note)
+        self.assertAlmostEqual(ledger.spent_eur, 0.001)
+        self.assertAlmostEqual(ledger.reserved_eur, 0.0)
+
+    def test_cost_ledger_flags_cost_above_reservation(self):
+        ledger = CostLedger(max_cost_eur=1.0)
+        spec = live_spec("A", "a")
+        _, _, reserved = ledger.reserve(spec, 100, 100)
+        cost, note = ledger.record(spec, 1000, 1000, reserved)
+        self.assertAlmostEqual(cost, 0.003)
+        self.assertEqual(note, "cost_above_forecast")
+
+    def test_cost_ledger_rejects_forecast_above_cap(self):
+        ledger = CostLedger(max_cost_eur=0.001)
+        spec = live_spec("A", "a")
+        allowed, reason, reserved = ledger.reserve(spec, 1000, 500)
+        self.assertFalse(allowed)
+        self.assertEqual(reason, "budget_exceeded_forecast")
+        self.assertAlmostEqual(reserved, 0.002)
+        self.assertEqual(ledger.calls, 0)
+
+    def test_benchmark_policy_requires_positive_token_bounds(self):
+        with self.assertRaises(ValueError):
+            BenchmarkPolicy(max_output_tokens_per_call=0).validate(live=False)
+
     def test_load_config_validates_file(self):
         payload = {
             "models": {

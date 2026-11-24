@@ -2,6 +2,7 @@
 
 - `src/orchestrator.py` est l'**orchestrateur TP04** (RCS-75) : mono-A, mono-B, routing et cascade bornée, refus/abstention, traces sans secret. Le squelette `NotImplementedError` du socle est remplacé, sans appel LLM réel tant que la configuration live n'est pas validée.
 - `src/model_config.py` valide l'identité exacte des deux modèles (nom, version, fournisseur, licence, droits, région, rétention, budget) ; `src/scoring.py` fournit le score automatique limité à la décision observable ; `src/run_benchmark.py` exécute le smoke test démo ou le mode live après autorisation.
+- Le budget par cas est réservé **avant** chaque appel : tarifs connus, prompt borné en octets et `max_tokens` transmis au client. Un tarif `ND` ou un montant prévisionnel supérieur au plafond bloque l'appel, y compris le premier appel A de la cascade. Le coût réel ne fait que régler la réservation après coup ; aucun chiffre n'est estimé. `max_calls_per_case` est également vérifié avant chaque requête : à 1, le fallback B est bloqué après A.
 - `config/tp04_models.example.json` est le gabarit de configuration live, **sans clé API**.
 - Le [CodeCarbon local facultatif](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/3) est proposé dans `src/observability/` (PR #3) ; il ne mesure pas les fournisseurs de modèles distants.
 - Le [comparateur TP04/TP05](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/9) vérifie le protocole et les résultats de modèles réels **lorsqu'ils existent**.
