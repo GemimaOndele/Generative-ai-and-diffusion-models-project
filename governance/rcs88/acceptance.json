@@ -1,0 +1,32 @@
+{
+  "issue": "RCS-88",
+  "decision": "NO_GO",
+  "demo_commissionable": false,
+  "criteria": {
+    "gabarits_model_et_dataset_cards": true,
+    "sous_groupes_uniquement_autorises": true,
+    "protocole_biais_et_refus": true,
+    "plan_action_avant_demo": true,
+    "preuve_avant_mise_en_service": false
+  },
+  "blocking_reasons": [
+    "proof.json absent : preuve avant mise en service démo manquante"
+  ],
+  "human_review_required": true,
+  "clinical_validation": false,
+  "no_bias_claim": false,
+  "generated_documents": [
+    "dataset_card_D-001.md",
+    "dataset_card_D-001b.md",
+    "dataset_card_D-002.md",
+    "dataset_card_D-003.md",
+    "matrice_biais_robustesse.md",
+    "model_card_MC-baseline.md",
+    "model_card_MC-diffusion-j1.md",
+    "model_card_MC-mono-llm.md",
+    "model_card_MC-v2-multillm.md",
+    "plan_action.md",
+    "protocole_refus_biais.md"
+  ],
+  "note": "Une preuve signée ne vaut pas validation clinique et n'autorise pas d'action autonome."
+}

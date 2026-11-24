@@ -1,0 +1,29 @@
+name: RCS-88 gouvernance
+
+on:
+  push:
+    paths:
+      - "tools/rcs88_governance.py"
+      - "tests/test_rcs88_governance.py"
+      - "governance/rcs88/**"
+      - "data/manifest.md"
+      - ".github/workflows/rcs88-governance.yml"
+  pull_request:
+    paths:
+      - "tools/rcs88_governance.py"
+      - "tests/test_rcs88_governance.py"
+      - "governance/rcs88/**"
+      - "data/manifest.md"
+
+jobs:
+  governance-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Contrôler les fiches, le refus et la preuve
+        run: python -m unittest tests.test_rcs88_governance -v
+      - name: Publier le rapport d'acceptation (NO_GO sans preuve humaine)
+        run: python tools/rcs88_governance.py
