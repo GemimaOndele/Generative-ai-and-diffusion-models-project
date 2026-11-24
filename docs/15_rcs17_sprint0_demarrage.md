@@ -5,7 +5,7 @@
 **Statut au 21/11/2026 : préparation concrète effectuée, mais Sprint Jira toujours FUTUR.** Ne pas inventer de disponibilités/dates/engagements. Les cinq membres doivent confirmer leurs créneaux **en privé** avant de publier des capacités agrégées approuvées.
 
 ## Objectif proposé (à approuver)
-1. Approuver les règles de contribution et la revue GitHub #1 ;
+1. Confirmer les règles de contribution du socle GitHub #1 déjà intégré ;
 2. Compléter la charte, la matrice de compétences, l'analyse des dépendances et les accords ;
 3. Vérifier la famille de machines pilote et les accès/licences au dataset ;
 4. Choisir les modèles et la logique de mesure TP04/TP05 sans dépenser sans accord ;
@@ -41,7 +41,7 @@ Responsable/binôme/relecteur, données et licences autorisées, source et livra
 Livrable disponible, tests pertinents réussis, preuve/limitations, revue distincte de l'auteur, traçabilité commits/versions/données, mise à jour Jira. Aucun résultat scientifique « effectué » si simulation seulement.
 
 ## Ordre de démarrage
-1. Relire PR #1 (toujours non fusionnée au dernier contrôle), corriger et faire approuver.
+1. Vérifier le socle intégré par PR #1.
 2. Confirmer les capacités/charges, les rôles supplémentaires RCS-81 à RCS-90 et la portée du Sprint.
 3. Valider une date de début et de fin ; **seulement ensuite** démarrer le Sprint 0 dans Jira.
 4. Intégrer PR #2 (plan et preuves), PR #3 (TP05) et PR #4 (gouvernance) après mise à jour des branches et revues.
@@ -54,7 +54,7 @@ Lancement et estimation, synchronisation courte, revue des livrables et rétrosp
 - Données de maintenance médicale non acquises ; bascule industrielle/simulée sous mention claire.
 - Licence/accès API LLM non décidés ; limites budgétaires avant achat.
 - Aucun modèle ni score réel démontré dans les fichiers de cadrage.
-- PRs #1–#4 non fusionnées ; prioriser l'approbation de la première.
+- PR #1 intégrée ; les PR #2–#4 restent à relire.
 - Suivi financier RCS-90 et risques RCS-18 dès le début, distincts des tests TP05 finaux.
 
 **Étape humaine restante :** Omar peut vérifier les estimations et la faisabilité ; Ayoub relit le plan ; les cinq membres décident de l'engagement et des dates.
@@ -72,6 +72,10 @@ Le rythme proposé est un **Sprint 0 court de 2 semaines, lundi 23 novembre → 
 | **Jeudi 3 décembre** | Point Jira/WhatsApp asynchrone (protocoles et budget) | Pas de réunion obligatoire |
 | **Dimanche 6 décembre, 18 h–18 h 30** | Revue + décision sur suite du projet | À confirmer |
 
-**Premier objectif minimal raisonnable** : (1) relire/valider la PR #1, (2) valider capacités et règles de travail, (3) fixer famille/données/risques/budget et protocole C3/TP04. Les dix tickets déjà présents dans le Sprint sont un **backlog candidat**, pas dix obligations à livrer en parallèle. Les membres proposent leur capacité réelle ; une suggestion de 2–3 h hebdomadaires par personne est **une hypothèse de planification**, pas une disponibilité connue.
+**Premier objectif minimal raisonnable** : (1) vérifier le socle #1 intégré, (2) valider capacités et règles de travail, (3) fixer famille/données/risques/budget et protocole C3/TP04. Les dix tickets déjà présents dans le Sprint sont un **backlog candidat**, pas dix obligations à livrer en parallèle. Les membres proposent leur capacité réelle ; une suggestion de 2–3 h hebdomadaires par personne est **une hypothèse de planification**, pas une disponibilité connue.
 
 En cas d'absence de consensus avant le 23 novembre, **ne pas démarrer** et proposer le **30 novembre–13 décembre** comme alternative. Aucun changement de dates ni démarrage réel n'est effectué dans Jira par ce document.
+
+
+## Coordination du 24/11
+Référence opérationnelle unique RCS-17 ; #2 conserve le cadrage historique. Les dates proposées des 22 et 23 novembre sont échues et non validées. Contrôler le statut Jira réel ; si aucun accord n'est confirmé, proposer de nouvelles dates (alternative 30/11–13/12 non validée). Aucun démarrage automatique.
