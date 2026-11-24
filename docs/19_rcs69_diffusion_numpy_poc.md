@@ -1,4 +1,4 @@
-# RCS-69 — Première diffusion réellement entraînée sur signaux synthétiques
+# RCS-70 — Démonstration technique de diffusion sur signaux synthétiques (contribution préparatoire)
 
 **Gémima (pilote), Aminata (binôme), Omar (relai), Elias (relecteur technique).**
 
@@ -51,3 +51,6 @@ Ce sont des résultats **synthétiques sur cette seed**, pas une preuve de
 supériorité générale ou clinique. Le JSON est conservé localement ; aucune
 mesure d'énergie, facture ni donnée médicale n'a été inventée ou ajoutée.
 La validation des sources et le gel collectif des cas restent à réaliser.
+
+
+Périmètre de revue : preuve technique synthétique contribuant à RCS-70 (Elias pilote du ticket), pas satisfaction de RCS-69. La grille de RCS-69 reste candidate ; harmoniser avec l'inventaire historique #25 et approuver collectivement un nouveau manifeste avant évaluation. Aucun transfert de responsabilité Jira ni gel rétroactif.

@@ -51,3 +51,6 @@ Après installation de `requirements-rcs69.txt`, exécuter `python -m experiment
 - Groupe : réaliser les expériences et revenir sur un cas d'échec.
 
 PR en revue humaine après CI ; aucun gel automatiquement effectué par ce dépôt.
+
+
+La grille proposée n'est pas gelée ; la démonstration de diffusion jointe relève du périmètre technique RCS-70. RCS-69 reste ouvert jusqu'au choix de données, au manifeste et à la validation collective antérieure aux évaluations. Les dix cas historiques #25 constituent une référence à examiner, pas une preuve de gel préalable.
