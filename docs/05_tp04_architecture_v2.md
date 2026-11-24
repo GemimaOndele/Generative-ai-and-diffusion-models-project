@@ -140,6 +140,8 @@ Ne pas réessayer indéfiniment. Le fallback est une abstention explicite ou une
 - **Appels payants :** pas d'exécution sans autorisation explicite.
 - **Droits, région, contrat et rétention :** vérification requise pour A et B avant tout transfert.
 
+**Garantie préalable (et non seulement post factum).** Lorsque `max_cost_eur_per_case` est fixé, `CostLedger.reserve()` calcule avant chaque appel le montant maximal prévisionnel à partir des tarifs connus et des bornes `max_input_tokens_per_call` / `max_output_tokens_per_call`. Le prompt est tronqué à `max_input_tokens_per_call` octets UTF-8 (borne supérieure du nombre de tokens, indépendante du tokeniseur), avec une marge `input_token_overhead` pour les tokens de cadre, et `max_output_tokens_per_call` est transmis au client. Si un tarif, une borne ou le solde ne permet pas de couvrir ce montant, l'appel est bloqué **avant le réseau**, y compris le premier appel de la cascade A → B. Le coût réel est ensuite réglé sur la réservation par `CostLedger.record()` ; un coût devenu `ND` après coup reste compté au pire cas et interdit les appels suivants. Sans plafond configuré, aucun montant n'est garanti et le mode live reste soumis à `allow_paid_calls` et à la revue humaine.
+
 ## Règles de sécurité
 
 - Aucun transfert non autorisé à un second fournisseur : droits, région, contrat et rétention doivent être validés pour A et B avant tout appel.
