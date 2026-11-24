@@ -1,0 +1,27 @@
+name: RCS-78 secure projection to RCS-89
+on:
+  push:
+    branches: [feature/RCS-78-secure-projection-20261124]
+  pull_request:
+    paths:
+      - tools/rcs78_trace_projection.py
+      - tests/test_rcs78_trace_projection.py
+      - data/contracts/trace_event_v1.json
+      - requirements-rcs78-projection.txt
+      - .github/workflows/rcs78-projection.yml
+permissions:
+  contents: read
+jobs:
+  projection:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-rcs78-projection.txt
+      - run: python -m unittest discover -s tests -p test_rcs78_trace_projection.py -v
+      - run: python -m py_compile tools/rcs78_trace_projection.py

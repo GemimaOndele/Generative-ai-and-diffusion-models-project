@@ -68,7 +68,18 @@ La commande d'acceptation recalcule les pertes et les mesures depuis le code et 
 
 ## 6. Liens avec les autres tickets
 
-- **RCS-55 / RCS-71** : baseline règles/ML à exécuter sur les mêmes cas figés.
+- **RCS-55 / RCS-71** : comparaison exploratoire déjà exécutée dans #25 ; campagne confirmatoire sur cas préalablement gelés à réaliser.
 - **RCS-56** : étude Diffusion-TS / PhysDiff, licences et capacité GPU.
 - **RCS-69 / RCS-70** : cas gelés puis exécution diffusion réelle.
 - **RCS-22 / RCS-81** : protocole J1 vs J2, métriques distinctes, seuils gelés avant campagne.
+
+
+## 7. Articulation des trois implémentations J1 (revue du 24/11)
+
+| Contribution | Rôle | Périmètre de preuve |
+|---|---|---|
+| PR #7 (RCS-70) | DDPM NumPy sur signaux synthétiques, apprentissage et reconstruction | Démonstrateur pédagogique intégré à main |
+| PR #38 (RCS-57) | Mini-DDPM 1D en bibliothèque standard, comparaison contrôlée du conditionnement temporel | Reproductibilité logicielle synthétique, deux variantes |
+| PR #25 (RCS-71) | DDPM tabulaire PyTorch vs z-score/Isolation Forest sur AI4I industriel, ablations | Comparaison exploratoire B/C sur le même jeu industriel ; pas de preuve biomédicale |
+
+La PR #25 est la référence pour la comparaison exploratoire baseline/diffusion. Son artefact de reproduction du 24/11 (commit b638aea, `experiments/results/j1_reproduction_2026-11-24.json`) rapporte les métriques de qualité identiques après rejeu. Ce n'est pas un gel préalable : `freeze_commit` reste null. Les deux démonstrateurs synthétiques ne sont pas des implémentations concurrentes du benchmark. Ne pas mélanger leurs métriques, données et hypothèses. Un choix de modèle et une campagne confirmatoire distincte doivent être validés en équipe.
