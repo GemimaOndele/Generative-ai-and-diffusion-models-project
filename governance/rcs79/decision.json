@@ -1,0 +1,66 @@
+{
+  "blocking_reasons": [
+    "Cas RCS-81 non gelés collectivement : freeze_commit absent ou invalide.",
+    "Modèles A/B réels non validés (identité, licence, droits, région, rétention).",
+    "Aucune exécution live réelle sur dix cas : le mode démo ne mesure pas la qualité.",
+    "Gain V2 inférieur au seuil approuvé ou seuil ND.",
+    "p95 V2 supérieure au seuil approuvé ou seuil ND.",
+    "Coût V2 supérieur au seuil approuvé ou seuil ND.",
+    "Énergie/CO₂e non documentée ou non calculée sur un périmètre commun.",
+    "Relecteur humain absent.",
+    "Commit de référence absent.",
+    "T01: non gelé",
+    "T01: référence de gel absente ou SHA complet invalide"
+  ],
+  "commit": "ND",
+  "comparatif": {
+    "V2": {
+      "co2e_kg": "ND",
+      "cost_eur": "ND",
+      "energy_status": "ND",
+      "p95_ms": "ND",
+      "quality": "ND"
+    },
+    "mono-A": {
+      "co2e_kg": "ND",
+      "cost_eur": "ND",
+      "energy_status": "ND",
+      "p95_ms": "ND",
+      "quality": "ND"
+    },
+    "mono-B": {
+      "co2e_kg": "ND",
+      "cost_eur": "ND",
+      "energy_status": "ND",
+      "p95_ms": "ND",
+      "quality": "ND"
+    }
+  },
+  "decision": "NO_GO",
+  "gates": {
+    "cas_geles": false,
+    "commit_reference": false,
+    "cout_conforme": false,
+    "energie_documentee": false,
+    "latence_conforme": false,
+    "modeles_ab_valides": false,
+    "qualite_v2_superieure": false,
+    "resultats_live_reels": false,
+    "revue_humaine": false
+  },
+  "inputs": {
+    "manifest": "planning/rcs81_case_manifest.csv",
+    "models": "ND",
+    "results": "ND"
+  },
+  "issue": "RCS-79",
+  "liens": [
+    "docs/05_tp04_benchmark.md",
+    "data/manifest.md",
+    "planning/rcs81_case_manifest.csv",
+    "README.md"
+  ],
+  "note": "Un mock ou le mode démo ne peut jamais étayer un GO.",
+  "reviewer": "ND",
+  "schema": "rcs79_benchmark_decision/v1"
+}
