@@ -1,0 +1,11 @@
+case_id,category,input_ref,dataset_id,label_source,expected_behavior,check_mode,status
+C3-01,normal,,,,,,proposed
+C3-02,normal,,,,,,proposed
+C3-03,normal,,,,,,proposed
+C3-04,normal,,,,,,proposed
+C3-05,anomaly_point,,,,,,proposed
+C3-06,anomaly_sustained,,,,,,proposed
+C3-07,anomaly_rare,,,,,,proposed
+C3-08,data_quality_missing,,,,,,proposed
+C3-09,domain_shift,,,,,,proposed
+C3-10,unauthorized_source,,,,,,proposed
