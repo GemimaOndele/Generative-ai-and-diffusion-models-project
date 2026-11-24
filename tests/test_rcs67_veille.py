@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from tools.rcs67_veille import (
@@ -79,6 +80,26 @@ class Rcs67VeilleTests(unittest.TestCase):
             ok, reasons = check_outputs(root, report)
             self.assertFalse(ok)
             self.assertTrue(any("traçabilité" in reason for reason in reasons))
+
+    def test_duplicate_adr_is_rejected(self) -> None:
+        make_root(self.root, ids=ADR_IDS + ["ADR-001"])
+        with self.assertRaisesRegex(ValueError, "dupliqué"):
+            build_report(self.root)
+
+    def test_missing_adr_id_is_rejected(self) -> None:
+        make_root(self.root, ids=ADR_IDS + [""])
+        with self.assertRaisesRegex(ValueError, "sans identifiant"):
+            build_report(self.root)
+
+    def test_duplicate_fiche_is_rejected(self) -> None:
+        with patch("tools.rcs67_veille.FICHES", FICHES + [dict(FICHES[0])]):
+            with self.assertRaisesRegex(ValueError, "dupliqué"):
+                build_report(self.root)
+
+    def test_invalid_citation_date_is_rejected(self) -> None:
+        with patch("tools.rcs67_veille.FICHES", [dict(FICHES[0], date_citation="2026-02-30")]):
+            with self.assertRaisesRegex(ValueError, "Date de citation ISO"):
+                build_report(self.root)
 
     def test_missing_register_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as other:

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import date
 import json
 import sys
 from pathlib import Path
@@ -106,7 +107,14 @@ def load_adr_register(root: Path) -> Dict[str, Dict[str, str]]:
         if not reader.fieldnames or "id" not in reader.fieldnames:
             raise ValueError("Registre ADR invalide : colonne id absente")
         rows = list(reader)
-    register = {row["id"].strip(): row for row in rows if row.get("id", "").strip()}
+    register = {}
+    for line, row in enumerate(rows, start=2):
+        ident = (row.get("id") or "").strip()
+        if not ident:
+            raise ValueError(f"ADR sans identifiant, ligne {line}")
+        if ident in register:
+            raise ValueError(f"Identifiant ADR dupliqué : {ident}")
+        register[ident] = row
     if not register:
         raise ValueError("Registre ADR vide")
     return register
@@ -119,7 +127,18 @@ def build_report(root: Path) -> Dict[str, Any]:
         for ident, row in register.items()
     }
     fiches: List[Dict[str, Any]] = []
+    seen = set()
     for raw in FICHES:
+        ident = raw.get("id")
+        if not isinstance(ident, str) or not ident.strip() or ident in seen:
+            raise ValueError("Identifiant de fiche absent ou dupliqué")
+        seen.add(ident)
+        citation = raw.get("date_citation")
+        try:
+            if not isinstance(citation, str) or date.fromisoformat(citation).isoformat() != citation:
+                raise ValueError("date non canonique")
+        except ValueError as exc:
+            raise ValueError(f"Date de citation ISO invalide : {ident}") from exc
         item = dict(raw)
         item["date_lecture"] = ND
         item["statut_lecture"] = ND
