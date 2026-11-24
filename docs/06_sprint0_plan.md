@@ -1,6 +1,6 @@
 # Sprint 0 — Cadrage et préparation C3/TP04 (RCS-17)
 
-> **Statut : périmètre préparatoire, non démarré et non estimé.** Le Sprint `Sprint 0 — Cadrage et préparation des preuves C3/TP04` (Jira, ID 1) est **future**. Les tâches ci-dessous y figurent déjà, mais leur engagement reste soumis à la capacité des cinq membres.
+> **Statut : archive de cadrage préparatoire du 20/11, non estimée à cette date. Plan opérationnel unique : RCS-17, PR #6 (`docs/15_rcs17_sprint0_demarrage.md`).** Le Sprint `Sprint 0 — Cadrage et préparation des preuves C3/TP04` (Jira, ID 1) est **future**. Les tâches ci-dessous y figurent déjà, mais leur engagement reste soumis à la capacité des cinq membres.
 
 ## Objectif du Sprint
 Établir une base collaborative exploitable (règles Jira–GitHub, responsabilité et validation, dépôt et cas de tests), afin de pouvoir exécuter ensuite les preuves scientifiques CM03 (60 min) et TP04 (120 min + atelier facultatif 30 min). **Préparer ≠ exécuter** les expérimentations.
@@ -53,7 +53,7 @@ Réunion de lancement et estimation → point court de synchronisation → revue
 1. **Données C3** : valider famille pilote, jeu industriel/simulé ou réel autorisé, métriques, partition test sans fuite ; voir RCS-19, RCS-25, RCS-27 et RCS-69.
 2. **Modèles TP04** : deux **LLM** distincts avec IDs/versions/licences/régions et permissions ; voir RCS-75.
 3. **Droits/coût** : ne lancer aucun appel API payant sans accord et ne jamais publier de vrais comptes rendus médicaux.
-4. **GitHub** : PR #1 soumise à approbation, pas de fusion sans validation ; le CI actuel ne prouve pas la qualité du modèle.
+4. **GitHub** : PR #1 intégrée au socle main ; les PR suivantes restent soumises à approbation ; le CI actuel ne prouve pas la qualité du modèle.
 
 ## Liens
 - Jira : https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog
@@ -67,3 +67,6 @@ Réunion de lancement et estimation → point court de synchronisation → revue
 - Préparer la cartographie versionnée de la solution (RCS-87) et le contrat de traces (RCS-89) avant de déclarer un modèle évalué ou une interface de monitoring effective.
 - Les quatre missions RCS-87–90 ne sont **pas ajoutées automatiquement à l'engagement du Sprint** : le groupe doit d'abord estimer les heures/capacités et arbitrer les dépendances. Les coûts/risques sont néanmoins des critères d'entrée à surveiller.
 - Les références complètes sont dans la PR #4 et dans la bibliothèque V3.6/CDC V1.3 destinés au Drive. Les preuves techniques C3/TP04 restent non réalisées.
+
+
+Ce document est historique ; capacités, dates et engagements sont gérés par #6. Les cas TP04 sont des candidats RCS-74 sous responsabilité d'Aminata ; le manifeste RCS-81 (#9) reste bloqué sans gel approuvé. Pour les nouveaux chemins, privilégier le préfixe RCS-XX et l'index unique #4.
