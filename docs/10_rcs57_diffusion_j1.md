@@ -49,6 +49,8 @@ python -m unittest discover -s tests -p 'test_*.py' -v
 
 La commande d'acceptation recalcule les pertes et les mesures depuis le code et les compare à l'artefact conservé (tolérance relative `1e-6`). Elle vérifie neuf critères : champs du ticket, deux variantes contrôlées, seeds fixes, hyperparamètres journalisés, logs conservés, outputs conservés, rejeu déterministe, absence de résultat figé, et périmètre synthétique sans seuil de détection gelé.
 
+Cette même commande est rejouée automatiquement par `.github/workflows/tp04-tests.yml` (étape « Preuve de reproductibilité diffusion J1 ») dès que le code, les tests, l'artefact de run ou la preuve changent : une divergence de rejeu fait échouer la CI. Le workflow reste cantonné aux tests logiciels ; il ne mesure aucune performance clinique.
+
 ## 4. Outputs conservés
 
 | Fichier | Rôle |

@@ -161,6 +161,13 @@ class DiffusionAdapterTest(unittest.TestCase):
         proof = json.loads(DEFAULT_PROOF_PATH.read_text(encoding="utf-8"))
         self.assertEqual(proof, acceptance_check())
 
+    def test_ci_replays_acceptance_proof(self):
+        """La preuve doit être rejouée en CI, pas seulement vérifiée en local."""
+        workflow = (ROOT / ".github/workflows/tp04-tests.yml").read_text(encoding="utf-8")
+        self.assertIn("python -m src.diffusion_adapter --acceptance", workflow)
+        self.assertIn("experiments/results/rcs57_diffusion_variants.json", workflow)
+        self.assertIn("governance/rcs57_acceptance.json", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

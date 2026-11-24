@@ -1,10 +1,12 @@
-name: RCS — TP04 orchestration Multi-LLM (tests logiciels)
+name: RCS — tests logiciels (TP04 Multi-LLM + diffusion J1)
 on:
   pull_request:
     paths:
       - 'src/**'
       - 'tests/**'
       - 'experiments/tp04_cases.jsonl'
+      - 'experiments/results/rcs57_diffusion_variants.json'
+      - 'governance/rcs57_acceptance.json'
       - '.github/workflows/tp04-tests.yml'
   push:
     branches: [main]
@@ -30,5 +32,10 @@ jobs:
         run: python -m unittest discover -s tests -p 'test_*.py' -v
       - name: Smoke test démo (orchestration uniquement)
         run: python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --out experiments/results/tp04_demo_ci
+      - name: Preuve de reproductibilité diffusion J1 (RCS-57)
+        run: >-
+          python -m src.diffusion_adapter --acceptance
+          --out experiments/results/rcs57_diffusion_variants.json
+          --proof-out governance/rcs57_acceptance.json
       - name: Portée de la vérification
-        run: echo "Le mode démo valide le routage, la cascade et les traces avec des clients simulés. Aucune qualité LLM, latence réelle, coût ou CO2e n'est mesuré ici."
+        run: echo "Le mode démo valide le routage, la cascade et les traces avec des clients simulés. La preuve RCS-57 rejoue un smoke test synthétique. Aucune qualité LLM, latence réelle, coût, CO2e ou performance clinique n'est mesuré ici."
