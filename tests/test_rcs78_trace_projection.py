@@ -4,7 +4,12 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from jsonschema import Draft202012Validator
+try:
+    from jsonschema import Draft202012Validator
+except ModuleNotFoundError as exc:
+    if exc.name != 'jsonschema':
+        raise
+    raise unittest.SkipTest('jsonschema absent ; suite exécutée dans la CI dédiée RCS-78') from exc
 from tools.rcs78_trace_projection import SCHEMA, ProjectionError, export_file, project_bytes
 
 

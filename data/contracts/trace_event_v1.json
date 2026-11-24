@@ -39,7 +39,13 @@
     },
     "component": {
       "type": "string",
-      "enum": ["ingestion", "diffusion_j1", "orchestrator_j2", "alerts_hitl", "api"]
+      "enum": [
+        "ingestion",
+        "diffusion_j1",
+        "orchestrator_j2",
+        "alerts_hitl",
+        "api"
+      ]
     },
     "model_version": {
       "type": "string",
@@ -48,34 +54,103 @@
     },
     "status": {
       "type": "string",
-      "enum": ["ok", "fallback", "error"]
+      "enum": [
+        "ok",
+        "fallback",
+        "error"
+      ]
     },
     "latency_ms": {
       "type": "number",
       "minimum": 0
     },
     "cost_eur": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0
     },
     "energy_kwh": {
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0
     },
     "energy_kwh_status": {
       "type": "string",
-      "enum": ["measured", "estimated", "ND"]
+      "enum": [
+        "measured",
+        "estimated",
+        "ND"
+      ]
     },
     "boundary": {
       "type": "string",
-      "enum": ["local_compute", "remote_api", "hybrid"]
+      "enum": [
+        "local_compute",
+        "remote_api",
+        "hybrid"
+      ]
     },
     "fallback_triggered": {
       "type": "boolean"
     },
     "error_code": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "maxLength": 64
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "energy_kwh_status": {
+            "const": "ND"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "energy_kwh": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "energy_kwh": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "boundary": {
+            "enum": [
+              "remote_api",
+              "hybrid"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "energy_kwh_status": {
+            "const": "ND"
+          },
+          "energy_kwh": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
 }

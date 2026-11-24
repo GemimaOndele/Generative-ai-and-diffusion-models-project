@@ -1,7 +1,6 @@
 """Tests de validation du contrat de traces JSON et de rejet PII (RCS-89)."""
 import json
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "data" / "contracts" / "trace_event_v1.json"
@@ -14,33 +13,9 @@ def _load_schema() -> dict:
 
 
 def _validate_against_schema(payload: dict, schema: dict) -> list[str]:
-    """Validateur léger autonome aligné sur les règles de trace_event_v1.json."""
-    errors: list[str] = []
-    props = schema["properties"]
-
-    if schema.get("additionalProperties") is False:
-        extra = set(payload.keys()) - set(props.keys())
-        if extra:
-            errors.append(f"Champs non autorisés : {sorted(extra)}")
-
-    for req in schema.get("required", []):
-        if req not in payload:
-            errors.append(f"Champ requis manquant : {req}")
-
-    for key, value in payload.items():
-        if key not in props:
-            continue
-        spec = props[key]
-        if "const" in spec and value != spec["const"]:
-            errors.append(f"{key} doit valoir {spec['const']!r}")
-        if "enum" in spec and value not in spec["enum"]:
-            errors.append(f"{key} valeur invalide : {value!r}")
-        if "pattern" in spec and (not isinstance(value, str) or not re.fullmatch(spec["pattern"], value)):
-            errors.append(f"{key} ne respecte pas le motif {spec['pattern']}")
-        if "minimum" in spec and isinstance(value, (int, float)) and not isinstance(value, bool):
-            if value < spec["minimum"]:
-                errors.append(f"{key} doit être >= {spec['minimum']}")
-    return errors
+    from jsonschema import Draft202012Validator
+    Draft202012Validator.check_schema(schema)
+    return [error.message for error in Draft202012Validator(schema).iter_errors(payload)]
 
 
 def _valid_sample() -> dict:
@@ -122,3 +97,20 @@ def test_doc_mentions_thresholds_and_no_pii_rules():
         "additionalproperties: false",
     ]:
         assert token in text, f"Élément attendu absent de la doc : {token}"
+
+
+def test_energy_boundary_and_status_consistency():
+    schema = _load_schema()
+    for changes in [
+        {"boundary": "remote_api"},
+        {"boundary": "hybrid"},
+        {"energy_kwh_status": "ND"},
+        {"energy_kwh": None},
+        {"latency_ms": "412"},
+        {"fallback_triggered": 1},
+        {"model_version": "x" * 121},
+    ]:
+        assert _validate_against_schema({**_valid_sample(), **changes}, schema)
+    for boundary in ("local_compute", "remote_api", "hybrid"):
+        payload = {**_valid_sample(), "boundary": boundary, "energy_kwh_status": "ND", "energy_kwh": None}
+        assert not _validate_against_schema(payload, schema)
