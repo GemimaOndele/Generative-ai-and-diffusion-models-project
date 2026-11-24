@@ -7,10 +7,12 @@
     "sous_groupes_uniquement_autorises": true,
     "protocole_biais_et_refus": true,
     "plan_action_avant_demo": true,
-    "preuve_avant_mise_en_service": false
+    "preuve_avant_mise_en_service": false,
+    "declaration_structurelle_valide": false
   },
   "blocking_reasons": [
-    "proof.json absent : preuve avant mise en service démo manquante"
+    "proof.json absent : preuve avant mise en service démo manquante",
+    "Authentification externe et ratification humaine non vérifiées par cet outil."
   ],
   "human_review_required": true,
   "clinical_validation": false,

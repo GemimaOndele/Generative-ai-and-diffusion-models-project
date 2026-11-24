@@ -23,7 +23,7 @@ Les fiches sont dérivées de `data/manifest.md`, des gabarits `governance/model
 1. **Refus par défaut.** Un sous-groupe absent du manifeste, non autorisé, ou sans preuve (jeu identifié, effectif, métriques, provenance) donne `REFUSED` — « évaluation non disponible ».
 2. **Aucun attribut sensible inféré.** Seules cinq dimensions sont recevables : `type_appareil`, `site`, `regime_signal`, `langue`, `format`, et uniquement si les données autorisées le permettent.
 3. **Pas d'absence de biais.** Même une évaluation recevable reste sous revue humaine et ne conclut jamais à l'absence de biais.
-4. **Démo bloquée sans preuve.** `acceptance.json` reste `NO_GO` tant que `governance/rcs88/proof.json` n'est pas fourni avec un relecteur, une date, une décision et des références de preuve existantes.
+4. **Démo bloquée par défaut.** Un `proof.json` avec relecteur, date ISO, décision et références locales existantes ne constitue qu’une déclaration structurelle. `acceptance.json` reste `NO_GO` : l’authentification externe et la ratification humaine ne sont pas vérifiables par cet outil.
 
 ## Utilisation
 
@@ -40,11 +40,11 @@ Format de preuve attendu (à remplir **par un humain**, jamais généré automat
   "reviewer": "nom du relecteur ayant ratifié la décision",
   "review_date": "AAAA-MM-JJ",
   "decision": "GO | NO_GO | A_TESTER",
-  "evidence": ["chemin/vers/un/fichier/existant", "https://exemple/lien/interne"]
+  "evidence": ["chemin/vers/un/fichier/existant"]
 }
 ```
 
-Une preuve signée autorise au plus une démo sous revue humaine : elle ne constitue **ni** une validation clinique, **ni** une autorisation d'action autonome sur un appareil.
+Une preuve authentifiée et ratifiée par l'équipe pourrait autoriser au plus une démo sous revue humaine : elle ne constitue **ni** une validation clinique, **ni** une autorisation d'action autonome sur un appareil.
 
 ## Liens transversaux
 

@@ -15,6 +15,7 @@ de la branche RCS-88 comme sur le socle plus récent de ``main``.
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
 import re
 from pathlib import Path
@@ -467,7 +468,13 @@ def _load_proof(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
     for key in ("reviewer", "review_date", "decision"):
         if not isinstance(proof.get(key), str) or not proof[key].strip() or len(proof[key]) > 200:
             problems.append(f"champ {key} manquant ou invalide")
-    if proof.get("decision") not in {"GO", "NO_GO", "A_TESTER"}:
+    try:
+        value = proof.get("review_date")
+        if not isinstance(value, str) or date.fromisoformat(value).isoformat() != value:
+            raise ValueError("date non canonique")
+    except ValueError:
+        problems.append("review_date : date ISO invalide")
+    if not isinstance(proof.get("decision"), str) or proof.get("decision") not in {"GO", "NO_GO", "A_TESTER"}:
         problems.append("décision doit être GO, NO_GO ou A_TESTER")
     evidence = proof.get("evidence")
     if not isinstance(evidence, list) or not evidence:
@@ -478,10 +485,11 @@ def _load_proof(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
                 problems.append("référence de preuve invalide ou sensible")
                 continue
             if ref.startswith(("http://", "https://")):
+                problems.append("référence externe non vérifiée")
                 continue
             target = (root / ref).resolve()
             if not target.is_relative_to(root.resolve()) or not target.is_file():
-                problems.append(f"référence de preuve introuvable : {ref}")
+                problems.append("référence de preuve locale introuvable ou hors périmètre")
     if any(_sensitive(str(k)) for k in proof):
         problems.append("champ sensible interdit dans proof.json")
     return proof, problems
@@ -510,6 +518,10 @@ def build_acceptance(root: Path) -> dict[str, Any]:
         ),
         "preuve_avant_mise_en_service": proof is not None and not problems and proof.get("decision") == "GO",
     }
+    criteria["declaration_structurelle_valide"] = criteria["preuve_avant_mise_en_service"]
+    # Le fichier local ne permet pas d’authentifier le relecteur ni la ratification.
+    criteria["preuve_avant_mise_en_service"] = False
+    problems.append("Authentification externe et ratification humaine non vérifiées par cet outil.")
     commissionable = all(criteria.values())
     return {
         "issue": "RCS-88",

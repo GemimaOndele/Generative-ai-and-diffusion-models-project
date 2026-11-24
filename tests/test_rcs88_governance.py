@@ -134,15 +134,27 @@ class Rcs88GovernanceTests(unittest.TestCase):
         self.assertEqual(report["decision"], "NO_GO")
         self.assertTrue(any("reviewer" in reason for reason in report["blocking_reasons"]))
 
-    def test_preuve_avec_relecteur_et_evidence_debloque_demo_sans_clinique(self):
+    def test_declaration_valide_ne_debloque_pas_demo_sans_authentification(self):
         (self.root / "governance" / "rcs88").mkdir(parents=True)
         path = self.root / "governance" / "rcs88" / "proof.json"
         path.write_text(json.dumps(self.proof()), encoding="utf-8")
         report = build_acceptance(self.root)
-        self.assertTrue(report["demo_commissionable"])
-        self.assertEqual(report["decision"], "GO_SOUS_RESERVE_REVUE")
+        self.assertTrue(report["criteria"]["declaration_structurelle_valide"])
+        self.assertFalse(report["criteria"]["preuve_avant_mise_en_service"])
+        self.assertFalse(report["demo_commissionable"])
+        self.assertEqual(report["decision"], "NO_GO")
         self.assertTrue(report["human_review_required"])
         self.assertFalse(report["clinical_validation"])
+
+    def test_invalid_date_and_unverified_external_reference(self):
+        (self.root / "governance" / "rcs88").mkdir(parents=True)
+        path = self.root / "governance" / "rcs88" / "proof.json"
+        for overrides in ({"review_date": "2026-02-30"}, {"evidence": ["https://example.invalid/proof"]}):
+            with self.subTest(overrides=overrides):
+                path.write_text(json.dumps(self.proof(**overrides)), encoding="utf-8")
+                report = build_acceptance(self.root)
+                self.assertFalse(report["criteria"]["declaration_structurelle_valide"])
+                self.assertEqual(report["decision"], "NO_GO")
 
     def test_documents_generes_sont_deterministes_et_sans_claim(self):
         first = render_documents()
