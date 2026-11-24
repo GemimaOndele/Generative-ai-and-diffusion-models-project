@@ -3,7 +3,13 @@ import sqlite3
 import sys
 from pathlib import Path
 
-import pytest
+import unittest
+try:
+    import pytest
+except ModuleNotFoundError as exc:
+    if exc.name != 'pytest':
+        raise
+    raise unittest.SkipTest('Suite SQL exécutée par le workflow RCS-42 avec pytest') from exc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from rcs.db import connect  # noqa: E402
