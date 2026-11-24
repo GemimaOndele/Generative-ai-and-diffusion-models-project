@@ -6,6 +6,7 @@ Aucun résultat de mesure n'est inclus. Utilisation opt-in, dépendance facultat
 from __future__ import annotations
 
 import csv
+import math
 from contextlib import contextmanager
 from pathlib import Path
 import re
@@ -72,15 +73,20 @@ def read_local_metrics(run_id: str, output_root: Optional[Path] = None) -> dict:
         value = row.get(field)
         if value in ("", None):
             return None
-        return float(value)
+        number = float(value)
+        if not math.isfinite(number) or number < 0:
+            raise ValueError(f"Métrique CodeCarbon non valide : {field}")
+        return number
 
+    energy = maybe_float("energy_consumed")
+    emissions = maybe_float("emissions")
     return {
         "run_id": run_id,
         "boundary": "local_compute",
         "source": "CodeCarbon",
-        "measurement_status": "estimation_codecarbon",
-        "energy_kwh": maybe_float("energy_consumed"),
-        "co2e_kg": maybe_float("emissions"),
+        "measurement_status": "estimation_codecarbon" if energy is not None or emissions is not None else "ND",
+        "energy_kwh": energy,
+        "co2e_kg": emissions,
         "duration_s": maybe_float("duration"),
         "tracking_mode": row.get("tracking_mode"),
         "tool_version": row.get("codecarbon_version"),

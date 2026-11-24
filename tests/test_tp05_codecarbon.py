@@ -15,6 +15,15 @@ class TestLocalCodeCarbonReader(unittest.TestCase):
             self.assertIsNone(data["energy_kwh"])
             self.assertIsNone(data["co2e_kg"])
 
+    def test_invalid_metrics_rejected(self):
+        for value in ("NaN", "inf", "-1"):
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as tmp:
+                d = pathlib.Path(tmp) / "test"
+                d.mkdir()
+                (d / "emissions.csv").write_text("energy_consumed,emissions,duration\n" + value + ",0,1\n", encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    read_local_metrics("test", pathlib.Path(tmp))
+
     def test_rejet_traversee_repertoire(self):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(ValueError):

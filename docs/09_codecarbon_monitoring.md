@@ -46,3 +46,6 @@ Le contrat final sera aligné avec le MCD/MLD JMerise et le référentiel RGPD. 
 - https://docs.codecarbon.io/latest/
 - https://docs.codecarbon.io/latest/reference/output/
 - https://docs.codecarbon.io/latest/how-to/configuration/
+
+
+Intégration : #29 fournit le contrat canonique, #33 la projection ; CodeCarbon estime le calcul local uniquement. Les métriques non finies/négatives sont refusées, l'absence reste ND. #11/#26 contiennent des résultats historiques distincts, non validés scientifiquement. Aucune exécution API distante n'est mesurée par ce module.
