@@ -1,0 +1,180 @@
+{
+  "blocking_reasons": [
+    "Modèles A/B réels non validés (licence, droits, région, rétention).",
+    "Cas TP04 non gelés collectivement (freeze_commit vide dans planning/rcs81_case_manifest.csv).",
+    "Aucune mesure de qualité, latence, coût ou énergie en mode démo."
+  ],
+  "cases": [
+    {
+      "case_id": "T01",
+      "category": "usual",
+      "mono_a": {
+        "call_count": 1,
+        "decisions": [
+          "mono_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 1,
+        "decisions": [
+          "mono_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "A",
+      "route_avec_expected_modifie": "A",
+      "route_observee": "A",
+      "routing": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-1"
+      }
+    },
+    {
+      "case_id": "T05",
+      "category": "complex",
+      "mono_a": {
+        "call_count": 1,
+        "decisions": [
+          "mono_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 1,
+        "decisions": [
+          "mono_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "A",
+      "route_avec_expected_modifie": "B",
+      "route_observee": "B",
+      "routing": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      }
+    },
+    {
+      "case_id": "T10",
+      "category": "sensitive",
+      "mono_a": {
+        "call_count": 0,
+        "decisions": [
+          "transfer_blocked"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 0,
+        "decisions": [
+          "transfer_blocked"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-b",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "refus",
+      "route_avec_expected_modifie": "A",
+      "route_observee": "A",
+      "routing": {
+        "call_count": 0,
+        "decisions": [
+          "route_to_a"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-1"
+      }
+    }
+  ],
+  "checks": {
+    "cas_sensible_refuse_sans_appel": true,
+    "comparaison_mono_presente": true,
+    "deux_modeles_distincts": true,
+    "garde_fous_actifs": true,
+    "selection_par_categorie_uniquement": true,
+    "traces_sans_secret_ni_expected": true
+  },
+  "demo_gate": "PASS",
+  "issue": "RCS-62",
+  "live_decision": "NO_GO",
+  "mode": "demo_orchestration_only",
+  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles.",
+  "qualite_llm_mesuree": false,
+  "schema": "rcs62_routing_acceptance/v1"
+}

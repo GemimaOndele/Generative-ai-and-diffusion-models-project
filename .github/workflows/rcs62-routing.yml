@@ -1,0 +1,33 @@
+name: RCS-62 routage Multi-LLM
+
+on:
+  push:
+    paths:
+      - "tools/rcs62_routing_acceptance.py"
+      - "tests/test_rcs62_routing_acceptance.py"
+      - "governance/rcs62/**"
+      - "docs/44_rcs62_routing_multillm.md"
+      - "src/orchestrator.py"
+      - "src/model_config.py"
+      - ".github/workflows/rcs62-routing.yml"
+  pull_request:
+    paths:
+      - "tools/rcs62_routing_acceptance.py"
+      - "tests/test_rcs62_routing_acceptance.py"
+      - "governance/rcs62/**"
+      - "docs/44_rcs62_routing_multillm.md"
+      - "src/orchestrator.py"
+      - "src/model_config.py"
+
+jobs:
+  routing-acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Contrôler les trois cas de routage et la comparaison mono
+        run: python -m unittest tests.test_rcs62_routing_acceptance -v
+      - name: Vérifier que le rapport démo reste NO_GO en live
+        run: python -m tools.rcs62_routing_acceptance --check
