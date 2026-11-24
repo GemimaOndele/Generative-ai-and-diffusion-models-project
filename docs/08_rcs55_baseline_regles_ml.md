@@ -107,8 +107,7 @@ change. Aucune preuve de rejeu n'est écrite dans le dépôt par défaut : l'opt
 ## 7. Référence RCS-55 et doublon à ne pas fusionner tel quel
 
 - La **[PR #40](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/40)** est la référence RCS-55 : elle contient le notebook reproductible, l'artefact réel, la calibration `train_only` et les tests qui vérifient l'absence de fuite et le rejeu du notebook.
-- La **[PR #34](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/34)** (RCS-61, baseline mono-LLM) ajoute une ancienne copie de `experiments/baseline_rules_ml.py`. Cette version calcule le z-score avec `X - X.mean()` et `X.std()` sur `X_test` après standardization, donc sur le jeu de test : elle réintroduit une fuite de distribution.
-- **Décision** : ne pas fusionner #34 avec ce doublon. Si #34 doit être fusionnée pour RCS-61, supprimer sa copie de `experiments/baseline_rules_ml.py` ou la remplacer par le contenu de la référence #40 avant fusion. Les tests RCS-55 et le rejeu du notebook doivent rester verts.
+- La PR #34 est fusionnée dans main (287ddc0), sans l'ancienne baseline J1 concurrente. Elle ne contient que le démonstrateur mono-LLM RCS-61 ; #40 reste la référence notebook RCS-55, distincte de la comparaison exploratoire industrielle #25.
 - Le jeu de données indépendant (D-002) reste à sélectionner, à autoriser et à geler : il est consigné `ND` ici et dans l'artefact. Aucun gel rétroactif n'est appliqué aux exécutions antérieures.
 
 [Index des résultats](../experiments/results/README.md) · [Manifeste des données](../data/manifest.md) · [README principal](../README.md)

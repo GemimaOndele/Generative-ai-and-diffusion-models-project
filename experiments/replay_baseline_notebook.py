@@ -143,6 +143,7 @@ def main() -> int:
         return 1
     if artefact.get("status") != "computed":
         print("Artefact en statut ND : aucune mesure à comparer.")
+        return 1
     return 0
 
 

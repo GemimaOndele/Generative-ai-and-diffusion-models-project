@@ -1,14 +1,15 @@
 """Tests RCS-55 : baseline règles/ML reproductible et sans fuite de calibration.
 
 Les tests de structure (artefact, notebook) n'importent que la bibliothèque standard.
-Les tests d'exécution sont ignorés si numpy/pandas/sklearn sont absents ou si
-l'import du module échoue dans l'environnement courant.
+Les tests d'exécution sont ignorés uniquement si numpy/pandas/sklearn sont absents.
+Une erreur d'import avec dépendances présentes doit faire échouer la suite.
 """
 
 from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 import unittest
 from pathlib import Path
 
@@ -87,12 +88,10 @@ class ArtefactEtNotebookTests(unittest.TestCase):
 class BaselineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        try:
-            spec = importlib.util.spec_from_file_location("rcs55_baseline_rules_ml", MODULE_PATH)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-        except Exception as exc:
-            raise unittest.SkipTest(f"Import du module indisponible : {exc}") from exc
+        spec = importlib.util.spec_from_file_location("rcs55_baseline_rules_ml", MODULE_PATH)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
         cls.mod = module
 
     def test_determinisme_meme_seed(self):
@@ -159,6 +158,18 @@ class BaselineTests(unittest.TestCase):
                 resultats["dataset"]["test_rows"],
             )
             self.assertIsInstance(resultats[cle]["report"], str)
+
+    def test_rejeu_cli_rejects_nd(self):
+        from unittest.mock import patch
+        import tempfile
+        spec = importlib.util.spec_from_file_location("rcs55_replay_notebook", REPLAY_PATH)
+        replay = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(replay)
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = Path(directory) / "nd.json"
+            artifact.write_text('{"status":"ND"}', encoding="utf-8")
+            with patch.object(replay, "replay_notebook", return_value={"notebook":"fixture", "cells_executed":1}), patch.object(replay, "comparer_artefact", return_value=([], {})), patch.object(replay, "ROOT", Path(directory)), patch.object(sys, "argv", ["replay", "--artifact", str(artifact)]):
+                self.assertEqual(replay.main(), 1)
 
     def test_rejeu_notebook_conforme_artefact(self):
         """Le notebook doit être rejouable et reproduire l'artefact conservé."""

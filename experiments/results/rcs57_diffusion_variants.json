@@ -1,0 +1,67 @@
+{
+  "ticket": "RCS-57",
+  "jalon": "J1",
+  "run_id": "aefedbf6d93e",
+  "config": {
+    "seed": 42,
+    "n_train": 48,
+    "n_test": 8,
+    "seq_len": 16,
+    "timesteps": 16,
+    "batch_size": 16,
+    "epochs": 2,
+    "lr": 0.02,
+    "hidden": 8,
+    "time_dim": 8,
+    "beta_start": 0.0001,
+    "beta_end": 0.02,
+    "variants": [
+      "base",
+      "adapte"
+    ]
+  },
+  "data": {
+    "generator": "sinusoïdes + bruit gaussien, déterministes",
+    "n_train": 48,
+    "n_test": 8,
+    "seed_train": 42,
+    "seed_test": 1042,
+    "seq_len": 16
+  },
+  "schedule": "linear, identique pour les deux variantes",
+  "variants": {
+    "base": {
+      "conditionnement_temporel": false,
+      "seed": 42,
+      "epoch_losses": [
+        3.2408954638431973,
+        2.61478471158311
+      ],
+      "final_train_loss": 2.61478471158311,
+      "noise_prediction_mse": 3.0082486179584143,
+      "reconstruction_mse": 4.007534206866996,
+      "n_test": 8
+    },
+    "adapte": {
+      "conditionnement_temporel": true,
+      "seed": 42,
+      "epoch_losses": [
+        2.1294215716150746,
+        1.687405787063656
+      ],
+      "final_train_loss": 1.687405787063656,
+      "noise_prediction_mse": 1.728064908661496,
+      "reconstruction_mse": 4.101613865177399,
+      "n_test": 8
+    }
+  },
+  "runtime": "Python stdlib (math, random, json) ; ni GPU, ni réseau, ni modèle pré-entraîné",
+  "limits": [
+    "Signaux entièrement synthétiques : aucune preuve médicale ou industrielle.",
+    "Mini-débruiteur pédagogique, pas un modèle SOTA ni un modèle pré-entraîné.",
+    "Aucun seuil de détection n'est gelé ici : il reste ND avant campagne validée.",
+    "La reconstruction mesurée ne vaut pas comparaison baseline vs diffusion (RCS-71).",
+    "V2 (orchestration J2) n'est pas une optimisation directe de ce DDPM J1.",
+    "Aucun GPU, réseau, version de modèle, licence, coût ou CO2e n'est revendiqué."
+  ]
+}
