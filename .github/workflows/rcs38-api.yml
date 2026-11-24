@@ -8,12 +8,16 @@ permissions:
 jobs:
   local-api-tests:
     name: Tester les décisions simulées HTTP et SQLite
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Tests du serveur HTTP/SQLite
         run: python -m unittest discover -s tests -p 'test_rcs38_api.py' -v
       - name: Vérifier le contrat existant
