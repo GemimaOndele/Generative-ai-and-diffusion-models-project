@@ -1,0 +1,27 @@
+{
+  "python_version": "3.15.0",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "system": "Windows",
+  "machine": "AMD64",
+  "torch_available": false,
+  "packages": {
+    "numpy": true,
+    "sklearn": true,
+    "pandas": true
+  },
+  "cuda_available": "ND",
+  "gpu_count": "ND",
+  "gpu_name": "ND",
+  "torch_probe_status": "not_installed",
+  "measured_at": "2026-11-24T10:49:44+00:00",
+  "interpretation": {
+    "diffusion_ts_smoke_test_local": {
+      "decision": "NO_GO",
+      "reason": "CUDA ND/non disponible localement"
+    },
+    "stdlib_j1_smoke_test": {
+      "decision": "GO",
+      "reason": "Aucun GPU requis (référence RCS-57)"
+    }
+  }
+}
