@@ -70,14 +70,14 @@ function maintenance(){
   };
   const rows=actions.map(x=>'<tr><td>'+escapeHtml(x.id)+'</td><td>'+escapeHtml(x.device)+'</td><td>'+escapeHtml(x.site)+'</td><td>'+escapeHtml(x.reason)+'</td><td>'+badge(x.state)+'</td><td>'+controls(x)+'</td></tr>');
   const filteredEvents=(data.events||[]).filter(x=>chosenSite==="all" || actions.some(a=>a.id===x.action_id && a.site===chosenSite));
-  const eventRows=filteredEvents.map(x=>'<tr><td><code>'+escapeHtml(x.trace_id.slice(0,8))+'</code></td><td>'+escapeHtml(x.action_id)+'</td><td>'+badge(x.after_state)+'</td><td>'+escapeHtml(x.reason_code)+'</td><td>'+escapeHtml(x.created_at)+'</td></tr>');
+  const eventRows=filteredEvents.map(x=>'<tr><td><code>'+escapeHtml(x.trace_id.slice(0,8))+'</code></td><td>'+escapeHtml(x.action_id)+'</td><td>'+badge(x.after_state)+'</td><td>'+escapeHtml(x.reason_code)+'</td><td>'+escapeHtml(x.actor_role || 'ND')+'</td><td>'+escapeHtml(x.created_at)+'</td></tr>');
   const cards=metric("Actions fictives",actions.length,"État SQLite en mode API")+
     metric("En attente",pending,"Confirmation explicite")+
     metric("Décisions simulées",filteredEvents.length,"Journal de traces non clinique")+
     metric("Interventions réelles","ND","Aucune machine connectée");
   return '<div class="metric-grid">'+cards+'</div><div class="panels">'+
     panel("Alertes et validation humaine simulée",table(["Référence","Équipement","Site","Motif","État","Décision fictive"],rows),true)+
-    panel("Historique des décisions — identifiant de trace",table(["Trace","Action","Décision","Motif","Date UTC"],eventRows),true)+
+    panel("Historique des décisions — identifiant de trace",table(["Trace","Action","Décision","Motif","Rôle simulé","Date UTC"],eventRows),true)+
     panel("Workflow et limites",'<div class="summary">'+
       row("1. Alerte","Création / journal")+row("2. Contrôle","Qualité et contexte")+
       row("3. Décision","Simulation de technicien")+row("4. Traçabilité","SQLite locale + trace_id")+
