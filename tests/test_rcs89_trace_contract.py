@@ -1,7 +1,6 @@
 """Tests de validation du contrat de traces JSON et de rejet PII (RCS-89)."""
 import json
 from pathlib import Path
-from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_PATH = ROOT / "data" / "contracts" / "trace_event_v1.json"
@@ -14,6 +13,7 @@ def _load_schema() -> dict:
 
 
 def _validate_against_schema(payload: dict, schema: dict) -> list[str]:
+    from jsonschema import Draft202012Validator
     Draft202012Validator.check_schema(schema)
     return [error.message for error in Draft202012Validator(schema).iter_errors(payload)]
 
