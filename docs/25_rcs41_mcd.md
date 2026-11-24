@@ -45,3 +45,24 @@ AUDIT(**id**, acteur, événement, cible, horodatage) ; EXPERIMENT_RUN(**id**, j
 EXPERIMENT_METRIC(nom, valeur, unité, split).
 
 AUDIT est volontairement non relié par clé étrangère (journal append-only, la cible est textuelle).
+
+
+## Alignement SQL canonique (#19)
+Alerte et observation liée doivent partager l'équipement ; décision terminale avec acteur et date ; clé métrique (run_id, nom, split non nul). Run sans métrique possible avant clôture : 0..n en SQL, 1..n exigé à la clôture. Intervention manuelle sans alerte : concept cible, pas implémenté par l'API RCS-50. Audit append-only par convention, non garanti en SQL.
+
+```mermaid
+erDiagram
+ SOURCE_DONNEES ||--o{ LOT_IMPORT : fournit
+ LOT_IMPORT ||--o{ OBSERVATION : contient
+ EQUIPEMENT ||--o{ OBSERVATION : mesure
+ OBSERVATION ||--o{ ANALYSE_MODELE : score
+ ANALYSE_MODELE ||--o| ALERTE : produit
+ EQUIPEMENT ||--o{ ALERTE : concerne
+ UTILISATEUR o|--o{ ALERTE : decide
+ ALERTE o|--o{ INTERVENTION : ouvre
+ UTILISATEUR ||--o{ INTERVENTION : responsable
+ EQUIPEMENT ||--o{ INTERVENTION : cible
+ EXPERIMENT_RUN ||--o{ EXPERIMENT_METRIC : mesure
+```
+
+Diagramme Mermaid, non export JMerise ; l'export original et comparaison restent nécessaires.
