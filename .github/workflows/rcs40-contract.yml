@@ -1,0 +1,17 @@
+name: RCS-40 — contrat de données
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  rcs40:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements-rcs40.txt
+      - run: python -m pytest -q tests/test_rcs40_contract.py
