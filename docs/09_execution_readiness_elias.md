@@ -34,6 +34,7 @@
 | Élément | Statut | Preuve / fichier | Blocage restant |
 |---|---|---|---|
 | POC diffusion 1D | Prêt (smoke) | `experiments/diffusion_poc.py` | — |
+| Deux variantes contrôlées + preuve | Prêt | `src/diffusion_adapter.py`, `experiments/results/rcs57_diffusion_variants.json`, `governance/rcs57_acceptance.json` | passage au modèle réel (RCS-70) |
 | Config exemple | Prêt | `experiments/diffusion_config.example.json` | — |
 | Étude Diffusion-TS/PhysDiff | Brouillon | `docs/06_etude_diffusion_ts_physdiff.md` | Vérifier licences/repos |
 | Smoke test synthétique | Possible | `--synthetic --epochs 2` | Pas preuve médicale |

@@ -92,6 +92,20 @@ Qualité LLM réelle, latence réseau, coût et CO₂e restent `ND` : ces fichie
 
 Les cinq fixtures M01–M05 sont volontairement indépendantes : elles couvrent la logique mono, l'abstention et le refus, sans appel LLM. Elles ne sont ni les dix cas candidats RCS-77 (#37), ni le futur workload gelé RCS-81 (#9). Aucun classement entre stratégies ne peut être déduit de ces deux jeux distincts. La comparaison J2 exige les mêmes dix cas, une version et une empreinte approuvées en amont. Le code de détection règles/ML J1 relève de RCS-55 (#40), avec calibration train-only ; la comparaison industrielle reste portée par RCS-71 (#25). Les journaux de cette démo sont locaux et ne doivent pas contenir de données réelles.
 
+### 📊 Comparaison des approches (RCS-22)
+
+La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La clarification J1/J2 impose des workloads et métriques séparés, des seuils gelés avant chaque campagne et rappelle que V2 n'est pas une optimisation directe du DDPM. La preuve d'acceptation vérifie **13 critères** (dont les champs du ticket Jira, la séparation J1/J2, le périmètre V2, la portée méthodologique et la séquence d'intégration #30/#36) et est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
+
+```bash
+python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json
+```
+
+Les résultats historiques J1 de #25 sont exploratoires et documentés dans la fiche RCS-22. Les mesures confirmatoires restent `ND` jusqu'au gel et à la validation des protocoles distincts J1/J2.
+
+### 🔬 Diffusion J1 — deux variantes contrôlées (RCS-57)
+
+[`src/diffusion_adapter.py`](src/diffusion_adapter.py) fournit un mini-DDPM 1D déterministe (bibliothèque standard, ni GPU ni réseau) avec deux variantes ne différant que par le conditionnement temporel du débruiteur : `base` et `adapte`. Seeds, hyperparamètres, pertes par époque et mesures sont conservés dans [`experiments/results/rcs57_diffusion_variants.json`](experiments/results/rcs57_diffusion_variants.json) ; la preuve de reproductibilité est dans [`governance/rcs57_acceptance.json`](governance/rcs57_acceptance.json). Détails et commandes dans [la fiche RCS-57](docs/10_rcs57_diffusion_j1.md). Il s'agit d'un **smoke test synthétique** : aucun seuil de détection n'est gelé, aucune performance clinique n'est revendiquée, et le « V2 » TP04 reste une orchestration J2 sans lien avec ce DDPM.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
