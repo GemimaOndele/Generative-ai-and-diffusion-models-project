@@ -1,6 +1,6 @@
 # RCS-38 / RCS-49 / RCS-50 / RCS-52 — contrat d'intégration en lecture seule
 
-**Statut : proposition technique à relire par Omar et Ayoub.** Cette branche est dérivée de la branche de prototype de Gémima `feature/RCS-38-monitoring-quatre-vues`. Elle n'écrase pas les modules d'Omar et ne modifie ni son schéma SQL ni sa vue Streamlit.
+**Statut : intégration finale en revue (#32).** Le socle SQL/CSV/stockage/dashboard et les tests croisés sont déjà fusionnés dans `main`. Elle n'écrase pas les modules d'Omar et ne modifie ni son schéma SQL ni sa vue Streamlit.
 
 ## Pourquoi deux catégories de démonstration distinctes ?
 
@@ -38,7 +38,7 @@ python -m unittest discover -s tests -p 'test_rcs38_ai4i_bridge.py' -v
 
 Tests sur mini-base synthétique construite et détruite en mémoire/disque temporaire : provenance, catégories, absence d'actions, valeurs ND, refus des sources non marquées, refus des équipements non fictifs, limites, absence de mutation.
 
-Pour tester avec la base créée par la **branche d'Omar** (sans la committer), un script ou notebook local peut importer l'adaptateur et appeler :
+Pour tester avec la base créée par le pipeline RCS-50/RCS-52 intégré (sans la committer), un script ou notebook local peut importer l'adaptateur et appeler :
 
 ```python
 from tools.rcs38_ai4i_bridge import preview_ai4i
@@ -46,7 +46,7 @@ preview = preview_ai4i("data/rcs_poc.sqlite", limit=100)
 assert preview["control_enabled"] is False
 ```
 
-**Ce dernier test croisé n'est pas effectué** tant que les deux branches et la base générée ne sont pas réunies dans un workspace de vérification. La CI ne remplace pas la revue de compatibilité de schéma ; toute modification de schéma devra déclencher un test sur une base RCS-50 reconstruite.
+**Test croisé #23 intégré** (`072e32b9`) : les migrations réelles, l'import CSV, l'enregistrement de scores et le pont sont vérifiés sur deux lignes industrielles synthétiques. Les 24 workflows et 31 contrôles du commit d'intégration étaient verts. Cela ne constitue pas un rejeu du dataset complet. Le nouveau contrôle CI télécharge AI4I depuis UCI avec vérification SHA-256, exécute `scripts/demo_pipeline.py` sur une base temporaire, exporte le JSON puis vérifie la provenance, les scores et l'intégrité en lecture seule. Son résultat reste à constater sur le nouveau SHA ; aucune réussite n'est présumée. La revue manuelle UX d'Aminata reste requise.
 
 ## Suite après accord collectif
 
@@ -56,7 +56,7 @@ assert preview["control_enabled"] is False
 4. Gémima : prévoir un onglet UI « expérimentation AI4I » identifié, distinct du parcours fictif RCS-38 ; pas de connexion à un appareil médical.
 5. Elias : valider protocole seuils / labels / splits et versions de modèle, sans interprétation clinique.
 
-**Ordre des PR :** socle PR #1 revu → branches de contrat & migration Omar → tests d'intégration → composant UI. Cette PR est empilée sur la branche RCS-38 ; elle **ne doit pas** être fusionnée dans main avant PR #8 et l'accord d'intégration.
+**Ordre actuel :** #31 et #19 → #12 → #20 → #14 → #23 sont fusionnées. #32 cible `main` ; attendre le rejeu complet, la CI et la revue finale.
 
 ## Aperçu web local, strictement en lecture seule
 
@@ -68,6 +68,6 @@ Après génération de la base **sur une copie locale du pipeline RCS-52**, depu
 python -m tools.rcs38_ai4i_bridge --db data/rcs_poc.sqlite --out .local/rcs38_ai4i_preview.json --limit 100
 ```
 
-Puis démarrer le serveur RCS-38 local comme d'habitude et ouvrir `http://127.0.0.1:8000/ai4i_preview.html`. Sélectionner le JSON local ; il reste sur le poste de démonstration. Le fichier de sortie est volontairement stocké sous `.local/` et **ne doit pas être ajouté au dépôt**. Le schéma industriel (SQL) et l'adaptateur Python restent sur des branches différentes jusqu'à l'intégration. Le test croisé qui réunit le schéma RCS-50, l'ingestion CSV et cet adaptateur est proposé dans la PR #23.
+Puis démarrer le serveur RCS-38 local comme d'habitude et ouvrir `http://127.0.0.1:8000/ai4i_preview.html`. Sélectionner le JSON local ; il reste sur le poste de démonstration. Le fichier de sortie est volontairement stocké sous `.local/` et **ne doit pas être ajouté au dépôt**. Le schéma industriel et l'adaptateur Python sont réunis dans `main` depuis #23. Le présent changement ajoute le rejeu complet du pipeline et l'aperçu web ; aucune validation UX manuelle n'est revendiquée.
 
 **Portée de la preuve** : page d'affichage locale et pont de lecture. Ce n'est ni un serveur connecté au POC d'Omar en continu, ni un simulateur de décision hospitalière, ni une évaluation médicale. Ne pas importer de données d'hôpital réelles dans cette page.

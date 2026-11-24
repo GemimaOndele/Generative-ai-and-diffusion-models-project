@@ -2,10 +2,16 @@ name: "RCS-38 — pont AI4I lecture seule"
 on:
   push:
     branches:
-      - "feature/RCS-38-readonly-ai4i-bridge-20261122"
+      - main
   pull_request:
     paths:
       - "tools/rcs38_ai4i_bridge.py"
+      - "docs/39_rcs38_ai4i_bridge_readonly.md"
+      - "scripts/demo_pipeline.py"
+      - "scripts/download_ai4i.py"
+      - "src/rcs/**"
+      - "sql/**"
+      - "tests/test_rcs38_omar_integration.py"
       - "tests/test_rcs38_ai4i_bridge.py"
       - "tests/test_rcs38_ai4i_preview.cjs"
       - "frontend/monitoring/ai4i_preview.js"
@@ -30,3 +36,45 @@ jobs:
         run: node --test tests/test_rcs38_ai4i_preview.cjs
       - name: Check source syntax
         run: python -m py_compile tools/rcs38_ai4i_bridge.py tests/test_rcs38_ai4i_bridge.py
+
+  full-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -r requirements-rcs52.txt
+      - name: Fetch public synthetic AI4I dataset with pinned hash
+        run: python scripts/download_ai4i.py
+      - name: Replay integrated pipeline on ephemeral SQLite
+        run: python scripts/demo_pipeline.py --db "${{ runner.temp }}/rcs-ai4i.sqlite" --limit 200
+      - name: Verify exported preview against the generated database
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, json, os, sqlite3, subprocess, sys
+          from contextlib import closing
+          from pathlib import Path
+          from tools.rcs38_ai4i_bridge import preview_ai4i
+          root = Path(os.environ["RUNNER_TEMP"])
+          db = root / "rcs-ai4i.sqlite"
+          out = root / "rcs-ai4i-preview.json"
+          digest = hashlib.sha256(db.read_bytes()).hexdigest()
+          expected = hashlib.sha256(Path("data/raw/ai4i2020.csv").read_bytes()).hexdigest()
+          with closing(sqlite3.connect(db.as_uri() + "?mode=ro", uri=True)) as conn:
+              assert conn.execute("SELECT count(*) FROM observation").fetchone()[0] == 10000
+              assert conn.execute("SELECT count(*) FROM analyse_modele").fetchone()[0] == 200
+          preview = preview_ai4i(db, limit=300)
+          subprocess.run([sys.executable, "-m", "tools.rcs38_ai4i_bridge", "--db", str(db), "--out", str(out), "--limit", "300"], check=True)
+          assert json.loads(out.read_text(encoding="utf-8")) == preview
+          assert len(preview["observations"]) == 300
+          assert sum(o["anomaly"]["score"] is not None for o in preview["observations"]) == 200
+          assert all(o["provenance"]["file_sha256"] == expected for o in preview["observations"])
+          assert preview["source_mode"] == "industrial_proxy_non_medical"
+          assert preview["read_only"] and not preview["medical_data"] and not preview["clinical_use"] and not preview["control_enabled"]
+          assert preview["actions"] == []
+          assert hashlib.sha256(db.read_bytes()).hexdigest() == digest
+          print("PASS: 10000 imported, 200 scored, 300 previewed; provenance and DB integrity verified.")
+          PY
