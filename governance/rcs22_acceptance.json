@@ -32,8 +32,71 @@
       "id": "TRACEABLE_SOURCES",
       "ok": true,
       "evidence": "preuve par approche et source par axe de protocole"
+    },
+    {
+      "id": "JIRA_TICKET_FIELDS",
+      "ok": true,
+      "evidence": {
+        "key": "RCS-22",
+        "source": "Backlog RoboCare Sentinel V3",
+        "phase": "S1 (indicative ; démarrage à fixer en planification)",
+        "domain": "BIZ",
+        "category": "Fonctionnel",
+        "mission": "Benchmark trois approches selon qualité, diversité, coût, limites et faisabilité",
+        "acceptance": "Choix justifié avec hypothèses falsifiables",
+        "competence": "Analyse scientifique",
+        "roles": {
+          "owner": "Elias",
+          "binome": "Aminata",
+          "relais": "Omar",
+          "reviewer": "Gémima"
+        },
+        "volets": [
+          "contribution du pilote",
+          "apprentissage accompagné du binôme",
+          "recherche/veille documentée si la mission le requiert"
+        ],
+        "blockage": "documenter obstacle, essais et liens dans le ticket ; solliciter binôme et relais ; arbitrer au point de coordination"
+      }
+    },
+    {
+      "id": "DOC_JIRA_ALIGNMENT",
+      "ok": true,
+      "evidence": "docs/03_comparaison_statuquo_reglesml_diffusion.md reprend les champs du ticket"
+    },
+    {
+      "id": "SCIENTIFIC_ANALYSIS",
+      "ok": true,
+      "evidence": "métriques, réfutations, protocole ND et aucune mesure inventée"
     }
   ],
+  "ticket_fields": {
+    "key": "RCS-22",
+    "source": "Backlog RoboCare Sentinel V3",
+    "phase": "S1 (indicative ; démarrage à fixer en planification)",
+    "domain": "BIZ",
+    "category": "Fonctionnel",
+    "mission": "Benchmark trois approches selon qualité, diversité, coût, limites et faisabilité",
+    "acceptance": "Choix justifié avec hypothèses falsifiables",
+    "competence": "Analyse scientifique",
+    "roles": {
+      "owner": "Elias",
+      "binome": "Aminata",
+      "relais": "Omar",
+      "reviewer": "Gémima"
+    },
+    "volets": [
+      "contribution du pilote",
+      "apprentissage accompagné du binôme",
+      "recherche/veille documentée si la mission le requiert"
+    ],
+    "blockage": "documenter obstacle, essais et liens dans le ticket ; solliciter binôme et relais ; arbitrer au point de coordination"
+  },
+  "document_alignment": {
+    "ok": true,
+    "path": "docs/03_comparaison_statuquo_reglesml_diffusion.md",
+    "missing": []
+  },
   "choice": {
     "reference": "B. règles / ML",
     "research": "C. diffusion en POC cadré",

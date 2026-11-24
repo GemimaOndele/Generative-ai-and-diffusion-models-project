@@ -2,13 +2,28 @@
 
 > **Statut : analyse cadrée, alignée sur le socle RCS‑75 le 2026‑11‑23.** Ne pas présenter de résultat mesuré non exécuté. Les affirmations doivent rester falsifiables et sourcées. Les modèles exacts, versions, fournisseur et licences restent `ND` jusqu'à validation.
 
+> **Fiche Jira (consultée le 2026‑11‑24)** : source : Backlog RoboCare Sentinel V3 ; phase indicative : S1 (ne pas démarrer le Sprint automatiquement) ; domaine d'origine : BIZ ; catégorie : Fonctionnel ; **compétence à développer : Analyse scientifique**.
+
 ## 0. Gouvernance du ticket (RCS-22)
 
 - Responsable Jira : **Elias** (recherche IA, diffusion, RAG, Multi-LLM).
 - Binôme de contribution et de progression : **Aminata**.
 - Relais en cas de blocage : **Omar**.
 - Relectrice des critères d'acceptation : **Gémima**.
-- Attribution approuvée collectivement ; Sprint et dates à fixer en planification (non supposés ici).
+- Trois volets : **contribution du pilote** ; **apprentissage accompagné du binôme** ; **recherche/veille documentée** si la mission le requiert (références de veille ci-dessous).
+- En cas de blocage : documenter **obstacle, essais et liens** dans le ticket Jira ; solliciter le binôme puis le **relais** ; arbitrer au **point de coordination**. Aucun blocage n'est inventé ici.
+- Attribution approuvée collectivement ; Sprint et dates à fixer en planification (non supposés ici), conformément à la phase S1 indicative.
+
+## Compétence à développer : Analyse scientifique
+
+| Volet de la compétence | Preuve dans ce livrable | Statut |
+|---|---|---|
+| Formuler des hypothèses réfutables | H1–H4 : énoncé, métrique, condition de réfutation | Déclaré, non testé (`ND`) |
+| Définir un protocole comparable | Mêmes cas figés, seed/config, cinq axes Jira, mode démo par défaut | `ND` avant RCS-81 |
+| Refuser les résultats non étayés | `validate_no_results()` interdit F1/%/ms/€ inventés et tout GO final | Vérifié par tests |
+| Documenter les limites et sources | Preuve par approche, source par axe, registre RCS-18 | Traçable |
+
+L'analyse scientifique est donc **méthodologique** ici : elle ne revendique aucune mesure métier tant que le jeu gelé RCS-81 n'existe pas.
 
 ## Question
 
@@ -98,9 +113,10 @@ Règles du protocole : mêmes cas figés pour A/B/C/V2, seed et config consigné
 ## Liens avec les autres tickets
 
 - RCS-18 : risques R-002 (qualité), R-004 (fournisseur), R-007 (diffusion).
-- RCS-55 : baseline règles/ML (`experiments/baseline_rules_ml.py`).
-- RCS-57/70 : POC diffusion (`experiments/diffusion_poc.py`, `docs/06_etude_diffusion_ts_physdiff.md`).
+- RCS-55 : baseline règles/ML à livrer par son propre ticket ; aucun script n'est revendiqué présent sur cette branche.
+- RCS-56/57/70 : recherche/veille diffusion ; les brouillons locaux ne sont pas versionnés ici, seuls les liens de tickets sont opérationnels.
 - RCS-61/62/75/79 : mono-LLM, routing, socle V2 et protocole benchmark.
+- RCS-18 : registre des décisions/risques ; R-002/R-004/R-007 restent ouverts.
 
 ## Limites
 
@@ -121,5 +137,6 @@ python -m src.compare_approaches --json
 python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json
 ```
 
-- `--acceptance` vérifie six critères sur pièces : trois approches comparées, cinq axes Jira, hypothèses réfutables, choix justifié et réversible, aucune mesure inventée, sources traçables. Le livrable `governance/rcs22_acceptance.json` est versionné et contrôlé par `tests/test_compare_approaches.py`.
+- `--acceptance` vérifie **neuf critères sur pièces** : trois approches comparées, cinq axes Jira, hypothèses réfutables, choix justifié et réversible, aucune mesure inventée, sources traçables, champs du ticket Jira (source, phase S1, domaine BIZ, catégorie, compétence, rôles, trois volets, procédure de blocage), alignement du Markdown livré sur ces champs et compétence « Analyse scientifique » démontrée par la méthode. Le livrable `governance/rcs22_acceptance.json` est versionné et contrôlé par `tests/test_compare_approaches.py`.
+- `--doc <chemin>` permet de contrôler une autre copie du document (utile en CI).
 - Tests : `tests/test_compare_approaches.py`, inclus dans la suite `python -m unittest discover -s tests -p 'test_*.py'`.

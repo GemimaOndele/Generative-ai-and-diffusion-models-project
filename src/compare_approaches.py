@@ -19,6 +19,9 @@ from pathlib import Path
 from typing import Iterable
 
 ND = "ND"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DOC_RELATIVE = "docs/03_comparaison_statuquo_reglesml_diffusion.md"
+DEFAULT_DOC = PROJECT_ROOT / DOC_RELATIVE
 REQUIRED_APPROACH_IDS = ("A", "B", "C")
 BENCHMARK_AXES = ("qualite", "diversite", "cout", "limites", "faisabilite")
 AXIS_FIELDS = {
@@ -118,6 +121,61 @@ PROTOCOL = (
     ProtocolAxis("Coût", "Coût par cas réussi", ND, "src/orchestrator.py"),
     ProtocolAxis("Limites", "Cas d'échec", ND, "RCS-18, RCS-88"),
     ProtocolAxis("Faisabilité", "Environnement, données", ND, "RCS-56/57/70"),
+)
+
+# Champs du ticket Jira RCS-22 (consultés le 2026-11-24), sans invention.
+TICKET_METADATA = {
+    "key": "RCS-22",
+    "source": "Backlog RoboCare Sentinel V3",
+    "phase": "S1 (indicative ; démarrage à fixer en planification)",
+    "domain": "BIZ",
+    "category": "Fonctionnel",
+    "mission": "Benchmark trois approches selon qualité, diversité, coût, limites et faisabilité",
+    "acceptance": "Choix justifié avec hypothèses falsifiables",
+    "competence": "Analyse scientifique",
+    "roles": {
+        "owner": "Elias",
+        "binome": "Aminata",
+        "relais": "Omar",
+        "reviewer": "Gémima",
+    },
+    "volets": [
+        "contribution du pilote",
+        "apprentissage accompagné du binôme",
+        "recherche/veille documentée si la mission le requiert",
+    ],
+    "blockage": "documenter obstacle, essais et liens dans le ticket ; solliciter binôme et relais ; arbitrer au point de coordination",
+}
+
+# Le livrable Markdown doit reprendre explicitement les champs du ticket.
+DOC_REQUIRED_TOKENS = (
+    "backlog robocare sentinel v3",
+    "s1",
+    "domaine d'origine : biz",
+    "catégorie : fonctionnel",
+    "compétence à développer",
+    "analyse scientifique",
+    "responsable jira",
+    "elias",
+    "aminata",
+    "omar",
+    "gémima",
+    "contribution du pilote",
+    "apprentissage accompagné du binôme",
+    "recherche/veille documentée",
+    "en cas de blocage",
+    "obstacle",
+    "essais",
+    "liens",
+    "relais",
+    "point de coordination",
+    "qualité",
+    "diversité",
+    "coût",
+    "limites",
+    "faisabilité",
+    "choix justifié",
+    "hypothèses falsifiables",
 )
 
 
@@ -241,9 +299,38 @@ def benchmark_matrix() -> dict:
     return {"axes": list(BENCHMARK_AXES), "approaches": rows}
 
 
-def acceptance_check() -> dict:
+def validate_ticket_metadata(metadata: dict = TICKET_METADATA) -> list[str]:
+    """Vérifie que les champs du ticket sont renseignés, sans résultat supposé."""
+    errors = []
+    for name in ("source", "phase", "domain", "category", "mission", "acceptance", "competence"):
+        if not metadata.get(name):
+            errors.append(f"ticket.{name}: champ vide")
+    for role, person in metadata.get("roles", {}).items():
+        if not person:
+            errors.append(f"ticket.roles.{role}: champ vide")
+    if len(metadata.get("volets", ())) != 3:
+        errors.append("ticket.volets: trois volets attendus")
+    if not all(keyword in metadata.get("blockage", "") for keyword in ("obstacle", "essais", "liens", "relais")):
+        errors.append("ticket.blockage: procédure incomplète")
+    return errors
+
+
+def document_alignment_check(path: str | Path = DEFAULT_DOC) -> dict:
+    """Vérifie que le document livré reprend explicitement le ticket Jira."""
+    document = Path(path)
+    try:
+        text = document.read_text(encoding="utf-8").lower()
+    except OSError as error:
+        return {"ok": False, "path": DOC_RELATIVE, "missing": [f"lecture impossible: {error}"]}
+    missing = [token for token in DOC_REQUIRED_TOKENS if token not in text]
+    return {"ok": not missing, "path": DOC_RELATIVE, "missing": missing}
+
+
+def acceptance_check(doc_path: str | Path = DEFAULT_DOC) -> dict:
     """Preuve d'acceptation du ticket Jira RCS-22, vérifiée sur les données."""
     errors = validate_no_results()
+    ticket_errors = validate_ticket_metadata()
+    alignment = document_alignment_check(doc_path)
     matrix = benchmark_matrix()
     covered = {row["id"] for row in matrix["approaches"]}
     choice = provisional_choice()
@@ -282,12 +369,34 @@ def acceptance_check() -> dict:
             and all(axis.source for axis in PROTOCOL),
             "evidence": "preuve par approche et source par axe de protocole",
         },
+        {
+            "id": "JIRA_TICKET_FIELDS",
+            "ok": not ticket_errors,
+            "evidence": ticket_errors or TICKET_METADATA,
+        },
+        {
+            "id": "DOC_JIRA_ALIGNMENT",
+            "ok": alignment["ok"],
+            "evidence": alignment["missing"] or f"{alignment['path']} reprend les champs du ticket",
+        },
+        {
+            "id": "SCIENTIFIC_ANALYSIS",
+            "ok": all(
+                hypothesis.metric and hypothesis.falsifier and hypothesis.status == ND
+                for hypothesis in HYPOTHESES
+            )
+            and all(axis.status == ND for axis in PROTOCOL)
+            and not errors,
+            "evidence": "métriques, réfutations, protocole ND et aucune mesure inventée",
+        },
     ]
     return {
         "ok": all(criterion["ok"] for criterion in criteria),
         "ticket": "RCS-22",
         "errors": errors,
         "criteria": criteria,
+        "ticket_fields": TICKET_METADATA,
+        "document_alignment": alignment,
         "choice": choice,
         "matrix": matrix,
     }
@@ -326,10 +435,11 @@ def main(argv: list[str] | None = None) -> int:
         help="critères d'acceptation Jira RCS-22 sur pièces (JSON)",
     )
     parser.add_argument("--out", default=None, help="fichier de sortie JSON facultatif")
+    parser.add_argument("--doc", default=None, help="document Markdown à contrôler (par défaut le livrable)")
     args = parser.parse_args(argv)
 
     if args.acceptance:
-        result = acceptance_check()
+        result = acceptance_check(args.doc or DEFAULT_DOC)
         text = json.dumps(result, ensure_ascii=False, indent=2)
         code = 0 if result["ok"] else 1
     elif args.json:

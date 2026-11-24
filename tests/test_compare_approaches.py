@@ -13,12 +13,15 @@ from src.compare_approaches import (
     BENCHMARK_AXES,
     HYPOTHESES,
     PROTOCOL,
+    TICKET_METADATA,
     acceptance_check,
     benchmark_matrix,
+    document_alignment_check,
     provisional_choice,
     render_comparison_table,
     render_hypotheses_table,
     validate_no_results,
+    validate_ticket_metadata,
 )
 
 
@@ -86,9 +89,48 @@ class CompareApproachesTest(unittest.TestCase):
     def test_acceptance_checks_all_jira_criteria(self):
         result = acceptance_check()
         self.assertTrue(result["ok"], result["criteria"])
-        self.assertEqual(len(result["criteria"]), 6)
+        self.assertEqual(len(result["criteria"]), 9)
         self.assertTrue(all(item["ok"] for item in result["criteria"]))
         self.assertEqual(result["errors"], [])
+        self.assertEqual(
+            {item["id"] for item in result["criteria"]},
+            {
+                "THREE_APPROACHES_BENCHMARKED", "FIVE_JIRA_AXES", "FALSIFIABLE_HYPOTHESES",
+                "JUSTIFIED_CHOICE", "NO_INVENTED_RESULTS", "TRACEABLE_SOURCES",
+                "JIRA_TICKET_FIELDS", "DOC_JIRA_ALIGNMENT", "SCIENTIFIC_ANALYSIS",
+            },
+        )
+
+    def test_jira_ticket_metadata_is_complete_and_not_invented(self):
+        self.assertEqual(validate_ticket_metadata(), [])
+        self.assertEqual(TICKET_METADATA["source"], "Backlog RoboCare Sentinel V3")
+        self.assertIn("S1", TICKET_METADATA["phase"])
+        self.assertEqual(TICKET_METADATA["domain"], "BIZ")
+        self.assertEqual(TICKET_METADATA["category"], "Fonctionnel")
+        self.assertEqual(TICKET_METADATA["competence"], "Analyse scientifique")
+        self.assertEqual(
+            TICKET_METADATA["roles"],
+            {"owner": "Elias", "binome": "Aminata", "relais": "Omar", "reviewer": "Gémima"},
+        )
+        self.assertEqual(len(TICKET_METADATA["volets"]), 3)
+
+        broken = dict(TICKET_METADATA, competence="")
+        self.assertTrue(any("ticket.competence" in error for error in validate_ticket_metadata(broken)))
+
+    def test_document_alignment_detects_missing_jira_field(self):
+        source = (self._root() / "docs" / "03_comparaison_statuquo_reglesml_diffusion.md")
+        original = source.read_text(encoding="utf-8")
+        self.assertTrue(document_alignment_check(source)["ok"])
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "doc.md"
+            target.write_text(
+                original.replace("Analyse scientifique", "à définir").replace("analyse scientifique", "à définir"),
+                encoding="utf-8",
+            )
+            result = document_alignment_check(target)
+            self.assertFalse(result["ok"])
+            self.assertIn("analyse scientifique", result["missing"])
+            self.assertFalse(acceptance_check(target)["ok"])
 
     def test_committed_acceptance_evidence_matches_code(self):
         evidence = self._root() / "governance" / "rcs22_acceptance.json"
