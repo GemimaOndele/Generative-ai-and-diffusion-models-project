@@ -1,4 +1,4 @@
--- RoboCare Sentinel — migration 001 : schéma initial (SQLite). MLD : docs/11_mcd_mld.md (RCS-41/42)
+-- RoboCare Sentinel — migration 001 : schéma initial (SQLite). MLD : docs/26_rcs42_mld_sql.md (RCS-41/42)
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS source_donnees (
@@ -73,7 +73,8 @@ CREATE TABLE IF NOT EXISTS alerte (
     decide_par      TEXT REFERENCES utilisateur(id),
     decide_le       TEXT,
     commentaire     TEXT,
-    cree_le         TEXT NOT NULL
+    cree_le         TEXT NOT NULL,
+    CHECK (statut = 'a_qualifier' OR (decide_par IS NOT NULL AND decide_le IS NOT NULL AND length(trim(decide_le)) > 0))
 );
 
 CREATE TABLE IF NOT EXISTS intervention (
@@ -110,9 +111,27 @@ CREATE TABLE IF NOT EXISTS experiment_metric (
     nom      TEXT NOT NULL,
     valeur   REAL,
     unite    TEXT,
-    split    TEXT,
+    split    TEXT NOT NULL,
     PRIMARY KEY (run_id, nom, split)
 );
 
 CREATE INDEX IF NOT EXISTS idx_obs_equipement ON observation(equipement_id);
 CREATE INDEX IF NOT EXISTS idx_alerte_statut ON alerte(statut);
+
+-- Integrity across the analysis/observation/alert chain (including later changes).
+CREATE TRIGGER IF NOT EXISTS alert_equipment_insert
+BEFORE INSERT ON alerte
+WHEN NOT EXISTS (SELECT 1 FROM analyse_modele a JOIN observation o ON o.id=a.observation_id WHERE a.id=NEW.analyse_id AND o.equipement_id=NEW.equipement_id)
+BEGIN SELECT RAISE(ABORT, 'alert equipment mismatch'); END;
+CREATE TRIGGER IF NOT EXISTS alert_equipment_update
+BEFORE UPDATE OF analyse_id, equipement_id ON alerte
+WHEN NOT EXISTS (SELECT 1 FROM analyse_modele a JOIN observation o ON o.id=a.observation_id WHERE a.id=NEW.analyse_id AND o.equipement_id=NEW.equipement_id)
+BEGIN SELECT RAISE(ABORT, 'alert equipment mismatch'); END;
+CREATE TRIGGER IF NOT EXISTS analysis_equipment_update
+BEFORE UPDATE OF observation_id ON analyse_modele
+WHEN EXISTS (SELECT 1 FROM alerte a JOIN observation o ON o.id=NEW.observation_id WHERE a.analyse_id=OLD.id AND a.equipement_id<>o.equipement_id)
+BEGIN SELECT RAISE(ABORT, 'analysis equipment mismatch'); END;
+CREATE TRIGGER IF NOT EXISTS observation_equipment_update
+BEFORE UPDATE OF equipement_id ON observation
+WHEN EXISTS (SELECT 1 FROM analyse_modele m JOIN alerte a ON a.analyse_id=m.id WHERE m.observation_id=OLD.id AND a.equipement_id<>NEW.equipement_id)
+BEGIN SELECT RAISE(ABORT, 'observation equipment mismatch'); END;
