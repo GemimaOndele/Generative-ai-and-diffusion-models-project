@@ -1,6 +1,6 @@
 # RCS-56 — Étude Diffusion-TS et PhysDiff
 
-> **Statut : veille technique avec licences vérifiées le 2026‑11‑23 ; aucune validation expérimentale revendiquée.** Les cases cochées ci-dessous concernent l'analyse documentaire, pas l'exécution. La disponibilité GPU locale et le jeu de données restent `ND`.
+> **Statut : veille technique avec licences vérifiées le 2026‑11‑23 et environnement local mesuré le 2026‑11‑24 ; aucune validation expérimentale revendiquée.** Les cases cochées ci-dessous concernent l'analyse documentaire et la mesure d'environnement, pas l'exécution d'un modèle. La disponibilité CUDA locale est `ND` (voir « Preuve d'environnement ») ; le jeu de données reste `ND`.
 
 ## Fiche 1 — Diffusion-TS
 
@@ -23,8 +23,8 @@
 
 - [x] Fiche critique complétée (source, licence, hypothèses, limites)
 - [x] Vérification licence/droits d'usage — MIT confirmé sur le dépôt officiel
-- [ ] Évaluation capacité GPU/environnement — **ND**, à faire avant tout smoke test
-- [x] Plan de faisabilité documenté (smoke test, métriques, risques) — voir ci-dessous ;GPU non encore évalué
+- [x] Évaluation capacité GPU/environnement — mesurée le 2026‑11‑24, preuve : [`governance/rcs56_gpu_capacity.json`](../governance/rcs56_gpu_capacity.json) (CUDA `ND`, torch absent localement)
+- [x] Plan de faisabilité documenté (smoke test, métriques, risques) — voir ci-dessous ; GPU évalué dans la « Preuve d'environnement »
 
 ## Fiche 2 — PhysDiff
 
@@ -68,11 +68,31 @@
 - PhysDiff : `https://api.github.com/repos/umariqb/PhysDiff` (`"license": null`), absence de `LICENSE` à la racine, `https://nvlabs.github.io/PhysDiff/` et `https://arxiv.org/abs/2212.02500` (licence article uniquement).
 - Aucun code de ces dépôts n'a été copié dans ce dépôt.
 
+## Preuve d'environnement (2026‑11‑24)
+
+Mesure produite par `experiments/check_diffusion_environment.py` (bibliothèque standard uniquement) et conservée dans [`governance/rcs56_gpu_capacity.json`](../governance/rcs56_gpu_capacity.json).
+
+| Élément | Valeur mesurée |
+|---|---|
+| Python | 3.15.0 |
+| Système / machine | Windows / AMD64 |
+| `torch_available` | `false` (détection par `find_spec`) |
+| `cuda_available` | `ND` (torch absent : aucun import CUDA tenté localement) |
+| `gpu_count` / `gpu_name` | `ND` / `ND` |
+| numpy / sklearn / pandas | disponibles (détection par `find_spec`) |
+| Smoke test Diffusion-TS local | **NO-GO** — « CUDA ND/non disponible localement » |
+| Mini-DDPM stdlib (RCS-57) | **GO** — aucun GPU requis |
+
+La sonde torch est bornée à 15 secondes dans un sous-processus : un import lent ou défaillant est enregistré comme `ND`. Le script ne relève ni pilote, ni coût, ni licence, et n'invente aucun GPU. Les vérifications de licence ci-dessus restent inchangées.
+
+**Décision :** NO-GO pour le smoke test Diffusion-TS sur cette machine tant que CUDA n'est pas disponible ; la veille et la préparation des données restent possibles. La poursuite expérimentale locale passe par un mini-DDPM en bibliothèque standard (RCS-57), sans GPU. Aucune échéance, version de modèle, licence, coût ou résultat d'entraînement n'est affirmé ici.
+
 ## Prochaines actions
 
 1. [x] Vérifier licences et conditions d'usage : MIT pour Diffusion-TS ; non déclarée pour PhysDiff.
 2. [ ] Identifier un dataset temporel autorisé/synthétique pour smoke test Diffusion-TS.
-3. [ ] Évaluer la capacité GPU locale (ND) avant de lancer quoi que ce soit.
+3. [x] Évaluer la capacité GPU locale : [preuve conservée](../governance/rcs56_gpu_capacity.json) — CUDA `ND`, smoke test Diffusion-TS local en NO-GO.
 4. [ ] Définir métriques J1 : reconstruction, détection, faux positifs/négatifs, coût, reproductibilité.
 5. [ ] Demander clarification de licence à l'équipe PhysDiff uniquement si un besoin méthodologique précis apparaît.
 6. [ ] Ne lancer aucun entraînement lourd sans validation données/GPU/budget.
+7. [ ] Poursuivre la voie locale sans GPU via le mini-DDPM stdlib (RCS-57), en s'appuyant sur la preuve d'environnement ci-dessus.
