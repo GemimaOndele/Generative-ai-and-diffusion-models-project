@@ -28,6 +28,10 @@ Chaque exécution d'inférence (Diffusion J1, Orchestrateur Multi-LLM J2, ingest
 
 ---
 
+Pour `ND`, l’énergie est obligatoirement `null` ; pour `measured` ou `estimated`, une valeur numérique non négative est obligatoire. Une frontière `remote_api` ou `hybrid` reste ND dans ce contrat v1 : une mesure locale partielle ne doit pas être assimilée au total distant/hybride.
+
+La projection des traces J2 est portée par la PR #33 (RCS-78), empilée sur ce contrat. Elle utilise une liste fermée de métadonnées et exige la preuve de provenance et du fallback. Les champs bruts `case_id`, `strategy`, `variant`, prompts et réponses ne sont pas copiés. L'intégration reste soumise à la revue et aux tests sur la base consolidée.
+
 ## 2. Règles strictes d'absence de données patient et de rédaction PII
 
 1. **Interdiction absolue de données patient (PHI/PII)** : aucun champ d'identité ou de santé patient (`patient_id`, `patient_name`, `ipp`, `nir`, `ssn`, `dob`, `birth_date`, `email`, `phone`, `address`, `diagnosis`, `clinical_note`) ne doit figurer dans un événement de trace.
@@ -38,6 +42,8 @@ Chaque exécution d'inférence (Diffusion J1, Orchestrateur Multi-LLM J2, ingest
 ---
 
 ## 3. Seuils d'alerte de monitoring opérationnel
+
+**Valeurs initiales proposées** : à confirmer par expérimentation, sans portée clinique.
 
 | Indicateur | Fenêtre d'observation | Seuil `attention` (Warning) | Seuil `critique` (Critical) | Action de remédiation |
 | :--- | :--- | :--- | :--- | :--- |
