@@ -23,3 +23,6 @@ alerte validée → intervention, une rejetée, toutes auditées. Test automatis
 
 Limites : données synthétiques **non médicales** ; profil utilisateur simulé ; la vue lit la base, elle n'envoie
 aucune commande à un équipement. Le score de démonstration est la baseline ; le DDPM (RCS-71) peut s'y brancher.
+
+
+Une version de modèle est sélectionnée explicitement : une observation apparaît au plus une fois, même avec plusieurs analyses. Le label est la vérité terrain synthétique AI4I, pas une donnée en temps réel. Le dashboard ouvre SQLite en lecture seule. Socle canonique : #19 → #12 → #20, puis #14. Les tests synthétiques contrôlent la jointure indépendamment du téléchargement AI4I.

@@ -70,10 +70,12 @@ def decider_alerte(conn: sqlite3.Connection, alerte_id: int, user_id: str, decis
         raise KeyError(alerte_id)
     if row["statut"] != "a_qualifier":
         raise TransitionInvalide(f"alerte {alerte_id} déjà {row['statut']}")
-    conn.execute(
-        "UPDATE alerte SET statut=?, decide_par=?, decide_le=?, commentaire=? WHERE id=?",
+    changed = conn.execute(
+        "UPDATE alerte SET statut=?, decide_par=?, decide_le=?, commentaire=? WHERE id=? AND statut='a_qualifier'",
         (decision, user_id, utc_now(), commentaire, alerte_id),
     )
+    if changed.rowcount != 1:
+        raise TransitionInvalide(f"alerte {alerte_id} déjà décidée")
     audit(conn, user_id, f"alerte_{decision}", f"alerte:{alerte_id}")
     conn.commit()
 
