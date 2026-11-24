@@ -3,7 +3,13 @@ import csv
 import sys
 from pathlib import Path
 
-import pytest
+import unittest
+try:
+    import pytest
+except ModuleNotFoundError as exc:
+    if exc.name != 'pytest':
+        raise
+    raise unittest.SkipTest('Suite RCS-49 exécutée par sa CI dédiée') from exc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -30,7 +36,10 @@ def _write(path: Path, rows):
 def conn():
     c = connect(":memory:")
     c.execute("INSERT INTO utilisateur VALUES ('tech-01','T','technicien'),('obs-01','O','admin')")
-    return c
+    try:
+        yield c
+    finally:
+        c.close()
 
 
 def test_import_accepts_rejects_and_dedups(conn, tmp_path):
@@ -63,3 +72,23 @@ def test_missing_columns_rejected(conn, tmp_path):
     p = tmp_path / "bad.csv"
     p.write_text("UDI,Type\n1,M\n", encoding="utf-8")
     assert import_csv(conn, p).statut == "rejete"
+
+
+def test_default_quarantine_and_nonfinite_values(conn, tmp_path, monkeypatch):
+    import json
+    monkeypatch.setenv("RCS_QUARANTINE_DIR", str(tmp_path / "default-q"))
+    p = _write(tmp_path / "invalid.csv", [_row(1), _row(2, rpm="nan"), _row(3, torque="inf")])
+    rep = import_csv(conn, p)
+    assert (rep.nb_acceptees, rep.nb_rejetees) == (1, 2)
+    files = list((tmp_path / "default-q").glob("*_rejets.jsonl"))
+    assert len(files) == 1
+    assert len([json.loads(line) for line in files[0].read_text(encoding="utf-8").splitlines()]) == 2
+
+
+def test_quarantine_write_failure_does_not_commit_lot(conn, tmp_path):
+    p = _write(tmp_path / "invalid.csv", [_row(1, typ="X")])
+    bad = tmp_path / "not-dir"
+    bad.write_text("x")
+    with pytest.raises(OSError):
+        import_csv(conn, p, quarantine_dir=bad)
+    assert conn.execute("SELECT COUNT(*) FROM lot_import").fetchone()[0] == 0
