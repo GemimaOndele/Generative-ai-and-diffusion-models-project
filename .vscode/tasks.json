@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "RCS-38: serveur local (simulation)",
+      "type": "process", "command": "python",
+      "args": ["-m", "tools.rcs38_demo_server", "--port", "8000", "--db", ".local/rcs38.sqlite3"],
+      "options": {"cwd": "${workspaceFolder}"}, "problemMatcher": []
+    },
+    {
+      "label": "RCS-38: tests HTTP SQLite et contrat",
+      "type": "process", "command": "python",
+      "args": ["-m", "unittest", "discover", "-s", "tests", "-v"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "group": {"kind": "test", "isDefault": true}, "problemMatcher": []
+    },
+    {
+      "label": "RCS-38: tests des rendus JavaScript",
+      "type": "process", "command": "node",
+      "args": ["--test", "tests/test_rcs38_frontend.cjs"],
+      "options": {"cwd": "${workspaceFolder}"}, "problemMatcher": []
+    }
+  ]
+}

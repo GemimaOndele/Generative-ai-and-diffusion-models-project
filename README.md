@@ -80,6 +80,18 @@ python -m src.governance docs/registre_decisions_risques.md --export-dir governa
 
 Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. La preuve [acceptance_rcs18.json](governance/acceptance_rcs18.json) vérifie les neuf critères Jira sur pièces : `python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance`. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
 
+### 🧪 Smoke test mono-LLM déterministe (RCS-61)
+
+Le workload défini est `experiments/rcs61_workload.jsonl` (cinq questions, identifiants uniques). La commande ci-dessous exécute deux fois le même workload avec un client déterministe, vérifie l'égalité des digests, puis écrit logs, latence locale, score observable et résumé :
+
+```bash
+python -m src.run_baseline_mono --cases experiments/rcs61_workload.jsonl --out experiments/results/rcs61_baseline_mono
+```
+
+Qualité LLM réelle, latence réseau, coût et CO₂e restent `ND` : ces fichiers valident l'orchestration logicielle, pas un modèle clinique.
+
+Les cinq fixtures M01–M05 sont volontairement indépendantes : elles couvrent la logique mono, l'abstention et le refus, sans appel LLM. Elles ne sont ni les dix cas candidats RCS-77 (#37), ni le futur workload gelé RCS-81 (#9). Aucun classement entre stratégies ne peut être déduit de ces deux jeux distincts. La comparaison J2 exige les mêmes dix cas, une version et une empreinte approuvées en amont. Le code de détection règles/ML J1 relève de RCS-55 (#40), avec calibration train-only ; la comparaison industrielle reste portée par RCS-71 (#25). Les journaux de cette démo sont locaux et ne doivent pas contenir de données réelles.
+
 ### 📊 Comparaison des approches (RCS-22)
 
 La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La clarification J1/J2 impose des workloads et métriques séparés, des seuils gelés avant chaque campagne et rappelle que V2 n'est pas une optimisation directe du DDPM. La preuve d'acceptation vérifie **13 critères** (dont les champs du ticket Jira, la séparation J1/J2, le périmètre V2, la portée méthodologique et la séquence d'intégration #30/#36) et est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
@@ -88,7 +100,7 @@ La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvr
 python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json
 ```
 
-Aucun résultat chiffré n'est revendiqué : toutes les mesures restent `ND` jusqu'au benchmark sur cas figés RCS-81.
+Les résultats historiques J1 de #25 sont exploratoires et documentés dans la fiche RCS-22. Les mesures confirmatoires restent `ND` jusqu'au gel et à la validation des protocoles distincts J1/J2.
 
 ## 👥 L'équipe
 
