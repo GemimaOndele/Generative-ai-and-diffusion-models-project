@@ -29,14 +29,12 @@ class TestGovernanceTemplates(unittest.TestCase):
         banned={"patient_name","patient_id","api_key","raw_prompt","personal_data"}
         self.assertTrue(banned.isdisjoint(d["properties"]))
 
+    def test_decision_template_not_parallel_register(self):
+        root = BASE / "governance"
+        template = root / "templates" / "decision_register_template.csv"
+        self.assertTrue(template.is_file())
+        self.assertEqual(len(template.read_text(encoding="utf-8").strip().splitlines()), 1)
+        self.assertFalse((root / "decision_register.csv").exists())
+
 if __name__=="__main__":
     unittest.main()
-
-
-def test_decision_template_not_parallel_register():
-    from pathlib import Path
-    root = Path(__file__).resolve().parents[1] / "governance"
-    template = root / "templates" / "decision_register_template.csv"
-    assert template.is_file()
-    assert len(template.read_text(encoding="utf-8").strip().splitlines()) == 1
-    assert not (root / "decision_register.csv").exists()
