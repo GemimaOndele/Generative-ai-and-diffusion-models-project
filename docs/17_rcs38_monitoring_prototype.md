@@ -73,3 +73,7 @@ Le mode local est **mono-utilisateur, sans mécanisme d'identification vérifié
 - [ ] Maintenance : tester refus sans confirmation, approbation et rejet simulés ; vérifier motif, rôle, date et persistance après redémarrage.
 - [ ] Plateforme : distinguer données simulées, valeurs ND et mesures réelles absentes.
 - [ ] Consigner le commit, l'environnement, les résultats et les réserves du relecteur. Cette checklist ne vaut pas preuve d'exécution.
+
+
+### Configuration locale récupérée de la PR #8
+Ouvrir `RoboCare-Sentinel.code-workspace` dans Cursor/VS Code, puis Terminal → Run Task. Lancer le serveur local avec `python -m tools.rcs38_demo_server --port 8000 --db .local/rcs38.sqlite3` et ouvrir http://127.0.0.1:8000/. Choisir un autre fichier SQLite pour une nouvelle session sans écraser la précédente ; arrêter le serveur avant de relancer sur le même port. Les fichiers `.local/.gitignore`, `.vscode/tasks.json` et le workspace portable sont conservés. L'historique de la PR #8 est rattaché à cette branche ; les fichiers applicatifs consolidés de #31 restent prioritaires.
