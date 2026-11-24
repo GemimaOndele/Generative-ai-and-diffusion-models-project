@@ -1,0 +1,140 @@
+{
+  "comparatif": {
+    "V2": {
+      "co2e_kg": "ND",
+      "cout_par_succes_eur": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "statut_emissions": "ND"
+    },
+    "mono-A": {
+      "co2e_kg": "ND",
+      "cout_par_succes_eur": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "statut_emissions": "ND"
+    },
+    "mono-B": {
+      "co2e_kg": "ND",
+      "cout_par_succes_eur": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "statut_emissions": "ND"
+    }
+  },
+  "decision": "À TESTER",
+  "detail_couts": {
+    "V2": {
+      "appels": "ND",
+      "cas": 0,
+      "cout_alloue_eur": "ND",
+      "cout_par_succes_eur": "ND",
+      "cout_variable_eur": "ND",
+      "retries": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "succes": "ND"
+    },
+    "mono-A": {
+      "appels": "ND",
+      "cas": 0,
+      "cout_alloue_eur": "ND",
+      "cout_par_succes_eur": "ND",
+      "cout_variable_eur": "ND",
+      "retries": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "succes": "ND"
+    },
+    "mono-B": {
+      "appels": "ND",
+      "cas": 0,
+      "cout_alloue_eur": "ND",
+      "cout_par_succes_eur": "ND",
+      "cout_variable_eur": "ND",
+      "retries": "ND",
+      "source": "ND",
+      "source_date": "ND",
+      "statut": "ND",
+      "succes": "ND"
+    }
+  },
+  "detail_emissions": {
+    "V2": {
+      "co2e_kg": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "note": "API distante non instrumentée par CodeCarbon local ; aucune valeur n'est mise à zéro.",
+      "statut": "ND"
+    },
+    "mono-A": {
+      "co2e_kg": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "note": "API distante non instrumentée par CodeCarbon local ; aucune valeur n'est mise à zéro.",
+      "statut": "ND"
+    },
+    "mono-B": {
+      "co2e_kg": "ND",
+      "energie_kwh": "ND",
+      "frontiere": "ND",
+      "note": "API distante non instrumentée par CodeCarbon local ; aucune valeur n'est mise à zéro.",
+      "statut": "ND"
+    }
+  },
+  "fichiers_versionnes": [
+    "docs/06_tp05_finops_green_ethique.md",
+    "experiments/results/tp05_mesures.csv",
+    "docs/49_rcs85_synthese_tp05.md",
+    "governance/rcs85/synthese.json"
+  ],
+  "inputs": {
+    "path": "experiments/results/tp05_mesures.csv",
+    "rows": 0,
+    "sha256": "b6f5cb5177cf9be6216c81d84c54dfe721303cacd6e120679e3b8829930cad48"
+  },
+  "issue": "RCS-85",
+  "limites": [
+    "Aucune valeur n'est inventée : le CSV de mesures sert de seule source chiffrée.",
+    "Coût par succès ND si succès = 0, coût incomplet ou source absente (jamais 0 €).",
+    "Statut énergie = le plus faible des statuts déclarés ; zéro n'est jamais substitué à ND.",
+    "Les tests éthiques ND ne valident aucune conformité RGPD/AI Act."
+  ],
+  "note": "La synthèse ne remplace ni la revue humaine ni le gel collectif des cas TP04/TP05.",
+  "reviewer": "ND",
+  "risque_principal": "ND",
+  "risques_residuels": [
+    {
+      "resultat": "ND",
+      "risque": "Hallucination ou citation absente (technicien, sécurité du service)",
+      "source": "docs/06_tp05_finops_green_ethique.md"
+    },
+    {
+      "resultat": "ND",
+      "risque": "Injection indirecte de document (technicien, équipe sécurité)",
+      "source": "docs/06_tp05_finops_green_ethique.md"
+    },
+    {
+      "resultat": "ND",
+      "risque": "Données patient et droits (patients, établissement)",
+      "source": "docs/06_tp05_finops_green_ethique.md"
+    },
+    {
+      "resultat": "ND",
+      "risque": "Décision de maintenance autonome (technicien, personnes concernées)",
+      "source": "docs/06_tp05_finops_green_ethique.md"
+    }
+  ],
+  "schema": "rcs85_synthese_tp05/v1"
+}
