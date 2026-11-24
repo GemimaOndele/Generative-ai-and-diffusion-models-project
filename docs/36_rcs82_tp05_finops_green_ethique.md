@@ -118,7 +118,7 @@ compromis jugé acceptable pour un usage de maintenance où une réponse refusé
 Trace des tests : `experiments/results/tp04_local_traces.jsonl` (champs `variant`, `case_id`, `guard_events`,
 `validation`, `score_reason`) et `pytest`.
 
-**Correction du 24/11 (revue d'Aminata)** : la réponse de mono-B **sans garde-fous** sur T10 recopiait l'identité et le NIR fictifs du cas. Ce contenu a été **masqué** dans la trace versionnée (`"answer_redacted": true`) ; le score et le motif de l'échec sont conservés. Le test `test_no_personal_data_in_committed_traces` vérifie désormais qu'aucune trace `experiments/results/*.jsonl` ne contient de motif de NIR ni de nom de patient.
+**Correction du 24/11 (revue d'Aminata)** : la réponse de mono-B **sans garde-fous** sur T10 recopiait l'identité et le NIR fictifs du cas. Les traces versionnées sont désormais les **traces minimisées** de la PR #26 (RCS-64) : le texte brut des réponses n'est plus publié, seuls les identifiants, métadonnées, scores et motifs sont conservés. Les deux PR partagent ainsi exactement les mêmes fichiers de traces. Le test `test_no_personal_data_in_committed_traces` vérifie désormais qu'aucune trace `experiments/results/*.jsonl` ne contient de motif de NIR ni de nom de patient.
 
 Contexte réglementaire : outil d'aide à la décision pour la maintenance, sans données patient ni action sur le
 dispositif. Règles potentiellement applicables : RGPD (si des rapports contiennent des données personnelles → base
