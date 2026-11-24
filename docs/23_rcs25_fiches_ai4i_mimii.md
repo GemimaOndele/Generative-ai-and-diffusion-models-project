@@ -15,4 +15,7 @@ Pages officielles consultées le **2026-11-20**. Pilote : Omar · binôme : Ayou
 | Citation | S. Matzka, *Explainable AI for Predictive Maintenance Applications*, AI4I 2020 | R. Tanabe et al., *MIMII DUE…*, arXiv:2105.02702, 2021 |
 
 **Conclusion** : les deux sont des **substituts méthodologiques non médicaux** ; aucun ne valide une performance sur
-scanner/IRM. AI4I est choisi pour le POC (décision GO, voir RCS-45) ; MIMII DUE reste en réserve.
+scanner/IRM. AI4I est utilisé comme proxy exploratoire du POC (GO proposé, RCS-45 ; accord collectif non attesté) ; MIMII DUE reste en réserve.
+
+
+Chiffres et licences issus de la fiche datée du 20/11, à revérifier avant acquisition ou redistribution. Pour MIMII DUE, vérifier les conditions NC/SA pour l'usage envisagé ; aucun droit commercial présumé. Données brutes hors Git, manifeste et empreinte obligatoires. Pas de choix de famille médicale par cette étude.
