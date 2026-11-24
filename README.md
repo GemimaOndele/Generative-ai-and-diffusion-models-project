@@ -70,7 +70,17 @@ python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --o
 
 Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
 
-### 🧪 Baseline mono-LLM reproductible (RCS-61)
+### 🧭 Gouvernance — registres ADR et risques (RCS-18)
+
+Le [registre documentaire](docs/registre_decisions_risques.md) est la source unique : décisions ADR (statut, propriétaire, date réelle) et risques cotés probabilité × gravité avec exposition initiale/résiduelle, déclencheurs, mitigation, propriétaire, reviewer, ticket et revue. La CLI valide le registre, exporte les deux vues opérationnelles et affiche la revue Sprint (escalades ≥ 12 ou gravité 5) :
+
+```bash
+python -m src.governance docs/registre_decisions_risques.md --export-dir governance --sprint-review --sprint S0
+```
+
+Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. La preuve [acceptance_rcs18.json](governance/acceptance_rcs18.json) vérifie les neuf critères Jira sur pièces : `python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance`. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
+
+### 🧪 Smoke test mono-LLM déterministe (RCS-61)
 
 Le workload défini est `experiments/rcs61_workload.jsonl` (cinq questions, identifiants uniques). La commande ci-dessous exécute deux fois le même workload avec un client déterministe, vérifie l'égalité des digests, puis écrit logs, latence locale, score observable et résumé :
 
@@ -79,6 +89,8 @@ python -m src.run_baseline_mono --cases experiments/rcs61_workload.jsonl --out e
 ```
 
 Qualité LLM réelle, latence réseau, coût et CO₂e restent `ND` : ces fichiers valident l'orchestration logicielle, pas un modèle clinique.
+
+Les cinq fixtures M01–M05 sont volontairement indépendantes : elles couvrent la logique mono, l'abstention et le refus, sans appel LLM. Elles ne sont ni les dix cas candidats RCS-77 (#37), ni le futur workload gelé RCS-81 (#9). Aucun classement entre stratégies ne peut être déduit de ces deux jeux distincts. La comparaison J2 exige les mêmes dix cas, une version et une empreinte approuvées en amont. Le code de détection règles/ML J1 relève de RCS-55 (#40), avec calibration train-only ; la comparaison industrielle reste portée par RCS-71 (#25). Les journaux de cette démo sont locaux et ne doivent pas contenir de données réelles.
 
 ## 👥 L'équipe
 

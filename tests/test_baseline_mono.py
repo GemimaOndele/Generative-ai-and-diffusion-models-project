@@ -61,6 +61,7 @@ class BaselineMonoTests(unittest.TestCase):
             self.assertTrue(out.with_suffix(".csv").exists())
             self.assertEqual(summary["reproducibility"]["verified"], True)
             self.assertEqual(summary["evidence"]["quality"], "ND")
+            self.assertEqual(summary["evidence"]["workload_scope"], "software_smoke_test_not_j2_benchmark")
             self.assertEqual(summary["evidence"]["cost"], "ND")
             self.assertTrue(all(row["traces"][0]["cost_eur"] is None for row in rows))
             self.assertTrue(all(row["evidence"] == "demo_logic_only" for row in rows))

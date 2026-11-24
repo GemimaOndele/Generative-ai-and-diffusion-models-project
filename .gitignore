@@ -62,3 +62,6 @@ local_runs/
 tmp/
 *.tmp
 *.bak
+
+# Journaux locaux de la démonstration mono-LLM
+experiments/results/rcs61_baseline_mono.jsonl

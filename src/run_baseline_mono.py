@@ -26,7 +26,7 @@ from .baseline_mono import (
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Baseline mono-LLM reproductible (RCS-61)")
+    parser = argparse.ArgumentParser(description="Smoke test déterministe mono-LLM (RCS-61), hors benchmark J2")
     parser.add_argument("--cases", default=str(DEFAULT_WORKLOAD))
     parser.add_argument("--out", default="experiments/results/rcs61_baseline_mono")
     parser.add_argument("--model-label", choices=["A", "B"], default="A")

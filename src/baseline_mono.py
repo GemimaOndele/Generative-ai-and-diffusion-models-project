@@ -74,7 +74,7 @@ class BaselineMonoClient(DemoClient):
 
 
 def load_workload(path: str | Path = DEFAULT_WORKLOAD) -> List[CaseInput]:
-    """Charge le workload défini du ticket (JSONL, une question par ligne)."""
+    """Charge les fixtures du smoke test RCS-61 (pas le benchmark J2 gelé)."""
     cases: List[CaseInput] = []
     with Path(path).open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -207,6 +207,7 @@ def write_outputs(bundle: Dict[str, Any], out_prefix: str | Path, *, reproducibl
         },
         "evidence": {
             "mode": "demo_deterministic_client",
+            "workload_scope": "software_smoke_test_not_j2_benchmark",
             "quality": "ND",
             "real_llm_latency": "ND",
             "cost": "ND",
