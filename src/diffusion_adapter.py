@@ -404,6 +404,8 @@ def validate_ticket_metadata(metadata: dict = TICKET_METADATA) -> list[str]:
 def validate_run(run: dict, config: DiffusionConfig = DEFAULT_CONFIG) -> list[str]:
     """Vérifie la structure et la cohérence interne de l'artefact conservé."""
     errors = []
+    if not isinstance(run, dict):
+        return ["run: objet JSON attendu"]
     if run.get("ticket") != "RCS-57" or run.get("jalon") != "J1":
         errors.append("run: identité RCS-57/J1 absente")
     if run.get("config") != config_as_dict(config):
@@ -411,21 +413,31 @@ def validate_run(run: dict, config: DiffusionConfig = DEFAULT_CONFIG) -> list[st
     if run.get("run_id") != config_fingerprint(config):
         errors.append("run.run_id: empreinte de configuration incohérente")
     data = run.get("data", {})
+    if not isinstance(data, dict):
+        return errors + ["run.data: objet attendu"]
     if data.get("n_train") != config.n_train or data.get("n_test") != config.n_test:
         errors.append("run.data: effectifs divergents")
     if data.get("seed_train") != config.seed or data.get("seed_test") != config.seed + 1000:
         errors.append("run.data: seeds divergents")
 
     variants = run.get("variants", {})
+    if not isinstance(variants, dict):
+        return errors + ["run.variants: objet attendu"]
     if list(variants) != list(config.variants):
         errors.append("run.variants: deux variantes attendues (base, adapte)")
     for name in config.variants:
         variant = variants.get(name, {})
+        if not isinstance(variant, dict):
+            errors.append(f"{name}: objet attendu")
+            continue
         if variant.get("conditionnement_temporel") is not (name == "adapte"):
             errors.append(f"{name}: conditionnement temporel incohérent")
         if variant.get("seed") != config.seed:
             errors.append(f"{name}: seed non déterministe")
         losses = variant.get("epoch_losses", [])
+        if not isinstance(losses, list):
+            errors.append(f"{name}.epoch_losses: liste attendue")
+            continue
         if len(losses) != config.epochs:
             errors.append(f"{name}.epoch_losses: {config.epochs} époques attendues")
         if any(not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0 for value in losses):
@@ -438,7 +450,10 @@ def validate_run(run: dict, config: DiffusionConfig = DEFAULT_CONFIG) -> list[st
                 errors.append(f"{name}.{metric}: mesure invalide")
         if variant.get("n_test") != config.n_test:
             errors.append(f"{name}.n_test: effectif divergent")
-    limits = " ".join(run.get("limits", []))
+    raw_limits = run.get("limits", [])
+    if not isinstance(raw_limits, list) or not all(isinstance(item, str) for item in raw_limits):
+        return errors + ["run.limits: liste de textes attendue"]
+    limits = " ".join(raw_limits)
     for token in ("synthétiques", "ND", "pas une optimisation"):
         if token not in limits:
             errors.append(f"run.limits: mention « {token} » absente")
@@ -452,7 +467,10 @@ def _close(left: float, right: float) -> bool:
 def _read_run(run_path: str | Path) -> tuple[dict | None, list[str]]:
     path = Path(run_path)
     try:
-        return json.loads(path.read_text(encoding="utf-8")), []
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(value, dict):
+            return None, ["artifact: objet JSON attendu"]
+        return value, []
     except (OSError, ValueError) as exc:
         return None, [f"artifact.lecture: {exc}"]
 
@@ -517,8 +535,8 @@ def acceptance_check(
         },
         {
             "id": "REPRODUCIBLE_EXECUTION",
-            "ok": not reproducibility_errors,
-            "evidence": reproducibility_errors or "rejeu déterministe du même run_id, tolérance 1e-6",
+            "ok": run is not None and not read_errors and not run_errors and not reproducibility_errors,
+            "evidence": read_errors or run_errors or reproducibility_errors or "rejeu déterministe du même run_id, tolérance 1e-6",
         },
         {
             "id": "NO_INVENTED_RESULTS",
@@ -533,7 +551,7 @@ def acceptance_check(
     ]
 
     return {
-        "ok": all(criterion["ok"] for criterion in criteria),
+        "ok": not (metadata_errors or read_errors or run_errors or reproducibility_errors) and all(criterion["ok"] for criterion in criteria),
         "ticket": "RCS-57",
         "criteria": criteria,
         "artifact_sha256": canonical_hash(run) if run is not None else ND,

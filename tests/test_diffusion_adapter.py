@@ -127,6 +127,24 @@ class DiffusionAdapterTest(unittest.TestCase):
                 [item for item in proof["criteria"] if item["id"] == "REPRODUCIBLE_EXECUTION"][0]["ok"]
             )
 
+    def test_structural_errors_block_acceptance_even_without_replay(self):
+        from copy import deepcopy
+        original = run_experiment()
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "bad.json"
+            for field, value in (("ticket", "INVALID"), ("data", []), ("variants", []), ("limits", 3)):
+                with self.subTest(field=field):
+                    bad = deepcopy(original)
+                    bad[field] = value
+                    path.write_text(json.dumps(bad), encoding="utf-8")
+                    proof = acceptance_check(path)
+                    self.assertFalse(proof["ok"])
+                    self.assertTrue(proof["errors"])
+                    criterion = next(c for c in proof["criteria"] if c["id"] == "REPRODUCIBLE_EXECUTION")
+                    self.assertFalse(criterion["ok"])
+            path.write_text("[]", encoding="utf-8")
+            self.assertFalse(acceptance_check(path)["ok"])
+
     def test_cli_writes_run_and_acceptance_proof(self):
         with tempfile.TemporaryDirectory() as folder:
             out = Path(folder) / "run.json"
