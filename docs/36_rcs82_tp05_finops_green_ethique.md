@@ -4,7 +4,7 @@ Pilote : Omar · binôme : Elias · relais : Gémima · relectrice : Aminata. Co
 
 Benchmark de référence : branche RCS-77 (`experiments/results/tp04_local_*`), même jeu de 10 cas pour toutes les stratégies.
 
-> **Statut du jeu de test (revue d'Aminata, 23/11)** : ces 10 cas sont des **candidats non encore gelés** au sens du protocole RCS-81 (PR #9 : manifeste approuvé, `freeze_commit` vide). Les résultats ci-dessous sont donc une **exécution exploratoire reproductible**, pas un benchmark de référence. Ils devront être relancés après le gel collectif (version exacte, empreinte SHA-256 et validation humaine du fichier de cas).
+> **Statut du jeu de test (revue d'Aminata, 23/11)** : ces 10 cas sont des **candidats non encore gelés** au sens du protocole RCS-81 (PR #9 : manifeste candidat, `freeze_commit` vide). Les résultats ci-dessous sont donc une **exécution exploratoire historique à reproduire**, pas un benchmark de référence. Ils devront être relancés après le gel collectif (version exacte, empreinte SHA-256 et validation humaine du fichier de cas).
 Entrées : benchmark TP04 (`experiments/results/tp04_local_*`), levier (`tp05_lever_*`), agrégat
 `experiments/results/rcs82_tp05_mesures.csv` (`python src/run_tp05.py`). Pas de nouveau POC ; J1 inchangé.
 
@@ -18,7 +18,7 @@ Statut de chaque chiffre : **mesuré** (observé par le code), **calculé** (for
 | Unité fonctionnelle | **une question technicien traitée avec succès** selon la règle pré-écrite du cas (réponse factuelle sourcée, ou abstention/blocage attendu) |
 | Workload | les 10 cas **candidats** de `experiments/test_cases.jsonl` (gel formel en attente, RCS-81), identiques pour toutes les stratégies |
 | Modèles | A = `SmolLM2-360M-Instruct@a10cc15`, B = `Qwen2.5-0.5B-Instruct@7ae5576` (Apache-2.0, locaux) |
-| Métrique qualité | réussite de tâche (0/1) moyenne sur 10 |
+| Métrique qualité | score proxy automatique (0/1) moyen sur 10 ; succès métier non validé |
 | Frontière | **100 % locale** : portable Intel i7-1355U, CPU seul, Windows 11 ; aucun appel API distant |
 
 ## 02 · FinOps — du coût d'appel au coût par tâche réussie
@@ -101,7 +101,7 @@ variance de latence jusqu'à ×3 observée entre deux passes identiques, échant
 permettent pas d'en déduire une énergie : nous ne l'avons pas fait. L'entraînement des modèles (amont) et la
 fabrication du matériel sont **hors périmètre**.
 
-**Décision** : le levier « génération courte » ne conserve pas la qualité → on garde la **cascade à 120 tokens** :
+**Conclusion exploratoire à ratifier** : le levier « génération courte » ne conserve pas la qualité → on garde la **cascade à 120 tokens** :
 +2,5× d'énergie estimée vs mono-B, mais +75 % de tâches réussies ; le CO₂e par succès passe de 0,0065 à 0,0092 g,
 compromis jugé acceptable pour un usage de maintenance où une réponse refusée oblige le technicien à chercher seul.
 
@@ -115,10 +115,9 @@ compromis jugé acceptable pour un usage de maintenance où une réponse refusé
 | 4. **Décision automatisée sans humain** (alerte J1 → action) | `test_alert_workflow_unique_and_human_review` | **PASS** : intervention impossible sans validation par un rôle habilité ; tout est audité | workflow à statuts, rôles, audit, aucune commande machine | `rcs.alerts` |
 | 5. **Licences / droits des données et modèles** | revue des sources (docs/23_rcs25_fiches_ai4i_mimii.md, data/manifest) | AI4I CC BY 4.0 (citée), modèles Apache-2.0, MIMII NC non utilisé, GMDN sous licence → non stocké | manifeste, empreintes, données brutes hors Git | pilote data |
 
-Trace des tests : `experiments/results/tp04_local_traces.jsonl` (champs `variant`, `case_id`, `guard_events`,
-`validation`, `score_reason`) et `pytest`.
+Trace des tests : `experiments/results/tp04_local_traces.jsonl` (champs `variant`, `case_id`, `status`, `score`) et `pytest`.
 
-**Correction du 24/11 (revue d'Aminata)** : la réponse de mono-B **sans garde-fous** sur T10 recopiait l'identité et le NIR fictifs du cas. Les traces versionnées sont désormais les **traces minimisées** de la PR #26 (RCS-64) : le texte brut des réponses n'est plus publié, seuls les identifiants, métadonnées, scores et motifs sont conservés. Les deux PR partagent ainsi exactement les mêmes fichiers de traces. Le test `test_no_personal_data_in_committed_traces` vérifie désormais qu'aucune trace `experiments/results/*.jsonl` ne contient de motif de NIR ni de nom de patient.
+**Correction du 24/11 (revue d'Aminata)** : la réponse de mono-B **sans garde-fous** sur T10 recopiait l'identité et le NIR fictifs du cas. Les traces versionnées sont désormais les **traces minimisées** de la PR #26 (RCS-64) : le texte brut des réponses n'est plus publié, seuls les identifiants, métadonnées, scores structurés sont conservés. Les deux PR partagent ainsi exactement les mêmes fichiers de traces. Le test `test_no_personal_data_in_committed_traces` vérifie désormais qu'aucune trace `experiments/results/*.jsonl` ne contient de motif de NIR ni de nom de patient.
 
 Contexte réglementaire : outil d'aide à la décision pour la maintenance, sans données patient ni action sur le
 dispositif. Règles potentiellement applicables : RGPD (si des rapports contiennent des données personnelles → base
@@ -147,3 +146,6 @@ vérification par un juriste/DPO est nécessaire avant tout usage réel.
 | Mesure énergie | CodeCarbon 3.3 `OfflineEmissionsTracker`, `country_iso_code=FRA`, échantillonnage 1 s, une session par stratégie |
 | Agrégation | `python src/run_tp05.py` → `experiments/results/rcs82_tp05_mesures.csv` (le test `test_committed_table_matches_inputs` vérifie la cohérence) |
 | Limite | machine partagée, autres processus inclus dans la durée ; résultats à relancer après le gel RCS-81 |
+
+
+Revue du 24/11 : les traces courantes sont identiques à #26, mais les commits antérieurs ne sont pas purgés. Contrôler la confidentialité de l'historique avant fusion. Les scores positifs automatiques ne sont pas des succès métier validés. Le commit historique abrégé et les paramètres rapportés ne prouvent pas le gel préalable ; reproduire après RCS-81 (#9). Coût complet ND.
