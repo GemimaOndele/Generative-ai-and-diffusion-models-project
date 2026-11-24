@@ -39,9 +39,9 @@ Colonnes manquantes dans l'en-tête → **lot entier rejeté** (`statut = rejete
 | `event_code` / `report_text` | str | pas d'identifiant patient | prévu pour openFDA (J2) |
 | `label` / `label_origin` | int / str | pas de « vérité terrain » supposée | ✔ |
 
-## 4. KPI qualité rapportés sur AI4I (import complet à reproduire)
+## 4. KPI qualité observés sur AI4I (import complet reproduit le 24/11)
 
-Ces compteurs sont rapportés par l'auteur, non vérifiés dans cette PR ; le manifeste généré doit être fourni avant validation expérimentale. Reproduire sur la branche pipeline RCS-52 avec le téléchargement vérifié et la commande documentée dans cette branche ; conserver le SHA-256, les compteurs et le commit d'exécution, sans publier les données brutes.
+**Reproduction du 24/11 (revue d'Aminata)** : `python scripts/download_ai4i.py` (SHA-256 vérifié `dc6630cd…a8e`), puis `python scripts/demo_pipeline.py` sur la branche pipeline (commit `d163e32`, PR #25 qui contient le socle #19/#12/#20/#14). Le manifeste généré `data/manifests/ai4i_import.json` (versionné dans la PR #12) est **identique** à celui de la branche, à l'horodatage près : `nb_lignes` 10 000, `nb_acceptees` 10 000, `nb_rejetees` 0, `nb_doublons` 0, `erreurs` vide. Le second import du même fichier renvoie `deja_importe`. Le nombre de pannes (`Machine failure` = 1) recompté sur le fichier téléchargé est 339. Les données brutes ne sont pas publiées.
 
 | KPI | Valeur |
 |---|---|
