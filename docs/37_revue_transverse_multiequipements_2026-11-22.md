@@ -58,3 +58,7 @@ Le tableau de vote Excel est lié dans [RCS-19](https://gemimakerenondelepourou.
 ## 6. Conditions avant publication ou utilisation
 
 Aucune donnée patient ; aucune clé d'API ni fichier sensible dans le dépôt ; aucune automatisation de décision clinique ; aucune assertion de performance biomédicale à partir d'AI4I ou de signaux synthétiques. Les feuilles du Drive et pièces jointes Jira non effectivement ouvertes ne sont **pas considérées comme auditées**. Ce document sollicite une **revue par l'équipe** ; il ne remplace ni le cahier des charges ni le vote de RCS-19.
+
+
+## DEC-02 / RCS-19 — clarification du 24/11
+Périmètre multi-familles ne signifie pas validation simultanée. Choisir collectivement une famille pilote, ou une famille par jalon si justifié : candidats, critères, scores indicatifs, accès/licences, limites, votes et motif. Aucun choix n'est présumé. Reporter la décision dans l'architecture #24, le CDC et les présentations ; AI4I reste non médical. Les constats du 22/11 sont un instantané historique.
