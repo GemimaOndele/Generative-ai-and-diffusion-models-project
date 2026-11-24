@@ -97,8 +97,11 @@ class Rcs85SyntheseTests(unittest.TestCase):
     def test_input_hash_is_real_and_not_fabricated(self) -> None:
         path = write_measures(self.root)
         report = build_report(self.root)
-        self.assertEqual(report["inputs"]["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
+        normalized = path.read_bytes().replace(b"\r\n", b"\n")
+        self.assertEqual(report["inputs"]["sha256"], hashlib.sha256(normalized).hexdigest())
         self.assertEqual(report["inputs"]["path"], MEASURES_REL.as_posix())
+        path.write_bytes(normalized)  # checkout Linux (LF) : même hash
+        self.assertEqual(build_report(self.root)["inputs"]["sha256"], report["inputs"]["sha256"])
 
     def test_cost_per_success_is_computed_with_source(self) -> None:
         write_measures(self.root, [measure_row(name) for name in STRATEGIES])

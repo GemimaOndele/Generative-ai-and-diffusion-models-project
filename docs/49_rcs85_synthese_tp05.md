@@ -1,6 +1,6 @@
 # RCS-85 — Synthèse TP05 (coût, émissions, risques, décision)
 
-> Décision : **À TESTER**. Source chiffrée unique : `experiments/results/tp05_mesures.csv` (0 ligne(s), SHA-256 `b6f5cb5177cf…`). Aucune valeur n'est inventée.
+> Décision : **À TESTER**. Source chiffrée unique : `experiments/results/tp05_mesures.csv` (0 ligne(s), SHA-256 `9e13efd684d5…`). Aucune valeur n'est inventée.
 
 ## Coût par tâche réussie et source
 

@@ -73,9 +73,12 @@ def read_measures(root: Path) -> tuple[List[Dict[str, str]], Dict[str, Any]]:
             missing = MEASURE_COLUMNS - set(reader.fieldnames or [])
             raise ValueError("Colonnes de mesures absentes : " + ", ".join(sorted(missing)))
         rows = [{key: _text(value) for key, value in row.items()} for row in reader]
+    # Normalisation CRLF -> LF : Git stocke le CSV en LF, Windows le restitue
+    # en CRLF. Le hash doit être identique sur tous les systèmes.
+    normalized = path.read_bytes().replace(b"\r\n", b"\n")
     provenance = {
         "path": MEASURES_REL.as_posix(),
-        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "sha256": hashlib.sha256(normalized).hexdigest(),
         "rows": len(rows),
     }
     return rows, provenance
