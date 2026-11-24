@@ -1,11 +1,13 @@
 # Règles d'automatisation et contrôle humain (HITL) — `RCS-39`
 
 > **Statut** : Spécification v1 alignée sur `src/rcs/ingestion.py` (PR #12), `src/rcs/alerts.py` et `sql/001_init_schema.sql` (PR #20).  
-> **Principe directeur** : Aide à la décision pour la maintenance prédictive des pompes à perfusion. **Aucune action autonome sur un appareil médical réel** n'est autorisée ; toute décision opérationnelle requiert une validation humaine (HITL) tracée dans `audit`.
+> **Principe directeur** : Aide à la décision pour la maintenance prédictive des équipements biomédicaux (famille pilote à décider, RCS-19). **Aucune action autonome sur un appareil médical réel** n'est autorisée ; toute décision opérationnelle requiert une validation humaine (HITL) tracée dans `audit`.
 
 ---
 
 ## 1. Périmètre et contrats de référence
+
+AI4I est un proxy synthétique industriel non médical. Les sources biomédicales futures restent soumises à validation des droits et du périmètre. Les PR #12 et #20 (et migration #19) sont des dépendances d’intégration, non réputées fusionnées. Les règles AUTO-04 (retries, timeout, repli et journalisation) sont des exigences proposées à confirmer par tests d’intégration ; elles ne constituent pas une preuve d’implémentation. Référence documentaire stable : RCS-39, distincte de RCS-78.
 
 | Composant | Fichier / PR | Fonctions & contraintes clés |
 | :--- | :--- | :--- |
@@ -26,7 +28,7 @@
 | **AUTO-05** | **Contrôle d'accès HITL (RBAC)** | Tentative de décision sur une alerte ou d'ouverture d'intervention par un `user_id` | Vérifier que `utilisateur.role` appartient à `ROLES_HABILITES` (`technicien` ou `responsable`). | Rôle non habilité (ex. `admin` non habilité métier ou utilisateur inconnu) → journalisation `decision_refusee_permission` dans `audit` et levée de `PermissionRefusee`. | `decider_alerte`, `ouvrir_intervention`, `utilisateur`, `audit` |
 | **AUTO-06** | **Validation / rejet HITL** | Revue d'une alerte au statut `a_qualifier` par un technicien/responsable habilité | Exécuter `decider_alerte` avec `decision` dans `{'validee', 'rejetee'}` et `commentaire` ; renseigner `decide_par`, `decide_le` (UTC ISO-8601) et tracer `alerte_validee` ou `alerte_rejetee` dans `audit`. | Alerte absente → `KeyError`. Statut différent de `a_qualifier` → `TransitionInvalide`. Décision hors `{'validee', 'rejetee'}` → `ValueError`. | `decider_alerte`, `alerte`, `audit` |
 | **AUTO-07** | **Ouverture d'intervention encadrée** | Demande d'ouverture d'une fiche d'intervention sur une alerte | Exécuter `ouvrir_intervention` uniquement si `alerte.statut == 'validee'` et `user_id` habilité ; créer la ligne `intervention` (`statut = 'ouverte'`) et tracer `intervention_ouverte` dans `audit`. | Alerte `a_qualifier`, `rejetee` ou inexistante → `TransitionInvalide`. Utilisateur non habilité → `PermissionRefusee`. | `ouvrir_intervention`, `intervention`, `audit` |
-| **AUTO-08** | **Garde-fou sécurité clinique** | Toute alerte `critique` ou recommandation générée par LLM | Afficher l'alerte et la recommandation comme **brouillon d'aide à la décision** uniquement ; exiger une action humaine explicite avant toute opération terrain. | **Interdiction absolue** d'envoyer une commande réseau/matérielle vers une pompe à perfusion réelle. Toute tentative hors périmètre est bloquée et auditée. | `alerte`, `intervention`, `audit` |
+| **AUTO-08** | **Garde-fou sécurité clinique** | Toute alerte `critique` ou recommandation générée par LLM | Afficher l'alerte et la recommandation comme **brouillon d'aide à la décision** uniquement ; exiger une action humaine explicite avant toute opération terrain. | **Interdiction absolue** d'envoyer une commande réseau/matérielle vers un équipement médical réel. Toute tentative hors périmètre est bloquée et auditée. | `alerte`, `intervention`, `audit` |
 
 ---
 
