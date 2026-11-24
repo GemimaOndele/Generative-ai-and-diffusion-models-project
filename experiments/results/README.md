@@ -13,4 +13,10 @@
 
 La baseline fictive [RCS-69 / PR #7](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/7) montre seulement le fonctionnement du calcul de métriques ; pas de validation clinique.
 
+### RCS-55 — baseline règles/ML
+
+- `rcs55_baseline_rules_ml.json` : artefact produit par `python experiments/baseline_rules_ml.py --synthetic --out experiments/results/rcs55_baseline_rules_ml.json`. Mesures **réellement calculées** sur le jeu synthétique généré avec `seed=42` : **smoke test non médical**, pas une performance clinique.
+- Le z-score de la baseline règles est calibré sur le train uniquement ; les seuils restent non gelés (`ND` pour le seuil de décision final) et le dataset indépendant est à sélectionner.
+- Protocole complet : [RCS-55](../docs/08_rcs55_baseline_regles_ml.md). Notebook reproductible : [baseline_rules_ml.ipynb](../baseline_rules_ml.ipynb). Si l'exécution n'est pas possible, l'artefact doit porter `status: "ND"` et une `reason`, sans métrique inventée.
+
 [README principal](../../README.md)

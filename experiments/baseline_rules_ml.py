@@ -1,14 +1,21 @@
 """Baseline de détection d'anomalies règles/ML — RCS-55.
 
 Objectif :
-- fournir un protocole reproductible (dataset, split, seed, métriques) ;
+- fournir un protocole reproductible (dataset indépendant, split, seed, métriques) ;
 - comparer une baseline règles simple à une baseline ML (IsolationForest) ;
 - ne pas inventer de résultats réels : les métriques affichées proviennent uniquement
   d'une exécution sur les données chargées/générées localement.
 
+Règle de calibration (anti-fuite de distribution) :
+- le ``StandardScaler`` est ajusté sur le TRAIN uniquement ;
+- sa moyenne et son écart-type (``scale_``, ddof=0) sont conservés dans
+  ``RuleCalibration`` puis appliqués au TEST ;
+- aucune statistique n'est recalculée sur le TEST ni sur TRAIN+TEST, et les
+  labels du TEST ne servent qu'à l'évaluation.
+
 Usage :
   python experiments/baseline_rules_ml.py --data path/to/dataset.csv --out experiments/results/baseline_rules_ml.json
-  python experiments/baseline_rules_ml.py --synthetic --out experiments/results/baseline_rules_ml_synthetic.json
+  python experiments/baseline_rules_ml.py --synthetic --out experiments/results/rcs55_baseline_rules_ml.json
 
 Le mode --synthetic sert uniquement à valider le pipeline (smoke test), pas à prouver
 une performance sur données médicales réelles.
@@ -42,6 +49,44 @@ class RunConfig:
     n_features: int = 8
 
 
+@dataclass(frozen=True)
+class RuleCalibration:
+    """Statistiques de la baseline règles, estimées sur le train uniquement."""
+
+    means: Tuple[float, ...]
+    stds: Tuple[float, ...]
+    features: Tuple[str, ...]
+
+    @classmethod
+    def fit(cls, X) -> "RuleCalibration":
+        scaler = StandardScaler()
+        scaler.fit(X)
+        stds = np.where(scaler.scale_ == 0.0, 1.0, scaler.scale_)
+        n_features = np.asarray(X).shape[1]
+        features = tuple(str(c) for c in getattr(X, "columns", [])) or tuple(
+            f"f{i + 1}" for i in range(n_features)
+        )
+        return cls(
+            means=tuple(float(v) for v in scaler.mean_),
+            stds=tuple(float(v) for v in stds),
+            features=features,
+        )
+
+    def as_dict(self) -> Dict:
+        return {
+            "fitted_on": "train_only",
+            "features": list(self.features),
+            "means": list(self.means),
+            "stds": list(self.stds),
+            "std_ddof": 0,
+        }
+
+
+def fit_rule_calibration(X_train) -> RuleCalibration:
+    """Calibre le z-score de la baseline règles sur le train uniquement."""
+    return RuleCalibration.fit(X_train)
+
+
 def make_synthetic(cfg: RunConfig) -> pd.DataFrame:
     """Génère un dataset synthétique pour smoke test uniquement."""
     rng = np.random.default_rng(cfg.seed)
@@ -72,13 +117,30 @@ def load_dataset(cfg: RunConfig) -> pd.DataFrame:
     raise ValueError(f"Format non supporté: {path.suffix}")
 
 
-def rule_based_predict(X: pd.DataFrame, z_threshold: float) -> np.ndarray:
-    """Baseline règles: anomalie si une feature dépasse z_threshold en valeur absolue."""
-    z = (X - X.mean()) / (X.std(ddof=0).replace(0, 1))
-    return (z.abs().max(axis=1) > z_threshold).astype(int).to_numpy()
+def stratified_split(X, y, cfg: RunConfig):
+    """Split train/test stratifié et reproductible (même seed, même résultat)."""
+    stratify = y if len(np.unique(y)) > 1 else None
+    return train_test_split(
+        X, y, test_size=cfg.test_size, random_state=cfg.seed, stratify=stratify
+    )
 
 
-def evaluate(y_true: np.ndarray, y_pred: np.ndarray) -> Dict:
+def rule_based_predict(X, calibration: RuleCalibration, z_threshold: float) -> np.ndarray:
+    """Anomalie si une feature dépasse ``z_threshold`` en valeur absolue.
+
+    Le z-score est calculé avec les statistiques TRAIN de ``calibration`` ;
+    aucune statistique n'est estimée sur les lignes passées ici (TEST).
+    """
+    values = X.to_numpy(dtype=float) if hasattr(X, "to_numpy") else np.asarray(X, dtype=float)
+    means = np.asarray(calibration.means, dtype=float)
+    stds = np.asarray(calibration.stds, dtype=float)
+    if values.ndim != 2 or values.shape[1] != means.size:
+        raise ValueError("Nombre de features incompatible avec la calibration train")
+    z = (values - means) / stds
+    return (np.abs(z).max(axis=1) > float(z_threshold)).astype(int)
+
+
+def evaluate(y_true, y_pred) -> Dict:
     precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="binary", zero_division=0)
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1]).tolist()
     return {
@@ -98,26 +160,50 @@ def run(cfg: RunConfig) -> Dict:
 
     X = df.drop(columns=["label"])
     y = df["label"].astype(int).to_numpy()
-    # Split stratifié reproductible
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=cfg.test_size, random_state=cfg.seed, stratify=y if len(np.unique(y)) > 1 else None
-    )
+    X_train, X_test, y_train, y_test = stratified_split(X, y, cfg)
 
-    scaler = StandardScaler()
-    X_train_s = scaler.fit_transform(X_train)
+    # Baseline règles : calibration TRAIN uniquement, application au TEST.
+    calibration = fit_rule_calibration(X_train)
+    y_pred_rules = rule_based_predict(X_test, calibration, cfg.z_threshold)
+
+    # Baseline ML (IsolationForest) - entraîné sur train sans labels pour rester réaliste.
+    scaler = StandardScaler().fit(X_train)
+    X_train_s = scaler.transform(X_train)
     X_test_s = scaler.transform(X_test)
-    X_test_df = pd.DataFrame(X_test_s, columns=X.columns)
-
-    # Baseline règles
-    y_pred_rules = rule_based_predict(X_test_df, cfg.z_threshold)
-
-    # Baseline ML (IsolationForest) - entraîné sur train sans labels pour rester réaliste
     iso = IsolationForest(random_state=cfg.seed, contamination=cfg.contamination)
     iso.fit(X_train_s)
     y_pred_iso = (iso.predict(X_test_s) == -1).astype(int)
 
     results = {
+        "schema": "rcs55_baseline_rules_ml/v1",
+        "status": "computed",
+        "source": "synthetic_smoke_test" if cfg.synthetic else "dataset",
         "config": asdict(cfg),
+        "protocol": {
+            "dataset": "dataset indépendant à sélectionner ; --synthetic = smoke test non médical",
+            "split": "train/test stratifié",
+            "seed": cfg.seed,
+            "test_size": cfg.test_size,
+            "rule_calibration": (
+                "StandardScaler ajusté sur le train uniquement ; moyenne et écart-type "
+                "train (ddof=0) appliqués au test, sans recalcul sur le test"
+            ),
+            "metrics": ["precision", "recall", "f1", "confusion_matrix"],
+        },
+        "thresholds": {
+            "z_threshold": {
+                "value": cfg.z_threshold,
+                "calibration": "statistiques du z-score calibrées sur le train uniquement",
+                "frozen": False,
+                "status": "ND (seuil de détection non gelé)",
+            },
+            "isolation_forest_contamination": {
+                "value": cfg.contamination,
+                "frozen": False,
+                "status": "ND (seuil de détection non gelé)",
+            },
+            "decision_threshold": "ND (à définir avant campagne)",
+        },
         "dataset": {
             "rows": int(len(df)),
             "features": list(X.columns),
@@ -125,11 +211,13 @@ def run(cfg: RunConfig) -> Dict:
             "train_rows": int(len(X_train)),
             "test_rows": int(len(X_test)),
         },
+        "rules_calibration": calibration.as_dict(),
         "rules_baseline": evaluate(y_test, y_pred_rules),
         "isolation_forest_baseline": evaluate(y_test, y_pred_iso),
         "notes": [
             "Résultats calculés uniquement sur les données chargées/générées lors de cette exécution.",
             "Le mode synthetic est un smoke test, pas une preuve de performance médicale.",
+            "Aucun seuil de détection n'est gelé : la valeur de configuration n'est pas un seuil validé.",
             "Aucun résultat ne doit être interprété comme validation clinique.",
         ],
     }
