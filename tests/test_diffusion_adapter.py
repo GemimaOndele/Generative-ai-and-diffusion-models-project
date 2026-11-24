@@ -145,10 +145,12 @@ class DiffusionAdapterTest(unittest.TestCase):
         self.assertEqual(validate_run(run), [])
         replay = run_experiment()
         for name in VARIANTS:
-            self.assertEqual(
-                run["variants"][name]["epoch_losses"],
-                replay["variants"][name]["epoch_losses"],
-            )
+            saved = run["variants"][name]["epoch_losses"]
+            fresh = replay["variants"][name]["epoch_losses"]
+            self.assertEqual(len(saved), len(fresh))
+            # Cross-platform floating-point arithmetic may differ by a few ULPs.
+            for left, right in zip(saved, fresh):
+                self.assertAlmostEqual(left, right, places=12)
             self.assertAlmostEqual(
                 run["variants"][name]["reconstruction_mse"],
                 replay["variants"][name]["reconstruction_mse"],
