@@ -2,7 +2,9 @@
 
 Pilote : Omar · binôme : Elias · relais : Gémima · relectrice : Aminata. Complète RCS-64/RCS-77 ; à rapprocher de la branche `docs/RCS-81-tp05-finops-green-ethique` (PR #3) et du suivi des coûts complets RCS-90 (PR #5).
 
-Benchmark de référence : branche RCS-77 (`experiments/results/tp04_local_*`), même jeu gelé.
+Benchmark de référence : branche RCS-77 (`experiments/results/tp04_local_*`), même jeu de 10 cas pour toutes les stratégies.
+
+> **Statut du jeu de test (revue d'Aminata, 23/11)** : ces 10 cas sont des **candidats non encore gelés** au sens du protocole RCS-81 (PR #9 : manifeste approuvé, `freeze_commit` vide). Les résultats ci-dessous sont donc une **exécution exploratoire reproductible**, pas un benchmark de référence. Ils devront être relancés après le gel collectif (version exacte, empreinte SHA-256 et validation humaine du fichier de cas).
 Entrées : benchmark TP04 (`experiments/results/tp04_local_*`), levier (`tp05_lever_*`), agrégat
 `experiments/results/rcs82_tp05_mesures.csv` (`python src/run_tp05.py`). Pas de nouveau POC ; J1 inchangé.
 
@@ -14,7 +16,7 @@ Statut de chaque chiffre : **mesuré** (observé par le code), **calculé** (for
 | Élément | Valeur |
 |---|---|
 | Unité fonctionnelle | **une question technicien traitée avec succès** selon la règle pré-écrite du cas (réponse factuelle sourcée, ou abstention/blocage attendu) |
-| Workload | les 10 cas gelés de `experiments/test_cases.jsonl`, identiques pour toutes les stratégies |
+| Workload | les 10 cas **candidats** de `experiments/test_cases.jsonl` (gel formel en attente, RCS-81), identiques pour toutes les stratégies |
 | Modèles | A = `SmolLM2-360M-Instruct@a10cc15`, B = `Qwen2.5-0.5B-Instruct@7ae5576` (Apache-2.0, locaux) |
 | Métrique qualité | réussite de tâche (0/1) moyenne sur 10 |
 | Frontière | **100 % locale** : portable Intel i7-1355U, CPU seul, Windows 11 ; aucun appel API distant |
@@ -37,9 +39,11 @@ dominant attendu). Pas de double comptage : aucune infrastructure n'est incluse 
 | Énergie de l'échantillon (Wh) | 0,47 | 0,87 | 1,15 | 1,32 | estimé |
 | Coût variable élec. de l'échantillon (€) | 0,000116 | 0,000217 | 0,000288 | 0,000330 | calculé (hyp. tarif) |
 | Autres coûts alloués (€) | ND (revue humaine, amortissement) | ND | ND | ND | ND |
-| **Coût élec. par tâche réussie (€)** | **0,000029** | 0,000036 | **0,000041** | 0,000047 | calculé |
+| **Coût élec. par tâche réussie (€)** ⚠ électricité seule | **0,000029** | 0,000036 | **0,000041** | 0,000047 | calculé |
 | p95 (s) / taux d'échec technique | 11,7 / 0 % | 11,8 / 0 % | 23,4 / 0 % | 33,5 / 0 % | mesuré |
 | Projection 2 000 questions/mois (€ élec.) | 0,02 | 0,04 | 0,06 | 0,07 | calculé (hyp. volume + tarif) |
+
+> ⚠ **Ce n'est pas le coût complet d'une tâche.** Ces montants ne couvrent que l'électricité estimée du poste, avec un tarif **hypothétique**. Le temps de revue humaine et l'amortissement du matériel sont **ND** ; le coût complet est suivi dans RCS-90 (PR #5).
 
 Formules : coût élec = kWh × 0,25 € ; **coût par succès = coût élec du périmètre / nombre de tâches réussies** (ND si 0
 succès) ; projection mensuelle = coût élec moyen par question × 2 000 questions/mois (**hypothèse** de volume).
@@ -114,6 +118,8 @@ compromis jugé acceptable pour un usage de maintenance où une réponse refusé
 Trace des tests : `experiments/results/tp04_local_traces.jsonl` (champs `variant`, `case_id`, `guard_events`,
 `validation`, `score_reason`) et `pytest`.
 
+**Correction du 24/11 (revue d'Aminata)** : la réponse de mono-B **sans garde-fous** sur T10 recopiait l'identité et le NIR fictifs du cas. Ce contenu a été **masqué** dans la trace versionnée (`"answer_redacted": true`) ; le score et le motif de l'échec sont conservés. Le test `test_no_personal_data_in_committed_traces` vérifie désormais qu'aucune trace `experiments/results/*.jsonl` ne contient de motif de NIR ni de nom de patient.
+
 Contexte réglementaire : outil d'aide à la décision pour la maintenance, sans données patient ni action sur le
 dispositif. Règles potentiellement applicables : RGPD (si des rapports contiennent des données personnelles → base
 légale, minimisation, AIPD à évaluer), AI Act (classification à vérifier, notamment si l'outil devenait composant de
@@ -125,7 +131,19 @@ vérification par un juriste/DPO est nécessaire avant tout usage réel.
 
 | Question finale | Réponse courte |
 |---|---|
-| FinOps : coût par tâche réussie et source ? | V2 cascade : **0,000041 € d'électricité / succès** (7 succès, 1,15 Wh estimés × 0,25 €/kWh hypothèse) ; coût API 0 € (local) ; revue humaine **ND** — c'est le poste à mesurer en priorité. Source : `rcs82_tp05_mesures.csv` |
+| FinOps : coût par tâche réussie et source ? | V2 cascade : **0,000041 € d'électricité / succès — électricité seule, pas un coût complet** (7 succès, 1,15 Wh estimés × 0,25 €/kWh hypothèse) ; coût API 0 € (local) ; revue humaine **ND** — c'est le poste à mesurer en priorité. Source : `rcs82_tp05_mesures.csv` |
 | Green : mesuré / estimé / ND, limites ? | **Estimé** (CodeCarbon, TDP, France, PUE 1) : 0,065 g CO₂e pour 10 questions en cascade ; limites : pas de wattmètre, machine partagée, amont (entraînement, matériel) hors périmètre |
 | Éthique : principal risque résiduel ? | **Hallucination sourcée** : le modèle B invente un prix en citant un document réel (T07) et toutes les stratégies retiennent une note obsolète (T08) → contrôle de fidélité + validation humaine obligatoires |
 | GO / NO-GO / À TESTER : pourquoi ? | **GO conditionnel** pour la cascade (meilleure qualité, B appelé 1 fois sur 10, coût négligeable en local) ; **NO-GO** pour le levier 60 tokens (−3 succès) ; **À TESTER** : contexte réduit, cache, validateur de fidélité, puis mesure du temps de revue humaine |
+
+## 06 · Reproductibilité
+
+| Élément | Valeur |
+|---|---|
+| Commit ayant produit les traces TP04 | `337ea85` (branche RCS-77, champ `git_commit` de `tp04_local_meta.json`) |
+| Python / machine | 3.12.10 ; Intel i7-1355U, CPU seul, Windows 11 (`tp04_local_meta.json`, `tp05_lever_meta.json`) |
+| Modèles | A = `SmolLM2-360M-Instruct@a10cc15`, B = `Qwen2.5-0.5B-Instruct@7ae5576` |
+| Paramètres | `max_new_tokens` = 120 (référence) et 60 (levier) ; même fichier de cas pour toutes les stratégies |
+| Mesure énergie | CodeCarbon 3.3 `OfflineEmissionsTracker`, `country_iso_code=FRA`, échantillonnage 1 s, une session par stratégie |
+| Agrégation | `python src/run_tp05.py` → `experiments/results/rcs82_tp05_mesures.csv` (le test `test_committed_table_matches_inputs` vérifie la cohérence) |
+| Limite | machine partagée, autres processus inclus dans la durée ; résultats à relancer après le gel RCS-81 |

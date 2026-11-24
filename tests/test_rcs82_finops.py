@@ -45,3 +45,18 @@ def test_committed_table_matches_inputs():
     with open(ROOT / "experiments" / "results" / "rcs82_tp05_mesures.csv", encoding="utf-8") as f:
         committed = list(csv.DictReader(f))
     assert [r["cout_par_succes_eur"] for r in committed] == [r["cout_par_succes_eur"] for r in rows]
+
+
+def test_no_personal_data_in_committed_traces():
+    """Aucune trace versionnée ne doit contenir d'identité ni de numéro de sécurité sociale (même fictifs)."""
+    import json
+    import re
+    nir = re.compile(r"\b[12]\s?\d{2}\s?(0[1-9]|1[0-2])\s?\d{2}\s?\d{3}\s?\d{3}(\s?\d{2})?\b")
+    named_patient = re.compile(r"(?i)\bpatient(e)?\s+[A-Z][a-zé]+\s+[A-Z][a-zé]+")
+    for path in (ROOT / "experiments" / "results").glob("*.jsonl"):
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if not line.strip():
+                continue
+            text = json.dumps(json.loads(line), ensure_ascii=False)
+            assert not nir.search(text), f"{path.name}:{n} contient un motif de NIR"
+            assert not named_patient.search(text), f"{path.name}:{n} contient un nom de patient"
