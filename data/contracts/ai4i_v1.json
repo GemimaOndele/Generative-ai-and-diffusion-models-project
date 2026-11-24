@@ -1,0 +1,118 @@
+{
+  "contrat": "ai4i_lot_csv",
+  "version": "1.0.0",
+  "date": "2026-11-20",
+  "source": {
+    "id": "S04",
+    "nom": "AI4I 2020 Predictive Maintenance Dataset",
+    "url": "https://archive.ics.uci.edu/dataset/601/ai4i",
+    "licence": "CC BY 4.0",
+    "sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e",
+    "categorie": "substitut NON médical (synthétique industriel)"
+  },
+  "regles_lot": {
+    "idempotence": "sha256 du fichier",
+    "deduplication": [
+      "equipement_id",
+      "cle_source"
+    ],
+    "rejet_lot_si_colonne_manquante": true,
+    "quarantaine": "data/quarantine/<fichier>_<sha8>_rejets.jsonl"
+  },
+  "champs": [
+    {
+      "source": "UDI",
+      "cible": "cle_source",
+      "type": "int",
+      "unite": null,
+      "min": 1,
+      "max": null,
+      "obligatoire": true,
+      "type_cible": "str",
+      "transformation": "str(int(UDI))"
+    },
+    {
+      "source": "Type",
+      "cible": "equipement_id",
+      "type": "str",
+      "unite": null,
+      "domaine": [
+        "L",
+        "M",
+        "H"
+      ],
+      "obligatoire": true,
+      "type_cible": "str",
+      "domaine_cible": [
+        "AI4I-L",
+        "AI4I-M",
+        "AI4I-H"
+      ],
+      "transformation": "AI4I- + Type"
+    },
+    {
+      "source": "Air temperature [K]",
+      "cible": "air_temp_k",
+      "type": "float",
+      "unite": "K",
+      "min": 250,
+      "max": 350,
+      "obligatoire": true
+    },
+    {
+      "source": "Process temperature [K]",
+      "cible": "process_temp_k",
+      "type": "float",
+      "unite": "K",
+      "min": 250,
+      "max": 380,
+      "obligatoire": true,
+      "coherence": "process_temp_k >= air_temp_k"
+    },
+    {
+      "source": "Rotational speed [rpm]",
+      "cible": "rpm",
+      "type": "float",
+      "unite": "tr/min",
+      "min": 0,
+      "max": 5000,
+      "obligatoire": true
+    },
+    {
+      "source": "Torque [Nm]",
+      "cible": "torque_nm",
+      "type": "float",
+      "unite": "N.m",
+      "min": 0,
+      "max": 200,
+      "obligatoire": true
+    },
+    {
+      "source": "Tool wear [min]",
+      "cible": "tool_wear_min",
+      "type": "float",
+      "unite": "min",
+      "min": 0,
+      "max": 400,
+      "obligatoire": true
+    },
+    {
+      "source": "Machine failure",
+      "cible": "label",
+      "type": "int",
+      "unite": null,
+      "domaine": [
+        0,
+        1
+      ],
+      "obligatoire": true
+    }
+  ],
+  "splits": {
+    "methode": "stratifié 60/20/20",
+    "seed": 42,
+    "train": "normaux du train uniquement",
+    "test": "gelé",
+    "ordre": "Stratifier toutes les observations étiquetées 60/20/20 avant filtrage ; filtrer seulement le train pour entraînement non supervisé, conserver validation et test intacts."
+  }
+}
