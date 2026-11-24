@@ -1,5 +1,5 @@
 {
-  "_note": "Modèle à copier puis renseigner. Aucune clé API ici : elle reste dans la variable nommée par api_key_env. Ne pas committer le fichier rempli s'il contient des informations confidentielles.",
+  "_note": "Modèle à copier puis renseigner. Aucune clé API ici : elle reste dans la variable nommée par api_key_env. Si max_cost_eur_per_case est fixé, renseigner les deux tarifs et les bornes de tokens : sans tarif connu, l'orchestrateur bloque avant le premier appel. Ne pas committer le fichier rempli s'il contient des informations confidentielles.",
   "models": {
     "A": {
       "model_name": "",
@@ -38,6 +38,9 @@
     "max_calls_per_case": 2,
     "max_cost_eur_per_case": null,
     "v2_pattern": "cascade",
-    "allow_paid_calls": false
+    "allow_paid_calls": false,
+    "max_input_tokens_per_call": 2000,
+    "max_output_tokens_per_call": 500,
+    "input_token_overhead": 16
   }
 }
