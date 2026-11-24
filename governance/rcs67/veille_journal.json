@@ -1,0 +1,258 @@
+{
+  "adr_index": {
+    "ADR-001": {
+      "fiches": [
+        "V-08"
+      ],
+      "status": "Proposé"
+    },
+    "ADR-002": {
+      "fiches": [
+        "V-01",
+        "V-03",
+        "V-04",
+        "V-06"
+      ],
+      "status": "Proposé"
+    },
+    "ADR-003": {
+      "fiches": [
+        "V-02"
+      ],
+      "status": "Proposé — en attente de validation"
+    },
+    "ADR-004": {
+      "fiches": [
+        "V-02"
+      ],
+      "status": "Proposé (principe) — à confirmer par benchmark"
+    },
+    "ADR-005": {
+      "fiches": [],
+      "status": "Accepté (local)"
+    },
+    "ADR-006": {
+      "fiches": [
+        "V-08"
+      ],
+      "status": "À décider"
+    },
+    "ADR-007": {
+      "fiches": [
+        "V-07"
+      ],
+      "status": "À décider"
+    },
+    "ADR-008": {
+      "fiches": [
+        "V-08"
+      ],
+      "status": "À décider"
+    },
+    "ADR-009": {
+      "fiches": [
+        "V-03",
+        "V-04",
+        "V-05"
+      ],
+      "status": "À décider"
+    },
+    "ADR-010": {
+      "fiches": [],
+      "status": "À décider"
+    }
+  },
+  "checks": {
+    "adr_ids_existants": true,
+    "fiches_dates_et_sources": true,
+    "limites_et_alternatives_presentes": true,
+    "pas_de_date_lecture_inventee": true,
+    "traceabilite_bidirectionnelle": true
+  },
+  "decision": "ND",
+  "fiches": [
+    {
+      "adr_ids": [
+        "ADR-002"
+      ],
+      "alternatives": [
+        "règles/ML",
+        "diffusion J1"
+      ],
+      "date_citation": "2026-11-14",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "cadrage pédagogique",
+      "id": "V-01",
+      "limites": [
+        "support de cours",
+        "aucune validation clinique"
+      ],
+      "statut_lecture": "ND",
+      "titre": "CM03 — première preuve GenAI",
+      "url": "ND"
+    },
+    {
+      "adr_ids": [
+        "ADR-003",
+        "ADR-004"
+      ],
+      "alternatives": [
+        "mono-LLM",
+        "routing A/B",
+        "cascade A→B"
+      ],
+      "date_citation": "2026-11-17",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "orchestration LLM",
+      "id": "V-02",
+      "limites": [
+        "défaut V1 non prouvé",
+        "modèles A/B et seuils ND"
+      ],
+      "statut_lecture": "ND",
+      "titre": "TP04 — du POC V1 à une V2 Multi-LLM démontrable",
+      "url": "ND"
+    },
+    {
+      "adr_ids": [
+        "ADR-002",
+        "ADR-009"
+      ],
+      "alternatives": [
+        "API distante",
+        "calcul local",
+        "hybride"
+      ],
+      "date_citation": "2026-11-20",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "coût, énergie, éthique",
+      "id": "V-03",
+      "limites": [
+        "exercice non exécuté",
+        "statut ND tant que non mesuré"
+      ],
+      "statut_lecture": "ND",
+      "titre": "TP05 — FinOps, Green AI & Éthique",
+      "url": "ND"
+    },
+    {
+      "adr_ids": [
+        "ADR-002",
+        "ADR-009"
+      ],
+      "alternatives": [
+        "mesure locale",
+        "API non instrumentée",
+        "ND"
+      ],
+      "date_citation": "2026-11-20",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "mesure énergie locale",
+      "id": "V-04",
+      "limites": [
+        "ne mesure pas l'énergie d'un serveur distant",
+        "estimation selon le matériel"
+      ],
+      "statut_lecture": "ND",
+      "titre": "CodeCarbon — documentation officielle",
+      "url": "https://docs.codecarbon.io/latest/"
+    },
+    {
+      "adr_ids": [
+        "ADR-009"
+      ],
+      "alternatives": [
+        "coût API seul",
+        "coût complet"
+      ],
+      "date_citation": "2026-11-20",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "gouvernance des coûts",
+      "id": "V-05",
+      "limites": [
+        "cadre général",
+        "aucun tarif du projet n'est fourni"
+      ],
+      "statut_lecture": "ND",
+      "titre": "FinOps Foundation — AI FinOps",
+      "url": "https://www.finops.org/wg/finops-for-ai-overview/"
+    },
+    {
+      "adr_ids": [
+        "ADR-002"
+      ],
+      "alternatives": [
+        "SCI",
+        "mesure directe",
+        "ND"
+      ],
+      "date_citation": "2026-11-20",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "intensité carbone",
+      "id": "V-06",
+      "limites": [
+        "modèle d'estimation",
+        "périmètre commun à expliciter"
+      ],
+      "statut_lecture": "ND",
+      "titre": "Green Software Foundation — SCI-AI",
+      "url": "https://greensoftware.foundation/standards/sci-ai/"
+    },
+    {
+      "adr_ids": [
+        "ADR-007"
+      ],
+      "alternatives": [
+        "minimisation",
+        "anonymisation",
+        "revue juridique"
+      ],
+      "date_citation": "2026-11-20",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "données et conformité",
+      "id": "V-07",
+      "limites": [
+        "un audit technique n'est pas une preuve de conformité",
+        "revue juridique requise"
+      ],
+      "statut_lecture": "ND",
+      "titre": "CNIL — fiches pratiques IA",
+      "url": "https://www.cnil.fr/fr/les-fiches-pratiques-ia"
+    },
+    {
+      "adr_ids": [
+        "ADR-001",
+        "ADR-006",
+        "ADR-008"
+      ],
+      "alternatives": [
+        "proposé",
+        "accepté",
+        "rejeté"
+      ],
+      "date_citation": "2026-11-23",
+      "date_lecture": "ND",
+      "decision_scientifique": "ND",
+      "domaine": "gouvernance projet",
+      "id": "V-08",
+      "limites": [
+        "la plupart des ADR sont proposés ou à décider",
+        "non ratification collective"
+      ],
+      "statut_lecture": "ND",
+      "titre": "Registre des décisions et risques (RCS-18)",
+      "url": "ND"
+    }
+  ],
+  "issue": "RCS-67",
+  "note": "Fiches de veille et ADR traçables ; aucune conclusion scientifique n'est produite.",
+  "schema": "rcs67_veille_journal/v1",
+  "traceabilite": "OK"
+}
