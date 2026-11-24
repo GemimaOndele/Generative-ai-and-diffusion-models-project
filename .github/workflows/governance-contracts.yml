@@ -1,0 +1,19 @@
+name: RCS — contrats de gouvernance (gabarits)
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  checks:
+    name: Vérifier registres et contrat de trace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m compileall -q tests
+      - run: python -m unittest discover -s tests -p 'test_governance_contracts.py' -v
+      - run: echo "Contrôle des schémas seulement — aucune donnée, énergie, biais ou performance scientifique mesurés."

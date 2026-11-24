@@ -2,7 +2,7 @@
 
 Les cas d'entrée sont à définir puis figer avant toute évaluation. `cases.csv` et `experiments/test_cases.jsonl` restent volontairement vides (contrat du socle). Les dix cas pédagogiques TP04 proposés sont dans `experiments/tp04_cases.jsonl` ; ils ne sont **pas** les cas gelés RCS-81.
 
-Tests unitaires présents : `test_model_config.py` (identité A/B, droits, budget), `test_orchestrator.py` (mono, cascade, routing, refus), `test_scoring.py` (règle simple, latences/coûts connus), `test_baseline_rules_ml.py` (RCS-55 : déterminisme, split stratifié, calibration train-only, métriques, artefact et notebook), plus les tests de structure du socle.
+Tests unitaires présents : `test_model_config.py` (identité A/B, droits, budget), `test_orchestrator.py` (mono, cascade, routing, refus), `test_scoring.py` (règle simple, latences/coûts connus), `test_baseline_mono.py` (RCS-61 : cinq fixtures de smoke test distinctes du benchmark J2), `test_baseline_rules_ml.py` (RCS-55 : calibration train-only et rejeu notebook), plus les tests de structure du socle.
 
 ```bash
 python -m unittest discover -s tests -p 'test_*.py' -v
