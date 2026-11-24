@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RoboCare Sentinel trace event, proposed v0.1",
+  "description": "Gabarit événement audit minimal ; aucune donnée patient ni prompt sensible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trace_id",
+    "run_id",
+    "timestamp_utc",
+    "component",
+    "result_status",
+    "measurement_status",
+    "measurement_boundary"
+  ],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "component": {
+      "type": "string",
+      "minLength": 1
+    },
+    "code_commit_sha": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dataset_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "model_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prompt_version": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "strategy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "case_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "duration_s": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "result_status": {
+      "enum": [
+        "success",
+        "failure",
+        "abstained",
+        "refused",
+        "not_run"
+      ]
+    },
+    "quality_status": {
+      "enum": [
+        "pass",
+        "fail",
+        "not_measured",
+        null
+      ]
+    },
+    "calls": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "retries": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "cost_eur": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "energy_kwh": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "co2e_kg": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "measurement_status": {
+      "enum": [
+        "measured",
+        "calculated",
+        "estimated",
+        "not_available"
+      ]
+    },
+    "measurement_boundary": {
+      "enum": [
+        "local",
+        "api_remote",
+        "hybrid",
+        "unknown"
+      ]
+    },
+    "source_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reviewer": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

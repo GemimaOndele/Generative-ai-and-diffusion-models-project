@@ -1,0 +1,33 @@
+name: RCS-56 — tests preuve environnement
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/check_diffusion_environment.py'
+      - 'governance/rcs56_gpu_capacity.json'
+      - 'tests/test_diffusion_environment.py'
+      - 'docs/06_etude_diffusion_ts_physdiff.md'
+      - '.github/workflows/rcs56-environment-tests.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  environnement:
+    name: Tests et rejeu de la preuve d'environnement
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Tests RCS-56
+        run: python -m unittest discover -s tests -p 'test_diffusion_environment.py' -v
+      - name: Rejeu de la preuve d'environnement
+        run: |
+          python experiments/check_diffusion_environment.py --out "$RUNNER_TEMP/rcs56_rejeu.json"
+          python -c "import json, os; a=json.load(open('governance/rcs56_gpu_capacity.json', encoding='utf-8')); b=json.load(open(os.environ['RUNNER_TEMP'] + '/rcs56_rejeu.json', encoding='utf-8')); assert a['interpretation'] == b['interpretation']; assert a['cuda_available'] == b['cuda_available'] or 'ND' in (a['cuda_available'], b['cuda_available']); print('decisions environnement reproductibles')"
+      - name: Portée de la vérification
+        run: echo "Mesure d'environnement et tests logiciels uniquement. Aucun modèle exécuté, aucune licence, coût ou performance d'entraînement revendiqué."

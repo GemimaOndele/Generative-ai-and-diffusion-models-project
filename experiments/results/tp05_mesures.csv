@@ -1,0 +1,1 @@
+case_id,run_id,strategy,model_version,model_source,status_success,latency_s,p95_s,calls,retries,input_tokens,output_tokens,variable_cost_eur,allocated_cost_eur,cost_per_success_eur,energy_kwh,co2e_kg,measurement_status,boundary,source_url,source_date,notes
