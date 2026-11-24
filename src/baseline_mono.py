@@ -60,17 +60,17 @@ class BaselineMonoClient(DemoClient):
         super().__init__("demo-mono-a", provider="demo", version="v1")
         self.abstain_case_ids = set(abstain_case_ids or ())
 
-    def generate(self, prompt: str, *, timeout_s: float) -> LLMResponse:
+    def generate(self, prompt: str, *, timeout_s: float, max_output_tokens: Optional[int] = None) -> LLMResponse:
         for case_id in sorted(self.abstain_case_ids):
             if f"case_id={case_id}" in prompt:
                 return LLMResponse(
                     text=_ABSTAIN_TEXT,
                     status="abstain",
                     input_tokens=50,
-                    output_tokens=20,
+                    output_tokens=20 if max_output_tokens is None else min(20, max_output_tokens),
                     error_type="ModelAbstained",
                 )
-        return super().generate(prompt, timeout_s=timeout_s)
+        return super().generate(prompt, timeout_s=timeout_s, max_output_tokens=max_output_tokens)
 
 
 def load_workload(path: str | Path = DEFAULT_WORKLOAD) -> List[CaseInput]:
