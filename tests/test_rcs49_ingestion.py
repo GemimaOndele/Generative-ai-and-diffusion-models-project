@@ -92,3 +92,33 @@ def test_quarantine_write_failure_does_not_commit_lot(conn, tmp_path):
     with pytest.raises(OSError):
         import_csv(conn, p, quarantine_dir=bad)
     assert conn.execute("SELECT COUNT(*) FROM lot_import").fetchone()[0] == 0
+
+
+def test_default_quarantine_without_argument_or_environment(conn, tmp_path, monkeypatch):
+    import json
+    monkeypatch.delenv("RCS_QUARANTINE_DIR", raising=False)
+    home = tmp_path / "home"
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: home))
+    source = _write(tmp_path / "reject.csv", [_row(1), _row(2, typ="X")])
+    report = import_csv(conn, source)
+    target = home / ".local" / "share" / "robocare_sentinel" / "quarantine" / f"reject_{report.sha256[:8]}_rejets.jsonl"
+    rows = [json.loads(line) for line in target.read_text(encoding="utf-8").splitlines()]
+    assert report.nb_rejetees == 1
+    assert len(rows) == 1 and rows[0]["ligne"] == 3
+    assert rows[0]["brut"]["Type"] == "X"
+    assert conn.execute("SELECT nb_rejetees FROM lot_import").fetchone()[0] == 1
+    assert import_csv(conn, source).statut == "deja_importe"
+    assert len(target.read_text(encoding="utf-8").splitlines()) == 1
+
+
+def test_contract_limits_match_ingestion():
+    import json
+    contract = json.loads((Path(__file__).resolve().parents[1] / "data/contracts/ai4i_v1.json").read_text(encoding="utf-8"))
+    fields = {field["source"]: field for field in contract["champs"]}
+    assert set(fields) == set(CONTRACT)
+    for source, (_, dtype, lower, upper) in CONTRACT.items():
+        field = fields[source]
+        assert field["type"] == dtype.__name__
+        if "domaine" not in field:
+            assert field.get("min") == lower and field.get("max") == upper
+    assert fields["Type"]["domaine"] == ["L", "M", "H"]

@@ -1,0 +1,45 @@
+name: RCS-55 — tests baseline règles/ML
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/baseline_rules_ml.py'
+      - 'experiments/replay_baseline_notebook.py'
+      - 'experiments/baseline_rules_ml.ipynb'
+      - 'experiments/results/rcs55_baseline_rules_ml.json'
+      - 'tests/test_baseline_rules_ml.py'
+      - 'docs/08_rcs55_baseline_regles_ml.md'
+      - '.github/workflows/rcs55-baseline-tests.yml'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    name: Dépendances installées, tests, notebook et artefact rejoués
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer les dépendances du baseline
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+      - name: Aucun test d'exécution ignoré
+        run: >-
+          python -c "import sys; sys.path.insert(0, 'tests');
+          import test_baseline_rules_ml as t;
+          assert not t.MANQUANTES, 'Dépendances manquantes: ' + ', '.join(t.MANQUANTES);
+          print('numpy/pandas/sklearn disponibles')"
+      - name: Tests RCS-55
+        run: python -m unittest discover -s tests -p 'test_baseline_rules_ml.py' -v
+      - name: Rejeu du notebook et comparaison à l'artefact
+        run: python experiments/replay_baseline_notebook.py --out "$RUNNER_TEMP/rcs55_notebook_replay.json"
+      - name: Rejeu de l'artefact synthétique
+        run: |
+          python experiments/baseline_rules_ml.py --synthetic --out "$RUNNER_TEMP/rcs55_rejeu.json"
+          python -c "import json, os; a=json.load(open('experiments/results/rcs55_baseline_rules_ml.json', encoding='utf-8')); b=json.load(open(os.environ['RUNNER_TEMP'] + '/rcs55_rejeu.json', encoding='utf-8')); assert a['status'] == b['status'] == 'computed'; assert a['dataset'] == b['dataset']; assert a['rules_calibration'] == b['rules_calibration']; assert a['rules_baseline'] == b['rules_baseline']; print('résultats rules reproductibles')"
+      - name: Portée de la vérification
+        run: echo "Smoke test synthétique uniquement. Aucun seuil de détection gelé, aucune performance clinique revendiquée."

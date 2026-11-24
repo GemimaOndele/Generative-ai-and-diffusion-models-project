@@ -1,0 +1,327 @@
+{
+  "ok": true,
+  "ticket": "RCS-22",
+  "errors": [],
+  "criteria": [
+    {
+      "id": "THREE_APPROACHES_BENCHMARKED",
+      "ok": true,
+      "evidence": "A statu quo, B règles/ML, C diffusion (+ V2 optimisation)"
+    },
+    {
+      "id": "FIVE_JIRA_AXES",
+      "ok": true,
+      "evidence": "qualite, diversite, cout, limites, faisabilite"
+    },
+    {
+      "id": "FALSIFIABLE_HYPOTHESES",
+      "ok": true,
+      "evidence": "H1–H4 : métrique, condition de réfutation et statut ND"
+    },
+    {
+      "id": "JUSTIFIED_CHOICE",
+      "ok": true,
+      "evidence": "B. règles / ML / C. diffusion en POC cadré ; renversement : Revoir le choix si H1/H2/H4 sont confirmés sur cas figés avec coût/latence acceptés"
+    },
+    {
+      "id": "NO_INVENTED_RESULTS",
+      "ok": true,
+      "evidence": "aucune mesure chiffrée, tous les statuts de protocole à ND"
+    },
+    {
+      "id": "TRACEABLE_SOURCES",
+      "ok": true,
+      "evidence": "preuve par approche et source par axe de protocole"
+    },
+    {
+      "id": "JIRA_TICKET_FIELDS",
+      "ok": true,
+      "evidence": {
+        "key": "RCS-22",
+        "source": "Backlog RoboCare Sentinel V3",
+        "phase": "S1 (indicative ; démarrage à fixer en planification)",
+        "domain": "BIZ",
+        "category": "Fonctionnel",
+        "mission": "Benchmark trois approches selon qualité, diversité, coût, limites et faisabilité",
+        "acceptance": "Choix justifié avec hypothèses falsifiables",
+        "competence": "Analyse scientifique",
+        "roles": {
+          "owner": "Elias",
+          "binome": "Aminata",
+          "relais": "Omar",
+          "reviewer": "Gémima"
+        },
+        "volets": [
+          "contribution du pilote",
+          "apprentissage accompagné du binôme",
+          "recherche/veille documentée si la mission le requiert"
+        ],
+        "blockage": "documenter obstacle, essais et liens dans le ticket ; solliciter binôme et relais ; arbitrer au point de coordination"
+      }
+    },
+    {
+      "id": "DOC_JIRA_ALIGNMENT",
+      "ok": true,
+      "evidence": "docs/03_comparaison_statuquo_reglesml_diffusion.md reprend les champs du ticket"
+    },
+    {
+      "id": "SCIENTIFIC_ANALYSIS",
+      "ok": true,
+      "evidence": "métriques, réfutations, protocole ND et aucune mesure inventée"
+    },
+    {
+      "id": "J1_J2_PROTOCOLS",
+      "ok": true,
+      "evidence": {
+        "workloads_separates": true,
+        "comparaison_intra_jalon": true,
+        "interdiction_cross_jalon": "aucune métrique de détection J1 comparée à un score documentaire J2",
+        "seuils": "harmonisés puis gelés avant chaque campagne",
+        "observations_historiques": "#25/#26 exploratoires, non validantes"
+      }
+    },
+    {
+      "id": "V2_NOT_DDPM_OPTIMIZATION",
+      "ok": true,
+      "evidence": {
+        "jalon": "J2",
+        "role": "choix d'orchestration mono-LLM vs routage/cascade",
+        "not": "pas une optimisation directe d'un détecteur DDPM (J1/C)"
+      }
+    },
+    {
+      "id": "METHOD_NOT_SCIENTIFIC_VALIDATION",
+      "ok": true,
+      "evidence": "preuve de complétude méthodologique, non une validation scientifique"
+    },
+    {
+      "id": "INTEGRATION_ORDER_AND_CI",
+      "ok": true,
+      "evidence": {
+        "socle": "TP04 synchronisé avec #30",
+        "base_temporaire": "#30",
+        "garde_fous": [
+          "preflight budget",
+          "max_calls_per_case",
+          "ledger"
+        ],
+        "ci_commit": "c36b94a",
+        "ci_resultat": "4 contrôles success (check-runs GitHub)",
+        "ci_url": "https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs",
+        "ordre": "#30 d'abord, puis retargeter #36 vers main",
+        "portee": "preuve de complétude méthodologique, non une validation scientifique"
+      }
+    }
+  ],
+  "ticket_fields": {
+    "key": "RCS-22",
+    "source": "Backlog RoboCare Sentinel V3",
+    "phase": "S1 (indicative ; démarrage à fixer en planification)",
+    "domain": "BIZ",
+    "category": "Fonctionnel",
+    "mission": "Benchmark trois approches selon qualité, diversité, coût, limites et faisabilité",
+    "acceptance": "Choix justifié avec hypothèses falsifiables",
+    "competence": "Analyse scientifique",
+    "roles": {
+      "owner": "Elias",
+      "binome": "Aminata",
+      "relais": "Omar",
+      "reviewer": "Gémima"
+    },
+    "volets": [
+      "contribution du pilote",
+      "apprentissage accompagné du binôme",
+      "recherche/veille documentée si la mission le requiert"
+    ],
+    "blockage": "documenter obstacle, essais et liens dans le ticket ; solliciter binôme et relais ; arbitrer au point de coordination"
+  },
+  "document_alignment": {
+    "ok": true,
+    "path": "docs/03_comparaison_statuquo_reglesml_diffusion.md",
+    "missing": []
+  },
+  "milestones": [
+    {
+      "id": "J1",
+      "scope": "détection/reconstruction de signaux (A/B/C)",
+      "workload": "C3/RCS-69 et RCS-71 : cas figés de détection/reconstruction",
+      "metrics": [
+        "rappel",
+        "précision",
+        "F1",
+        "faux négatifs",
+        "reconstruction"
+      ],
+      "tickets": [
+        "C3",
+        "RCS-69",
+        "RCS-71"
+      ],
+      "hypotheses": [
+        "H1",
+        "H2",
+        "H3"
+      ]
+    },
+    {
+      "id": "J2",
+      "scope": "mono-LLM vs routage/cascade (V2)",
+      "workload": "RCS-74/RCS-81 : cas documentaires, identité A/B validée",
+      "metrics": [
+        "score observable",
+        "coût par cas réussi",
+        "latence p95",
+        "traçabilité"
+      ],
+      "tickets": [
+        "RCS-74",
+        "RCS-79",
+        "RCS-81"
+      ],
+      "hypotheses": [
+        "H4"
+      ]
+    }
+  ],
+  "campaign_rules": {
+    "workloads_separates": true,
+    "comparaison_intra_jalon": true,
+    "interdiction_cross_jalon": "aucune métrique de détection J1 comparée à un score documentaire J2",
+    "seuils": "harmonisés puis gelés avant chaque campagne",
+    "observations_historiques": "#25/#26 exploratoires, non validantes"
+  },
+  "v2_scope": {
+    "jalon": "J2",
+    "role": "choix d'orchestration mono-LLM vs routage/cascade",
+    "not": "pas une optimisation directe d'un détecteur DDPM (J1/C)"
+  },
+  "integration": {
+    "socle": "TP04 synchronisé avec #30",
+    "base_temporaire": "#30",
+    "garde_fous": [
+      "preflight budget",
+      "max_calls_per_case",
+      "ledger"
+    ],
+    "ci_commit": "c36b94a",
+    "ci_resultat": "4 contrôles success (check-runs GitHub)",
+    "ci_url": "https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs",
+    "ordre": "#30 d'abord, puis retargeter #36 vers main",
+    "portee": "preuve de complétude méthodologique, non une validation scientifique"
+  },
+  "choice": {
+    "reference": "B. règles / ML",
+    "research": "C. diffusion en POC cadré",
+    "optimization": "V2 routage multi-LLM, à mesurer",
+    "status": "provisoire — GO/NO-GO après benchmark RCS-81",
+    "rationale": "Hypothèses réfutables, reproductibilité, H3",
+    "reversal": "Revoir le choix si H1/H2/H4 sont confirmés sur cas figés avec coût/latence acceptés"
+  },
+  "matrix": {
+    "axes": [
+      "qualite",
+      "diversite",
+      "cout",
+      "limites",
+      "faisabilite"
+    ],
+    "approaches": [
+      {
+        "id": "A",
+        "name": "Statu quo (manuel)",
+        "axes": {
+          "qualite": {
+            "quality": "Bon sur cas connus"
+          },
+          "diversite": {
+            "diversity": "Faible"
+          },
+          "cout": {
+            "cost_initial": "Faible",
+            "cost_ops": "Élevé",
+            "latency": "Variable"
+          },
+          "limites": {
+            "limits": "Oubli, charge"
+          },
+          "faisabilite": {
+            "feasibility": "Élevée"
+          }
+        },
+        "preuve": "Retours terrain"
+      },
+      {
+        "id": "B",
+        "name": "Règles / ML classique",
+        "axes": {
+          "qualite": {
+            "quality": "Bonne baseline"
+          },
+          "diversite": {
+            "diversity": "Moyenne"
+          },
+          "cout": {
+            "cost_initial": "Moyen",
+            "cost_ops": "Faible à moyen",
+            "latency": "Faible"
+          },
+          "limites": {
+            "limits": "Biais, dérive"
+          },
+          "faisabilite": {
+            "feasibility": "Élevée"
+          }
+        },
+        "preuve": "Notebook reproductible"
+      },
+      {
+        "id": "C",
+        "name": "Diffusion / GenAI (J1)",
+        "axes": {
+          "qualite": {
+            "quality": "À prouver"
+          },
+          "diversite": {
+            "diversity": "Potentielle"
+          },
+          "cout": {
+            "cost_initial": "Moyen à élevé",
+            "cost_ops": "Moyen à élevé",
+            "latency": "Moyenne à élevée"
+          },
+          "limites": {
+            "limits": "Artefacts"
+          },
+          "faisabilite": {
+            "feasibility": "Moyenne"
+          }
+        },
+        "preuve": "Cas figés, seed, logs"
+      },
+      {
+        "id": "V2",
+        "name": "Routage multi-LLM (non validé)",
+        "axes": {
+          "qualite": {
+            "quality": "À mesurer"
+          },
+          "diversite": {
+            "diversity": "À mesurer"
+          },
+          "cout": {
+            "cost_initial": "Moyen",
+            "cost_ops": "À mesurer",
+            "latency": "À mesurer"
+          },
+          "limites": {
+            "limits": "Supériorité non démontrée"
+          },
+          "faisabilite": {
+            "feasibility": "Démo seule"
+          }
+        },
+        "preuve": "RCS-75"
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prototype web RoboCare Sentinel — quatre vues de monitoring sur données fictives.">
+  <title>RoboCare Sentinel | Monitoring démonstration</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Aller au contenu</a>
+  <header class="masthead">
+    <div class="brand">
+      <span class="brand-symbol" aria-hidden="true">R</span>
+      <div><strong>RoboCare Sentinel</strong><small>Assistance à la maintenance biomédicale · Prototype</small></div>
+    </div>
+    <div class="demo-label">DÉMONSTRATION · DONNÉES FICTIVES</div>
+  </header>
+  <div class="page">
+    <aside class="sidebar" aria-label="Menu des indicateurs">
+      <div class="nav-heading">Monitoring</div>
+      <nav id="nav" aria-label="Sections de monitoring"></nav>
+      <div class="sidebar-note">Aucun équipement connecté. Aucune alerte ne déclenche une action automatique.</div>
+    </aside>
+    <main id="main">
+      <section class="notice" role="status">
+        <strong>Prototype pédagogique non médical</strong>
+        <p>Les appareils, incidents, montants et mesures affichés sont entièrement fictifs. Les décisions en mode local sont simulées et tracées ; elles n'engagent aucun technicien ni équipement réel. Les données non disponibles restent « ND ».</p>
+      </section>
+      <div class="toolbar">
+        <div>
+          <p class="eyebrow">Tableau de bord de démonstration</p>
+          <h1 id="section-title">Chargement...</h1>
+        </div>
+        <label for="site-filter">Site (démonstration)
+          <select id="site-filter" aria-label="Filtrer les données fictives par site">
+            <option value="all">Tous les sites</option>
+          </select>
+        </label>
+      </div>
+      <p id="feedback" class="feedback" role="status" aria-live="polite" hidden></p>
+      <div id="content"><p>Chargement des données de démonstration...</p></div>
+      <footer>Spécification RCS-38 · Vue fictive · Revue métier attendue (Aminata) et validation des indicateurs (Omar).</footer>
+    </main>
+  </div>
+</body>
+</html>
