@@ -11,6 +11,8 @@
 
 **Livrables attendus après exécution** : `results.csv` pour C3, `results/tp04_*.csv` pour TP04, `results/tp05_mesures.csv` pour TP05 (PR #3). Les comparaisons doivent reposer sur les **mêmes cas et unités**, avec incertitudes et statut de disponibilité.
 
+`results/rcs57_diffusion_variants.json` conserve l'exécution réelle du smoke test diffusion J1 (RCS-57) : configuration, seeds, logs et mesures des deux variantes. Sa preuve de reproductibilité est dans `governance/rcs57_acceptance.json`. Ces valeurs proviennent d'un jeu **synthétique** et ne valident ni la détection, ni un transfert médical.
+
 La baseline fictive [RCS-69 / PR #7](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pull/7) montre seulement le fonctionnement du calcul de métriques ; pas de validation clinique.
 
 [README principal](../../README.md)

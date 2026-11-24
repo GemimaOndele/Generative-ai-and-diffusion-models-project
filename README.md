@@ -102,6 +102,10 @@ python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.
 
 Les résultats historiques J1 de #25 sont exploratoires et documentés dans la fiche RCS-22. Les mesures confirmatoires restent `ND` jusqu'au gel et à la validation des protocoles distincts J1/J2.
 
+### 🔬 Diffusion J1 — deux variantes contrôlées (RCS-57)
+
+[`src/diffusion_adapter.py`](src/diffusion_adapter.py) fournit un mini-DDPM 1D déterministe (bibliothèque standard, ni GPU ni réseau) avec deux variantes ne différant que par le conditionnement temporel du débruiteur : `base` et `adapte`. Seeds, hyperparamètres, pertes par époque et mesures sont conservés dans [`experiments/results/rcs57_diffusion_variants.json`](experiments/results/rcs57_diffusion_variants.json) ; la preuve de reproductibilité est dans [`governance/rcs57_acceptance.json`](governance/rcs57_acceptance.json). Détails et commandes dans [la fiche RCS-57](docs/10_rcs57_diffusion_j1.md). Il s'agit d'un **smoke test synthétique** : aucun seuil de détection n'est gelé, aucune performance clinique n'est revendiquée, et le « V2 » TP04 reste une orchestration J2 sans lien avec ce DDPM.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
