@@ -111,7 +111,10 @@ def forbidden_markers(node: Any) -> List[str]:
     if isinstance(node, dict):
         for key, value in node.items():
             label = str(key).lower()
-            found.extend(marker for marker in FORBIDDEN_KEYS if marker in label)
+            # Les noms exacts du schéma natif sont contrôlés par type et valeur.
+            # Évite le faux positif "nom" dans "test_anomaly" sans autoriser de clé libre.
+            if key not in OPTIONAL_COUNTS:
+                found.extend(marker for marker in FORBIDDEN_KEYS if marker in label)
             found.extend(forbidden_markers(value))
     elif isinstance(node, list):
         for value in node:
