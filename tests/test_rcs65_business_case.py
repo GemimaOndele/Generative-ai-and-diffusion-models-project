@@ -15,6 +15,7 @@ from tools.rcs65_business_case import (
     build_report,
     check_outputs,
     compute_scenario,
+    load_assumptions,
     render_doc,
     scenario_ready,
     serialize,
@@ -114,6 +115,28 @@ class Rcs65BusinessCaseTests(unittest.TestCase):
         scenario = sourced_scenario(**{"H-09": "0"})
         self.assertFalse(scenario_ready(scenario))
         self.assertEqual(compute_scenario(scenario)["cout_total_annuel_eur"], ND)
+
+    def test_double_counting_requires_sourced_strict_boolean(self) -> None:
+        scenario = sourced_scenario()
+        scenario["H-09"] = replace(scenario["H-09"], source=ND)
+        self.assertFalse(scenario_ready(scenario))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "assumptions.json"
+            for flag in ("false", "true", 1, []):
+                path.write_text(json.dumps({"scenarios": {"central": {
+                    "H-09": {"value": flag, "status": "hypothèse"}
+                }}}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "booléen JSON"):
+                    load_assumptions(str(path))
+
+    def test_fraction_date_and_annual_horizon_are_validated(self) -> None:
+        self.assertFalse(scenario_ready(sourced_scenario(**{"H-02": "1.2"})))
+        scenario = sourced_scenario()
+        scenario["H-01"] = replace(scenario["H-01"], source_date="2026-02-30")
+        self.assertFalse(scenario_ready(scenario))
+        result = compute_scenario(sourced_scenario(**{"H-08": "24"}))
+        self.assertEqual(result["roi"], ND)
+        self.assertIn("12 mois", result["raison"])
 
     def test_zero_horizon_and_zero_cost_do_not_divide(self) -> None:
         zero_horizon = compute_scenario(sourced_scenario(**{"H-08": "0"}))

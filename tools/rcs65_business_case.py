@@ -9,6 +9,7 @@ automatiquement.
 from __future__ import annotations
 
 import argparse
+from datetime import date
 import json
 import sys
 from dataclasses import asdict, dataclass
@@ -60,7 +61,12 @@ class Hypothesis:
     def usable(self) -> bool:
         if self.value is None or self.status == ND:
             return False
-        return self.source not in ("", ND) and self.source_date not in ("", ND)
+        if not isinstance(self.source, str) or self.source.strip().casefold() in {"", "nd", "none", "null"}:
+            return False
+        try:
+            return date.fromisoformat(self.source_date).isoformat() == self.source_date
+        except (TypeError, ValueError):
+            return False
 
 
 def template_scenario() -> Dict[str, Hypothesis]:
@@ -107,21 +113,30 @@ def load_assumptions(path: Optional[str]) -> Dict[str, Dict[str, Hypothesis]]:
                 raise ValueError(f"Statut invalide pour {name}/{key}: {status}")
             value = _decimal(raw.get("value"), f"{name}/{key}") if key != "H-09" else None
             if key == "H-09":
-                value = Decimal("1") if bool(raw.get("value")) is True else Decimal("0")
+                flag = raw.get("value")
+                if flag is None or flag == ND:
+                    value = None
+                elif type(flag) is bool:
+                    value = Decimal("1") if flag else Decimal("0")
+                else:
+                    raise ValueError("H-09 : booléen JSON strict requis")
             scenarios[name][key] = Hypothesis(
                 label=HYPOTHESES[key],
                 value=value,
                 unit=str(raw.get("unit", "")),
                 status=status,
-                source=str(raw.get("source", ND)),
-                source_date=str(raw.get("source_date", ND)),
+                source=raw.get("source") if isinstance(raw.get("source"), str) else ND,
+                source_date=raw.get("source_date") if isinstance(raw.get("source_date"), str) else ND,
                 owner=str(raw.get("owner", "Équipe")),
             )
     return scenarios
 
 
 def scenario_ready(hypotheses: Dict[str, Hypothesis]) -> bool:
-    return all(hypotheses[key].usable() for key in NUMERIC_IDS) and hypotheses["H-09"].value == Decimal("1")
+    return (all(hypotheses[key].usable() for key in NUMERIC_IDS)
+            and hypotheses["H-09"].usable()
+            and hypotheses["H-09"].value == Decimal("1")
+            and Decimal("0") <= hypotheses["H-02"].value <= Decimal("1"))
 
 
 def compute_scenario(hypotheses: Dict[str, Hypothesis]) -> Dict[str, Any]:
@@ -152,6 +167,13 @@ def compute_scenario(hypotheses: Dict[str, Hypothesis]) -> Dict[str, Any]:
             "cout_total_annuel_eur": ND, "benefice_annuel_brut_valorise_eur": ND,
             "gain_net_annuel_eur": ND, "roi": ND, "payback_mois": ND,
             "raison": "horizon nul : division par zéro évitée",
+        }
+    if horizon != Decimal("12"):
+        return {
+            "cout_variable_mensuel_eur": ND, "cout_total_mensuel_eur": ND,
+            "cout_total_annuel_eur": ND, "benefice_annuel_brut_valorise_eur": ND,
+            "gain_net_annuel_eur": ND, "roi": ND, "payback_mois": ND,
+            "raison": "horizon annuel de 12 mois requis",
         }
     variable_monthly = volume * variable
     total_monthly = fixed + variable_monthly
