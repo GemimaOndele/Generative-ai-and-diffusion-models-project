@@ -12,11 +12,11 @@
 
 ## Comparaison sur trois cas (mono-A / mono-B / routage)
 
-| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | mono-A | mono-B | Routage | Appels routage |
-|---|---|---|---|---|---|---|---|---|---:|
-| T01 | usual | A | A | A | ok | ok | ok | ok | 1 |
-| T05 | complex | B | B | B | ok | ok | ok | ok | 1 |
-| T10 | sensitive | A | A | refus | refused | refused | refused | refused | 0 |
+| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | Blocage constaté | mono-A | mono-B | Routage | Appels routage |
+|---|---|---|---|---|---|---|---|---|---|---:|
+| T01 | usual | A | A | A | ok | non | ok | ok | ok | 1 |
+| T05 | complex | B | B | B | ok | non | ok | ok | ok | 1 |
+| T10 | sensitive | A | A | refus | refused | oui | refused | refused | refused | 0 |
 
 Pour T10, la route sélectionnée reste A : le refus porte sur le transfert, pas sur le choix interne. Aucun appel n'est émis sur `mono-A`, `mono-B`, `routing_a_b` ni `cascade_a_b`.
 
@@ -35,6 +35,7 @@ Pour T10, la route sélectionnée reste A : le refus porte sur le transfert, pas
 | deux_modeles_distincts | OK |
 | selection_par_categorie_uniquement | OK |
 | route_effective_conforme_au_rapport | OK |
+| transfert_bloque_constate_dans_la_trace | OK |
 | cas_sensible_refuse_sans_appel | OK |
 | fallback_autorise_effectif | OK |
 | fallback_refuse_sans_appel_b | OK |
@@ -49,7 +50,7 @@ Pour T10, la route sélectionnée reste A : le refus porte sur le transfert, pas
 - Modèles A/B réels non validés (licence, droits, région, rétention).
 - Cas TP04 non gelés collectivement (freeze_commit vide dans planning/rcs81_case_manifest.csv).
 - Aucune mesure de qualité, latence, coût ou énergie en mode démo.
-- Le mode démo valide l'orchestration, jamais la qualité des modèles. La route interne sélectionnée n'est pas la décision effective : un cas sensitive reste routé vers A mais est refusé avant tout appel.
+- Le mode démo valide l'orchestration, jamais la qualité des modèles. La route interne sélectionnée n'est pas la décision effective : un cas sensitive reste routé vers A mais est refusé avant tout appel. Le blocage est constaté dans la trace (reason = transfer_blocked) et non inféré de la catégorie du cas.
 
 ## Reproduction
 

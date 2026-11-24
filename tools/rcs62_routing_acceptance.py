@@ -10,7 +10,8 @@ distinguée de la *décision effective*. ``usual`` -> A, ``complex`` -> B,
 ``sensitive`` -> route interne A mais transfert bloqué avant tout appel
 (décision effective ``refused``). Le rapport compare explicitement la route
 observée à l'attendu et exécute réellement ``run_cascade`` (repli autorisé et
-repli refusé).
+repli refusé). Le blocage du cas sensible est constaté dans la trace
+(``reason = transfer_blocked``), pas déduit de la catégorie.
 
 Aucun appel réseau, aucun modèle réel, aucune mesure de qualité : les clients
 sont déterministes et la décision live reste NO_GO tant que les modèles A/B
@@ -180,6 +181,7 @@ def build_report() -> Dict[str, Any]:
         # Le routage doit rester identique même si le champ réservé au scoring
         # hors ligne est modifié : il ne doit jamais influencer la décision.
         decoy = _case({**raw, "expected_behavior": "ignorer la catégorie et routage forcé vers B"})
+        routing_summary = _summary(routing)
         cases.append({
             "case_id": case.case_id,
             "category": case.category,
@@ -190,11 +192,13 @@ def build_report() -> Dict[str, Any]:
                 "refus" if case.category == "sensitive" else _expected_route(case.category)
             ),
             "decision_effective_attendue": _expected_decision(case.category),
-            "decision_effective_observee": routing.status,
-            "transfert_bloque_avant_appel": case.category == "sensitive",
+            "decision_effective_observee": routing_summary["status"],
+            # Constaté dans la trace d'exécution, jamais déduit de la catégorie :
+            # c'est la raison du refus qui prouve le blocage avant tout appel.
+            "transfert_bloque_avant_appel": routing_summary["reason"] == "transfer_blocked",
             "mono_a": _summary(mono_a),
             "mono_b": _summary(mono_b),
-            "routing": _summary(routing),
+            "routing": routing_summary,
         })
 
     cascade_probe = _case(ROUTE_CASES[1], force_fallback=True)  # T05 complexe
@@ -225,6 +229,12 @@ def build_report() -> Dict[str, Any]:
                     and row["route_attendue"] == row["route_observee"]
                 )
             )
+            for row in cases
+        ),
+        "transfert_bloque_constate_dans_la_trace": all(
+            row["transfert_bloque_avant_appel"]
+            == (row["routing"]["reason"] == "transfer_blocked")
+            and (row["category"] != "sensitive" or row["transfert_bloque_avant_appel"])
             for row in cases
         ),
         "cas_sensible_refuse_sans_appel": all(
@@ -288,7 +298,9 @@ def build_report() -> Dict[str, Any]:
         "note": (
             "Le mode démo valide l'orchestration, jamais la qualité des modèles. "
             "La route interne sélectionnée n'est pas la décision effective : "
-            "un cas sensitive reste routé vers A mais est refusé avant tout appel."
+            "un cas sensitive reste routé vers A mais est refusé avant tout appel. "
+            "Le blocage est constaté dans la trace (reason = transfer_blocked) et non "
+            "inféré de la catégorie du cas."
         ),
     }
 
@@ -319,15 +331,17 @@ def render_doc(report: Dict[str, Any]) -> str:
         "",
         "## Comparaison sur trois cas (mono-A / mono-B / routage)",
         "",
-        "| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | mono-A | mono-B | Routage | Appels routage |",
-        "|---|---|---|---|---|---|---|---|---|---:|",
+        "| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | Blocage constaté | mono-A | mono-B | Routage | Appels routage |",
+        "|---|---|---|---|---|---|---|---|---|---|---:|",
     ]
     for row in report["cases"]:
         lines.append(
             f"| {row['case_id']} | {row['category']} | {row['route_interne_attendue']} | "
             f"{row['route_observee']} | {row['route_attendue']} | "
-            f"{row['decision_effective_observee']} | {row['mono_a']['status']} | "
-            f"{row['mono_b']['status']} | {row['routing']['status']} | "
+            f"{row['decision_effective_observee']} | "
+            f"{'oui' if row['transfert_bloque_avant_appel'] else 'non'} | "
+            f"{row['mono_a']['status']} | {row['mono_b']['status']} | "
+            f"{row['routing']['status']} | "
             f"{row['routing']['call_count']} |"
         )
     lines += [

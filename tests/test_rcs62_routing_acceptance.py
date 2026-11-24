@@ -134,6 +134,32 @@ class Rcs62RoutingAcceptanceTests(unittest.TestCase):
         self.assertEqual(sensible[0]["routing"]["call_count"], 0)
         self.assertTrue(self.report["checks"]["cas_sensible_refuse_sans_appel"])
 
+    def test_transfer_block_is_observed_from_trace_not_declared_from_category(self) -> None:
+        """Régression relecture #42 : le blocage sensible doit être constaté."""
+        by_id = {row["case_id"]: row for row in self.report["cases"]}
+        self.assertEqual(by_id["T10"]["routing"]["reason"], "transfer_blocked")
+        self.assertTrue(by_id["T10"]["transfert_bloque_avant_appel"])
+        for row in self.report["cases"]:
+            self.assertEqual(
+                row["transfert_bloque_avant_appel"],
+                row["routing"]["reason"] == "transfer_blocked",
+                row["case_id"],
+            )
+        self.assertTrue(self.report["checks"]["transfert_bloque_constate_dans_la_trace"])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_outputs(root, self.report)
+            doc = (root / DOC_REL).read_text(encoding="utf-8")
+            rows = {
+                line.split("|")[1].strip(): line
+                for line in doc.splitlines()
+                if line.startswith("| T") and "|" in line
+            }
+            self.assertIn("| non |", rows["T01"])
+            self.assertIn("| non |", rows["T05"])
+            self.assertIn("| oui |", rows["T10"])
+            self.assertIn("transfert_bloque_constate_dans_la_trace | OK", doc)
+
     def test_mono_comparison_present_for_each_case(self) -> None:
         for row in self.report["cases"]:
             self.assertIn(row["mono_a"]["status"], {"ok", "abstain", "refused"})

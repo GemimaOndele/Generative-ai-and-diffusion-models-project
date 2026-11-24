@@ -232,13 +232,14 @@
     "garde_fous_actifs": true,
     "route_effective_conforme_au_rapport": true,
     "selection_par_categorie_uniquement": true,
-    "traces_sans_secret_ni_expected": true
+    "traces_sans_secret_ni_expected": true,
+    "transfert_bloque_constate_dans_la_trace": true
   },
   "demo_gate": "PASS",
   "issue": "RCS-62",
   "live_decision": "NO_GO",
   "mode": "demo_orchestration_only",
-  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles. La route interne sélectionnée n'est pas la décision effective : un cas sensitive reste routé vers A mais est refusé avant tout appel.",
+  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles. La route interne sélectionnée n'est pas la décision effective : un cas sensitive reste routé vers A mais est refusé avant tout appel. Le blocage est constaté dans la trace (reason = transfer_blocked) et non inféré de la catégorie du cas.",
   "politique": {
     "complex": {
       "decision_effective": "ok",
