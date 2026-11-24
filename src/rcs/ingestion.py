@@ -148,7 +148,7 @@ def import_csv(conn: sqlite3.Connection, path: str | Path, quarantine_dir: str |
             with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=q, delete=False) as handle:
                 temp = Path(handle.name)
                 for record in rejected:
-                    handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+                    handle.write(json.dumps(record, ensure_ascii=False) + "\n")
             os.replace(temp, target)
         finally:
             if temp is not None:
