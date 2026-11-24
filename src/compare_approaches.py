@@ -176,7 +176,63 @@ DOC_REQUIRED_TOKENS = (
     "faisabilité",
     "choix justifié",
     "hypothèses falsifiables",
+    "j1",
+    "j2",
+    "workloads distincts",
+    "avant chaque campagne",
+    "pas une optimisation directe",
+    "ddpm",
+    "complétude méthodologique",
+    "non une validation scientifique",
+    "#30",
+    "c36b94a",
+    "retargeter #36 vers main",
 )
+
+# Clarification de revue du 24/11 : deux jalons, deux workloads, deux jeux de métriques.
+MILESTONES = [
+    {
+        "id": "J1",
+        "scope": "détection/reconstruction de signaux (A/B/C)",
+        "workload": "C3/RCS-69 et RCS-71 : cas figés de détection/reconstruction",
+        "metrics": ["rappel", "précision", "F1", "faux négatifs", "reconstruction"],
+        "tickets": ["C3", "RCS-69", "RCS-71"],
+        "hypotheses": ["H1", "H2", "H3"],
+    },
+    {
+        "id": "J2",
+        "scope": "mono-LLM vs routage/cascade (V2)",
+        "workload": "RCS-74/RCS-81 : cas documentaires, identité A/B validée",
+        "metrics": ["score observable", "coût par cas réussi", "latence p95", "traçabilité"],
+        "tickets": ["RCS-74", "RCS-79", "RCS-81"],
+        "hypotheses": ["H4"],
+    },
+]
+
+CAMPAIGN_RULES = {
+    "workloads_separates": True,
+    "comparaison_intra_jalon": True,
+    "interdiction_cross_jalon": "aucune métrique de détection J1 comparée à un score documentaire J2",
+    "seuils": "harmonisés puis gelés avant chaque campagne",
+    "observations_historiques": "#25/#26 exploratoires, non validantes",
+}
+
+V2_SCOPE = {
+    "jalon": "J2",
+    "role": "choix d'orchestration mono-LLM vs routage/cascade",
+    "not": "pas une optimisation directe d'un détecteur DDPM (J1/C)",
+}
+
+INTEGRATION = {
+    "socle": "TP04 synchronisé avec #30",
+    "base_temporaire": "#30",
+    "garde_fous": ["preflight budget", "max_calls_per_case", "ledger"],
+    "ci_commit": "c36b94a",
+    "ci_resultat": "4 contrôles success (check-runs GitHub)",
+    "ci_url": "https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs",
+    "ordre": "#30 d'abord, puis retargeter #36 vers main",
+    "portee": "preuve de complétude méthodologique, non une validation scientifique",
+}
 
 
 @dataclass(frozen=True)
@@ -315,6 +371,62 @@ def validate_ticket_metadata(metadata: dict = TICKET_METADATA) -> list[str]:
     return errors
 
 
+def validate_milestone_protocols(
+    milestones: list[dict] = MILESTONES,
+    rules: dict = CAMPAIGN_RULES,
+) -> list[str]:
+    """J1/J2 : workloads distincts, métriques non croisées, seuils gelés."""
+    errors = []
+    if [item["id"] for item in milestones] != ["J1", "J2"]:
+        errors.append("jalons: J1 et J2 attendus dans cet ordre")
+    for item in milestones:
+        for name in ("scope", "workload", "metrics", "tickets", "hypotheses"):
+            if not item.get(name):
+                errors.append(f"{item.get('id', '?')}.{name}: champ vide")
+    j1_metrics = set(milestones[0].get("metrics", []))
+    j2_metrics = set(milestones[1].get("metrics", []))
+    if j1_metrics & j2_metrics:
+        errors.append("J1/J2: métriques partagées interdites")
+    if set(milestones[0].get("hypotheses", [])) & set(milestones[1].get("hypotheses", [])):
+        errors.append("J1/J2: hypothèses partagées interdites")
+    for name in ("workloads_separates", "comparaison_intra_jalon"):
+        if not rules.get(name):
+            errors.append(f"campagne.{name}: règle absente")
+    if "avant chaque campagne" not in rules.get("seuils", ""):
+        errors.append("campagne.seuils: gel avant chaque campagne absent")
+    if "exploratoires" not in rules.get("observations_historiques", ""):
+        errors.append("campagne.observations_historiques: statut exploratoire absent")
+    return errors
+
+
+def validate_v2_scope(scope: dict = V2_SCOPE) -> list[str]:
+    """V2 est un choix d'orchestration J2, pas une optimisation DDPM."""
+    errors = []
+    if scope.get("jalon") != "J2":
+        errors.append("V2: le jalon doit être J2")
+    if "orchestration" not in scope.get("role", ""):
+        errors.append("V2: rôle d'orchestration absent")
+    if "pas une optimisation directe" not in scope.get("not", "") or "DDPM" not in scope.get("not", ""):
+        errors.append("V2: la non-équivalence avec une optimisation DDPM doit être explicite")
+    return errors
+
+
+def validate_integration(integration: dict = INTEGRATION) -> list[str]:
+    """Intégration : base #30 temporaire, CI vérifiée, portée méthodologique."""
+    errors = []
+    if "#30" not in integration.get("base_temporaire", ""):
+        errors.append("intégration.base_temporaire: #30 attendu")
+    if "#30" not in integration.get("ordre", "") or "#36" not in integration.get("ordre", ""):
+        errors.append("intégration.ordre: séquence #30 puis #36 attendue")
+    if "complétude méthodologique" not in integration.get("portee", ""):
+        errors.append("intégration.portee: complétude méthodologique absente")
+    if not all(name in integration.get("garde_fous", []) for name in ("preflight budget", "max_calls_per_case", "ledger")):
+        errors.append("intégration.garde_fous: garde-fous TP04 incomplets")
+    if not integration.get("ci_commit") or "success" not in integration.get("ci_resultat", ""):
+        errors.append("intégration.ci: résultat vérifié absent")
+    return errors
+
+
 def document_alignment_check(path: str | Path = DEFAULT_DOC) -> dict:
     """Vérifie que le document livré reprend explicitement le ticket Jira."""
     document = Path(path)
@@ -330,6 +442,9 @@ def acceptance_check(doc_path: str | Path = DEFAULT_DOC) -> dict:
     """Preuve d'acceptation du ticket Jira RCS-22, vérifiée sur les données."""
     errors = validate_no_results()
     ticket_errors = validate_ticket_metadata()
+    milestone_errors = validate_milestone_protocols()
+    v2_errors = validate_v2_scope()
+    integration_errors = validate_integration()
     alignment = document_alignment_check(doc_path)
     matrix = benchmark_matrix()
     covered = {row["id"] for row in matrix["approaches"]}
@@ -389,6 +504,27 @@ def acceptance_check(doc_path: str | Path = DEFAULT_DOC) -> dict:
             and not errors,
             "evidence": "métriques, réfutations, protocole ND et aucune mesure inventée",
         },
+        {
+            "id": "J1_J2_PROTOCOLS",
+            "ok": not milestone_errors,
+            "evidence": milestone_errors or CAMPAIGN_RULES,
+        },
+        {
+            "id": "V2_NOT_DDPM_OPTIMIZATION",
+            "ok": not v2_errors,
+            "evidence": v2_errors or V2_SCOPE,
+        },
+        {
+            "id": "METHOD_NOT_SCIENTIFIC_VALIDATION",
+            "ok": "complétude méthodologique" in INTEGRATION["portee"]
+            and "validation scientifique" in INTEGRATION["portee"],
+            "evidence": INTEGRATION["portee"],
+        },
+        {
+            "id": "INTEGRATION_ORDER_AND_CI",
+            "ok": not integration_errors,
+            "evidence": integration_errors or INTEGRATION,
+        },
     ]
     return {
         "ok": all(criterion["ok"] for criterion in criteria),
@@ -397,6 +533,10 @@ def acceptance_check(doc_path: str | Path = DEFAULT_DOC) -> dict:
         "criteria": criteria,
         "ticket_fields": TICKET_METADATA,
         "document_alignment": alignment,
+        "milestones": MILESTONES,
+        "campaign_rules": CAMPAIGN_RULES,
+        "v2_scope": V2_SCOPE,
+        "integration": INTEGRATION,
         "choice": choice,
         "matrix": matrix,
     }

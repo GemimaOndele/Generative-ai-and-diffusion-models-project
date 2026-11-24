@@ -68,6 +68,49 @@
       "id": "SCIENTIFIC_ANALYSIS",
       "ok": true,
       "evidence": "métriques, réfutations, protocole ND et aucune mesure inventée"
+    },
+    {
+      "id": "J1_J2_PROTOCOLS",
+      "ok": true,
+      "evidence": {
+        "workloads_separates": true,
+        "comparaison_intra_jalon": true,
+        "interdiction_cross_jalon": "aucune métrique de détection J1 comparée à un score documentaire J2",
+        "seuils": "harmonisés puis gelés avant chaque campagne",
+        "observations_historiques": "#25/#26 exploratoires, non validantes"
+      }
+    },
+    {
+      "id": "V2_NOT_DDPM_OPTIMIZATION",
+      "ok": true,
+      "evidence": {
+        "jalon": "J2",
+        "role": "choix d'orchestration mono-LLM vs routage/cascade",
+        "not": "pas une optimisation directe d'un détecteur DDPM (J1/C)"
+      }
+    },
+    {
+      "id": "METHOD_NOT_SCIENTIFIC_VALIDATION",
+      "ok": true,
+      "evidence": "preuve de complétude méthodologique, non une validation scientifique"
+    },
+    {
+      "id": "INTEGRATION_ORDER_AND_CI",
+      "ok": true,
+      "evidence": {
+        "socle": "TP04 synchronisé avec #30",
+        "base_temporaire": "#30",
+        "garde_fous": [
+          "preflight budget",
+          "max_calls_per_case",
+          "ledger"
+        ],
+        "ci_commit": "c36b94a",
+        "ci_resultat": "4 contrôles success (check-runs GitHub)",
+        "ci_url": "https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs",
+        "ordre": "#30 d'abord, puis retargeter #36 vers main",
+        "portee": "preuve de complétude méthodologique, non une validation scientifique"
+      }
     }
   ],
   "ticket_fields": {
@@ -96,6 +139,75 @@
     "ok": true,
     "path": "docs/03_comparaison_statuquo_reglesml_diffusion.md",
     "missing": []
+  },
+  "milestones": [
+    {
+      "id": "J1",
+      "scope": "détection/reconstruction de signaux (A/B/C)",
+      "workload": "C3/RCS-69 et RCS-71 : cas figés de détection/reconstruction",
+      "metrics": [
+        "rappel",
+        "précision",
+        "F1",
+        "faux négatifs",
+        "reconstruction"
+      ],
+      "tickets": [
+        "C3",
+        "RCS-69",
+        "RCS-71"
+      ],
+      "hypotheses": [
+        "H1",
+        "H2",
+        "H3"
+      ]
+    },
+    {
+      "id": "J2",
+      "scope": "mono-LLM vs routage/cascade (V2)",
+      "workload": "RCS-74/RCS-81 : cas documentaires, identité A/B validée",
+      "metrics": [
+        "score observable",
+        "coût par cas réussi",
+        "latence p95",
+        "traçabilité"
+      ],
+      "tickets": [
+        "RCS-74",
+        "RCS-79",
+        "RCS-81"
+      ],
+      "hypotheses": [
+        "H4"
+      ]
+    }
+  ],
+  "campaign_rules": {
+    "workloads_separates": true,
+    "comparaison_intra_jalon": true,
+    "interdiction_cross_jalon": "aucune métrique de détection J1 comparée à un score documentaire J2",
+    "seuils": "harmonisés puis gelés avant chaque campagne",
+    "observations_historiques": "#25/#26 exploratoires, non validantes"
+  },
+  "v2_scope": {
+    "jalon": "J2",
+    "role": "choix d'orchestration mono-LLM vs routage/cascade",
+    "not": "pas une optimisation directe d'un détecteur DDPM (J1/C)"
+  },
+  "integration": {
+    "socle": "TP04 synchronisé avec #30",
+    "base_temporaire": "#30",
+    "garde_fous": [
+      "preflight budget",
+      "max_calls_per_case",
+      "ledger"
+    ],
+    "ci_commit": "c36b94a",
+    "ci_resultat": "4 contrôles success (check-runs GitHub)",
+    "ci_url": "https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs",
+    "ordre": "#30 d'abord, puis retargeter #36 vers main",
+    "portee": "preuve de complétude méthodologique, non une validation scientifique"
   },
   "choice": {
     "reference": "B. règles / ML",

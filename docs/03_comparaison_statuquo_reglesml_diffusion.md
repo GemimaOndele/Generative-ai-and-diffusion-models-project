@@ -137,10 +137,30 @@ python -m src.compare_approaches --json
 python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json
 ```
 
-- `--acceptance` vérifie **neuf critères sur pièces** : trois approches comparées, cinq axes Jira, hypothèses réfutables, choix justifié et réversible, aucune mesure inventée, sources traçables, champs du ticket Jira (source, phase S1, domaine BIZ, catégorie, compétence, rôles, trois volets, procédure de blocage), alignement du Markdown livré sur ces champs et compétence « Analyse scientifique » démontrée par la méthode. Le livrable `governance/rcs22_acceptance.json` est versionné et contrôlé par `tests/test_compare_approaches.py`.
+- `--acceptance` vérifie **treize critères sur pièces** : trois approches comparées, cinq axes Jira, hypothèses réfutables, choix justifié et réversible, aucune mesure inventée, sources traçables, champs du ticket Jira (source, phase S1, domaine BIZ, catégorie, compétence, rôles, trois volets, procédure de blocage), alignement du Markdown livré sur ces champs, compétence « Analyse scientifique » démontrée par la méthode, séparation J1/J2, périmètre V2 ≠ optimisation DDPM, portée méthodologique (pas une validation scientifique) et séquence d'intégration #30/#36 avec CI vérifiée. Le livrable `governance/rcs22_acceptance.json` est versionné et contrôlé par `tests/test_compare_approaches.py`.
 - `--doc <chemin>` permet de contrôler une autre copie du document (utile en CI).
 - Tests : `tests/test_compare_approaches.py`, inclus dans la suite `python -m unittest discover -s tests -p 'test_*.py'`.
 
 
-## Clarification de revue du 24/11
-J1 (A/B/C : détection/reconstruction de signaux, C3/RCS-69 et RCS-71) et J2 (mono-LLM vs routage/cascade, RCS-74/81) nécessitent des workloads distincts. Comparer sur les mêmes cas **à l'intérieur de chaque jalon**, jamais une métrique de détection J1 à un score documentaire J2. Les hypothèses H1–H4 sont locales à ce document : leur nomenclature et leurs seuils doivent être alignés avec les protocoles de chaque jalon avant gel. Les observations historiques #25/#26 sont exploratoires et ne valident pas ces hypothèses. V2 est un choix d'orchestration J2, pas une optimisation directe d'un détecteur DDPM. Les critères automatisés sont une preuve de complétude documentaire, non une validation Jira ou métier.
+## Clarification de revue du 24/11 — J1/J2, V2 et intégration
+
+### Workloads et métriques séparés (J1 ≠ J2)
+
+| Jalon | Périmètre | Workload (cas figés) | Métriques | Hypothèses | Tickets |
+|---|---|---|---|---|---|
+| J1 | Détection/reconstruction de signaux (A/B/C) | C3/RCS-69 et RCS-71 : cas figés de détection/reconstruction | Rappel, précision, F1, faux négatifs, qualité de reconstruction | H1, H2, H3 | C3, RCS-69, RCS-71 |
+| J2 | Mono-LLM vs routage/cascade (V2) | RCS-74/RCS-81 : cas documentaires, identité A/B validée | Score observable, coût par cas réussi, latence p95, traçabilité | H4 | RCS-74, RCS-79, RCS-81 |
+
+Règle de comparaison : mêmes cas **à l'intérieur de chaque jalon**, jamais une métrique de détection J1 confrontée à un score documentaire J2. Les **workloads distincts** imposent des jeux de métriques distincts. Les hypothèses H1–H4 sont locales à ce document : leur nomenclature et leurs seuils doivent être harmonisés puis **gelés avant chaque campagne**. Les observations historiques #25/#26 restent exploratoires et ne valident aucune hypothèse.
+
+### V2 n'est pas une optimisation directe du DDPM
+
+V2 est un **choix d'orchestration J2** (mono-LLM vs routage/cascade), distinct de l'approche C. Un détecteur **DDPM** relève de J1/C. Le routage multi-LLM n'est donc **pas une optimisation directe** du DDPM : aucun gain de reconstruction n'est revendiqué ici.
+
+### Portée des contrôles et séquence d'intégration
+
+Les contrôles d'acceptation automatisés sont une preuve de **complétude méthodologique**, **non une validation scientifique** ni une validation Jira/métier.
+
+- Socle TP04 synchronisé avec **#30** ; garde-fous budgétaires conservés : preflight, `max_calls_per_case`, ledger.
+- Base temporaire de la PR #36 : **#30** (PR #30 d'abord), puis **retargeter #36 vers main** après intégration de #30.
+- CI vérifiée sur `c36b94a` : 4 contrôles au vert ([check-runs](https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/commits/c36b94a/check-runs)) ; ne pas intégrer avant ce feu vert.

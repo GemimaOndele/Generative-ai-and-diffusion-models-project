@@ -72,7 +72,7 @@ Le mode démo valide l'orchestration (clients simulés), **jamais la qualité de
 
 ### 📊 Comparaison des approches (RCS-22)
 
-La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La preuve d'acceptation vérifie **9 critères** (dont les champs du ticket Jira, les trois volets, la procédure de blocage et l'alignement du document livré) et est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
+La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La clarification J1/J2 impose des workloads et métriques séparés, des seuils gelés avant chaque campagne et rappelle que V2 n'est pas une optimisation directe du DDPM. La preuve d'acceptation vérifie **13 critères** (dont les champs du ticket Jira, la séparation J1/J2, le périmètre V2, la portée méthodologique et la séquence d'intégration #30/#36) et est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
 
 ```bash
 python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json

@@ -11,17 +11,24 @@ from pathlib import Path
 from src.compare_approaches import (
     APPROACHES,
     BENCHMARK_AXES,
+    CAMPAIGN_RULES,
     HYPOTHESES,
+    INTEGRATION,
+    MILESTONES,
     PROTOCOL,
     TICKET_METADATA,
+    V2_SCOPE,
     acceptance_check,
     benchmark_matrix,
     document_alignment_check,
     provisional_choice,
     render_comparison_table,
     render_hypotheses_table,
+    validate_integration,
+    validate_milestone_protocols,
     validate_no_results,
     validate_ticket_metadata,
+    validate_v2_scope,
 )
 
 
@@ -89,7 +96,7 @@ class CompareApproachesTest(unittest.TestCase):
     def test_acceptance_checks_all_jira_criteria(self):
         result = acceptance_check()
         self.assertTrue(result["ok"], result["criteria"])
-        self.assertEqual(len(result["criteria"]), 9)
+        self.assertEqual(len(result["criteria"]), 13)
         self.assertTrue(all(item["ok"] for item in result["criteria"]))
         self.assertEqual(result["errors"], [])
         self.assertEqual(
@@ -98,6 +105,8 @@ class CompareApproachesTest(unittest.TestCase):
                 "THREE_APPROACHES_BENCHMARKED", "FIVE_JIRA_AXES", "FALSIFIABLE_HYPOTHESES",
                 "JUSTIFIED_CHOICE", "NO_INVENTED_RESULTS", "TRACEABLE_SOURCES",
                 "JIRA_TICKET_FIELDS", "DOC_JIRA_ALIGNMENT", "SCIENTIFIC_ANALYSIS",
+                "J1_J2_PROTOCOLS", "V2_NOT_DDPM_OPTIMIZATION",
+                "METHOD_NOT_SCIENTIFIC_VALIDATION", "INTEGRATION_ORDER_AND_CI",
             },
         )
 
@@ -131,6 +140,49 @@ class CompareApproachesTest(unittest.TestCase):
             self.assertFalse(result["ok"])
             self.assertIn("analyse scientifique", result["missing"])
             self.assertFalse(acceptance_check(target)["ok"])
+
+    def test_j1_j2_workloads_and_metrics_are_separated(self):
+        self.assertEqual(validate_milestone_protocols(), [])
+        self.assertEqual([item["id"] for item in MILESTONES], ["J1", "J2"])
+        self.assertFalse(set(MILESTONES[0]["metrics"]) & set(MILESTONES[1]["metrics"]))
+        self.assertFalse(set(MILESTONES[0]["hypotheses"]) & set(MILESTONES[1]["hypotheses"]))
+        self.assertIn("avant chaque campagne", CAMPAIGN_RULES["seuils"])
+
+        broken = (
+            dict(MILESTONES[0], metrics=["rappel"]),
+            dict(MILESTONES[1], metrics=["rappel"]),
+        )
+        self.assertTrue(any("métriques partagées" in error for error in validate_milestone_protocols(broken)))
+
+    def test_v2_is_not_a_ddpm_optimization(self):
+        self.assertEqual(validate_v2_scope(), [])
+        self.assertEqual(V2_SCOPE["jalon"], "J2")
+        self.assertIn("pas une optimisation directe", V2_SCOPE["not"])
+        self.assertIn("DDPM", V2_SCOPE["not"])
+        broken = dict(V2_SCOPE, **{"not": "optimisation directe d'un DDPM"})
+        self.assertTrue(any("non-équivalence" in error for error in validate_v2_scope(broken)))
+
+    def test_acceptance_is_methodological_not_scientific_validation(self):
+        self.assertEqual(validate_integration(), [])
+        self.assertIn("complétude méthodologique", INTEGRATION["portee"])
+        self.assertIn("non une validation scientifique", INTEGRATION["portee"])
+        criterion = [
+            item for item in acceptance_check()["criteria"]
+            if item["id"] == "METHOD_NOT_SCIENTIFIC_VALIDATION"
+        ][0]
+        self.assertTrue(criterion["ok"])
+
+    def test_integration_keeps_guardrails_ci_and_order(self):
+        self.assertEqual(validate_integration(), [])
+        self.assertEqual(INTEGRATION["base_temporaire"], "#30")
+        self.assertIn("max_calls_per_case", INTEGRATION["garde_fous"])
+        self.assertEqual(INTEGRATION["ci_commit"], "c36b94a")
+        self.assertIn("success", INTEGRATION["ci_resultat"])
+        self.assertIn("#30", INTEGRATION["ordre"])
+        self.assertIn("#36", INTEGRATION["ordre"])
+
+        broken = dict(INTEGRATION, garde_fous=[])
+        self.assertTrue(any("garde_fous" in error for error in validate_integration(broken)))
 
     def test_committed_acceptance_evidence_matches_code(self):
         evidence = self._root() / "governance" / "rcs22_acceptance.json"
