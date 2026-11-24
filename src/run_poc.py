@@ -29,7 +29,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--track", choices=["llm", "j1"], default="llm")
     ap.add_argument("--mode", choices=["demo", "local", "live"], default="demo")
-    ap.add_argument("--cases", default=str(ROOT / "experiments" / "test_cases.jsonl"))
+    ap.add_argument("--cases", default=str(ROOT / "experiments" / "rcs77_cases_candidate.jsonl"))
     ap.add_argument("--quick", action="store_true")
     args = ap.parse_args()
 
@@ -42,7 +42,7 @@ def main() -> None:
     from rcs.j2.orchestrator import Orchestrator
 
     cases = load_cases(args.cases)
-    log.info("cas gelés : %d (%s)", len(cases), args.cases)
+    log.info("cas candidats : %d (%s)", len(cases), args.cases)
     a, b = build_clients(args.mode)
     orch = Orchestrator(a, b)
     # B0 = recherche seule ; G1-A = V1 (modèle B + RAG + prompt contraint) ; G1-B = ablation sans RAG

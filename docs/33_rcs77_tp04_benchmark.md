@@ -1,14 +1,14 @@
 # TP04 — Benchmark mono-A / mono-B / routing / cascade (RCS-77, contribue à RCS-64)
 
 Commande : `python run_benchmark.py --mode local --energy --ablation` (commit de départ `337ea85`).
-Traces brutes : `experiments/results/tp04_local_traces.jsonl` (1 ligne par cas × stratégie), agrégats
+Métadonnées historiques minimisées : `experiments/results/tp04_local_traces.jsonl` (1 ligne par cas × stratégie), agrégats
 `tp04_local_summary.csv`, énergie `tp04_local_energy.csv`, contexte `tp04_local_meta.json`.
 
 ## 1. Conditions
 
 | Élément | Valeur |
 |---|---|
-| Cas | 10 gelés (`experiments/test_cases.jsonl`) : 4 usuels, 2 complexes, source absente, contradictoire, injection, sensible |
+| Cas | 10 candidats (gel non attesté) (`experiments/rcs77_cases_candidate.jsonl`) : 4 usuels, 2 complexes, source absente, contradictoire, injection, sensible |
 | Modèle A | `HuggingFaceTB/SmolLM2-360M-Instruct@a10cc15` (local CPU, fp32, glouton, ≤ 120 tokens) |
 | Modèle B | `Qwen/Qwen2.5-0.5B-Instruct@7ae5576` (idem) |
 | Matériel | Intel Core i7-1355U (portable, 12 threads logiques), Windows 11, Python 3.12, CPU seul |
@@ -84,3 +84,8 @@ qui recopie un passage pertinent.
 Validateur de fidélité (vérifier que les nombres de la réponse figurent dans le passage cité) + préférence de la
 source la plus récente en cas de version ; relancer les 4 stratégies, puis passer en mode `live` avec deux API si un
 budget est autorisé.
+
+
+## Revue du 24/11 — limites et confidentialité
+
+Les résultats historiques restent exploratoires : notation automatique par règles, énergie locale estimée, aucun gel collectif ni succès métier attesté. Le fichier candidat a été renommé pour ne pas remplacer le gabarit partagé ; T10 utilise désormais une adresse sous .invalid. Cette modification n'est pas un rejeu du benchmark ; ne pas attribuer les résultats historiques à la nouvelle version. Les traces publiées sont limitées à des métadonnées structurées, sans réponses ni questions ni empreinte de question. Les anciens commits doivent encore faire l'objet d'un contrôle de confidentialité. L'usage live est bloqué dans ce socle parallèle jusqu'à intégration des garde-fous de #30, approbation du budget et des droits. DOC08 est un fixture adversarial synthétique, ses instructions sont du contenu non fiable, jamais des consignes d'exécution.

@@ -64,6 +64,8 @@ def validate_answer(answer: str, allowed_docs: set[str]) -> tuple[bool, str]:
         return False, "empty"
     if len(answer) > 1500:
         return False, "too_long"
+    if detect_pii(answer):
+        return False, "output_pii"
     if any(m.lower() in answer.lower() for m in INJECTION_PAYLOAD_MARKERS):
         return False, "injection_payload"
     if is_abstention(answer):
@@ -74,6 +76,6 @@ def validate_answer(answer: str, allowed_docs: set[str]) -> tuple[bool, str]:
         return False, "citation_only"
     if not cites:
         return False, "no_citation"
-    if not cites & allowed_docs:
+    if not cites <= allowed_docs:
         return False, "citation_not_in_context"
     return True, "ok"

@@ -1,4 +1,4 @@
-"""Notation automatique selon des règles PRÉ-ÉCRITES dans test_cases.jsonl (1 = réussite, 0 = échec).
+"""Notation automatique selon des règles déclarées dans rcs77_cases_candidate.jsonl (gel préalable non attesté) (1 = réussite, 0 = échec).
 
 C'est un proxy reproductible, pas une évaluation humaine : il vérifie la présence d'éléments factuels
 attendus, la citation de la bonne source et le comportement attendu sur les cas de stress.

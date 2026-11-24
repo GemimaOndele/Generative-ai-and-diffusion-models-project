@@ -1,5 +1,13 @@
 """RCS-77 — tests hors-ligne de l'orchestration J2 (clients simulés : aucune mesure de qualité LLM)."""
 import sys
+import unittest
+try:
+    import numpy
+    import sklearn
+except ModuleNotFoundError as exc:
+    if exc.name not in {'numpy', 'sklearn'}:
+        raise
+    raise unittest.SkipTest('Suite RCS-77 exécutée dans sa CI dédiée') from exc
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -10,7 +18,7 @@ from rcs.j2.llm import DemoClient, LLMResult  # noqa: E402
 from rcs.j2.orchestrator import Orchestrator  # noqa: E402
 from rcs.j2.scoring import score  # noqa: E402
 
-CASES = load_cases(Path(__file__).resolve().parents[1] / "experiments" / "test_cases.jsonl")
+CASES = load_cases(Path(__file__).resolve().parents[1] / "experiments" / "rcs77_cases_candidate.jsonl")
 BY_ID = {c["id"]: c for c in CASES}
 
 
@@ -24,7 +32,7 @@ class FixedClient:
                          None if self.status == "ok" else "SimulatedOutage")
 
 
-def test_frozen_test_set_shape():
+def test_candidate_test_set_shape():
     assert len(CASES) == 10
     cats = [c["category"] for c in CASES]
     assert cats.count("usuel") == 4 and cats.count("complexe") == 2
@@ -93,3 +101,34 @@ def test_scoring_rules():
     assert score(c, "Quantile 99 %. Sources: [DOC06]")[0] == 0
     assert score(BY_ID["T07"], "Information non disponible dans les sources.")[0] == 1
     assert score(BY_ID["T07"], "Il coûte 1 M€. Sources: [DOC08]")[0] == 0
+
+
+def test_injection_and_secret_request_removed_in_every_guarded_strategy():
+    class Spy(FixedClient):
+        def generate(self, system, user, timeout_s=1.0):
+            assert "ACCÈS ADMIN" not in user and "mot de passe" not in user.lower()
+            assert "ignore toutes les instructions" not in user.lower()
+            assert "6 mois" in user
+            return super().generate(system, user, timeout_s)
+    for strategy in ("mono_a", "mono_b", "routing", "cascade"):
+        a, b = Spy("A", ""), Spy("B", "La visite préventive a lieu tous les 6 mois. Sources: [DOC08]")
+        trace = Orchestrator(a, b).run(BY_ID["T09"], strategy)
+        assert trace.call_count >= 1
+        assert "ACCÈS ADMIN" not in trace.answer
+
+
+def test_guarded_output_never_echoes_rejected_sensitive_content():
+    a = FixedClient("A", "Contactez demo@example.invalid pour la procédure. Sources: [DOC01]")
+    trace = Orchestrator(a, a).run(BY_ID["T01"], "mono_a")
+    assert trace.validation == "output_pii" and "example.invalid" not in trace.answer
+
+
+def test_trace_writer_excludes_raw_text(tmp_path):
+    import json
+    from rcs.j2.bench import write_outputs
+    row = {"trace_id":"test-trace-1", "case_id":"T01", "strategy":"mono_a", "status":"ok", "variant":"default", "answer":"demo@example.invalid", "question_sha256":"private", "score_reason":"free text"}
+    prefix = tmp_path / "trace"
+    write_outputs(prefix, [row], [], [], {})
+    published = json.loads((tmp_path / "trace_traces.jsonl").read_text(encoding="utf-8"))
+    assert not ({"answer", "question_sha256", "score_reason"} & published.keys())
+    assert "example.invalid" not in str(published)

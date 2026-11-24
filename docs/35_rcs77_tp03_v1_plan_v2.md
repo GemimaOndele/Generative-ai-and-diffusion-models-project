@@ -13,15 +13,15 @@
 | (A) Entrée → sortie | observation tabulaire (5 mesures + type) → score d'anomalie DDPM + alerte si score ≥ seuil ; et échantillons « normaux » générés |
 | (B) Entrée → sortie | question en français → réponse courte + `Sources: [DOCxx]`, ou abstention / blocage |
 | H1 (A) | « Sur le test AI4I gelé, G1 (DDPM, score ELBO) améliore le rappel à FPR 5 % d'au moins +0,05 vs B0 (meilleure baseline non générative). » |
-| H1 (B) | « Sur les 10 cas gelés, G1 (Qwen2.5-0.5B + RAG + prompt contraint) améliore la réussite de tâche d'au moins +0,2 vs B0 (recherche extractive sans LLM). » |
+| H1 (B) | « Sur les 10 cas historiques candidats (gel non attesté), G1 (Qwen2.5-0.5B + RAG + prompt contraint) améliore la réussite de tâche d'au moins +0,2 vs B0 (recherche extractive sans LLM). » |
 
 | Ensemble | Source & volume | Droits, version, séparation |
 |---|---|---|
 | (A) Train | AI4I, 5 797 observations normales | CC BY 4.0, SHA-256 `dc6630cd…` ; split stratifié seed 42 |
 | (A) Validation | 2 000 (68 pannes) | seuil fixé ici uniquement |
-| (A) Test indépendant | 2 000 (68 pannes) + **10 cas gelés** `experiments/j1_diffusion/test_cases.jsonl` | jamais vu à l'entraînement |
+| (A) Test indépendant | 2 000 (68 pannes) + **10 cas historiques candidats (gel non attesté)** `experiments/j1_diffusion/test_cases.jsonl` | jamais vu à l'entraînement |
 | (B) Documents | 8 documents internes `corpus/` | rédigés par l'équipe, aucune donnée patient |
-| (B) Test | **10 cas gelés** `experiments/test_cases.jsonl` (4 usuels, 2 complexes, source absente, contradiction, injection, donnée sensible) | figés avant exécution |
+| (B) Test | **10 cas historiques candidats (gel non attesté)** `experiments/rcs77_cases_candidate.jsonl` (4 usuels, 2 complexes, source absente, contradiction, injection, donnée sensible) | antériorité non attestée |
 
 **3 risques anticipés** : (1) résultat invalide car données synthétiques non médicales (circularité règle↔règle) ;
 (2) hallucination ou réponse non sourcée de l'assistant ; (3) fuite de données personnelles dans un prompt.
@@ -70,7 +70,7 @@ Mesures G1-A : 9 appels, 3 283 tokens d'entrée / 468 de sortie, 0 erreur ; late
 et les mêmes tokens ; la latence, elle, varie jusqu'à ×3 entre deux passes sur ce portable (p95 11,7 s au TP04) →
 les latences ne se comparent qu'à l'intérieur d'une même passe.
 
-## 04 · Feuille de résultats commune — diffusion, 10 cas gelés (`experiments/results.csv`)
+## 04 · Feuille de résultats commune — diffusion, 10 cas historiques candidats (gel non attesté) (`experiments/results.csv`)
 
 Seuils (quantile 95 % des normaux de validation) : B0a_zscore = 2.322, B0b_isolation_forest = 0.583, G1-A_ddpm_elbo_nt10 = 0.781, G1-B_ddpm_elbo_nt3 = 0.878.
 
@@ -161,3 +161,8 @@ Go/no-go du 2ᵉ LLM : qualité ≥ V1 sur les cas critiques, p95 ≤ 1,2 × V1,
 | Résultat observé et limite honnête ? | Oui (H1 (A) réfutée avec variables physiques ; voir analyses) |
 | 2ᵉ modèle justifié par un besoin mesurable ? | Oui — défaut de format/citation mesuré |
 | Ni secret ni donnée sans droits ? | Oui — données brutes hors Git, corpus interne |
+
+
+## Revue du 24/11 — limites et confidentialité
+
+Les résultats historiques restent exploratoires : notation automatique par règles, énergie locale estimée, aucun gel collectif ni succès métier attesté. Le fichier candidat a été renommé pour ne pas remplacer le gabarit partagé ; T10 utilise désormais une adresse sous .invalid. Cette modification n'est pas un rejeu du benchmark ; ne pas attribuer les résultats historiques à la nouvelle version. Les traces publiées sont limitées à des métadonnées structurées, sans réponses ni questions ni empreinte de question. Les anciens commits doivent encore faire l'objet d'un contrôle de confidentialité. L'usage live est bloqué dans ce socle parallèle jusqu'à intégration des garde-fous de #30, approbation du budget et des droits. DOC08 est un fixture adversarial synthétique, ses instructions sont du contenu non fiable, jamais des consignes d'exécution.

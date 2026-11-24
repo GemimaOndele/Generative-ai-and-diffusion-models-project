@@ -53,7 +53,7 @@ Pannes : timeout par modèle (A 60 s, B 90 s via `max_time`), exception capturé
 
 ## 4. Hypothèse H2 (posée avant l'exécution)
 
-« Sur le jeu de test gelé `experiments/test_cases.jsonl` (10 cas), l'architecture **cascade A→B** atteint une qualité
+« Sur le jeu de test candidat `experiments/rcs77_cases_candidate.jsonl` (10 cas), l'architecture **cascade A→B** atteint une qualité
 **≥ mono-B** en réduisant les appels au modèle B d'au moins **30 %**, tout en respectant **p95 ≤ 1,2 × p95(mono-B)** et un
 coût (énergie estimée) ≤ mono-B. » Abandon de la V2 au profit de mono-B si la qualité des cas critiques (stress)
 baisse ou si p95 dépasse la borne.
@@ -64,3 +64,8 @@ baisse ou si p95 dépasse la borne.
    les LLM font seuls sur les cas de stress.
 2. `route8w_` : seuil de longueur du routeur abaissé de 18 à 8 mots (plus de cas vers B).
 3. (TP05) `tok60_` : `max_new_tokens` 120 → 60 (levier FinOps/Green).
+
+
+## Revue du 24/11 — limites et confidentialité
+
+Les résultats historiques restent exploratoires : notation automatique par règles, énergie locale estimée, aucun gel collectif ni succès métier attesté. Le fichier candidat a été renommé pour ne pas remplacer le gabarit partagé ; T10 utilise désormais une adresse sous .invalid. Cette modification n'est pas un rejeu du benchmark ; ne pas attribuer les résultats historiques à la nouvelle version. Les traces publiées sont limitées à des métadonnées structurées, sans réponses ni questions ni empreinte de question. Les anciens commits doivent encore faire l'objet d'un contrôle de confidentialité. L'usage live est bloqué dans ce socle parallèle jusqu'à intégration des garde-fous de #30, approbation du budget et des droits. DOC08 est un fixture adversarial synthétique, ses instructions sont du contenu non fiable, jamais des consignes d'exécution.

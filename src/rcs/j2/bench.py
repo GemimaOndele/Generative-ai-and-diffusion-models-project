@@ -28,7 +28,7 @@ def build_clients(mode: str, max_new_tokens: int = 120):
         return (llm.LocalHFClient(os.environ.get("LLM_A_REPO", MODEL_A_DEFAULT), max_new_tokens),
                 llm.LocalHFClient(os.environ.get("LLM_B_REPO", MODEL_B_DEFAULT), max_new_tokens))
     if mode == "live":
-        return llm.OpenAICompatibleClient("LLM_A"), llm.OpenAICompatibleClient("LLM_B")
+        raise ValueError("Mode live bloqué : intégrer la politique budgétaire #30 et obtenir les autorisations avant appels payants")
     raise ValueError(mode)
 
 
@@ -94,7 +94,8 @@ def write_outputs(prefix: Path, traces: list[dict], summary: list[dict], energy:
     prefix.parent.mkdir(parents=True, exist_ok=True)
     with open(f"{prefix}_traces.jsonl", "w", encoding="utf-8") as f:
         for t in traces:
-            f.write(json.dumps(t, ensure_ascii=False) + "\n")
+            allowed = ("trace_id", "case_id", "variant", "strategy", "status", "models", "call_count", "latency_ms", "input_tokens", "output_tokens", "cost_eur", "score")
+            f.write(json.dumps({k: t[k] for k in allowed if k in t}, ensure_ascii=False) + "\n")
     for name, rows in (("summary", summary), ("energy", energy)):
         if rows:
             with open(f"{prefix}_{name}.csv", "w", newline="", encoding="utf-8") as f:

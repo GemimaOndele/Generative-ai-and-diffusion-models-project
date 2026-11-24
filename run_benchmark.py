@@ -30,7 +30,7 @@ def git_sha() -> str:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["demo", "local", "live"], default="demo")
-    ap.add_argument("--cases", default="experiments/test_cases.jsonl")
+    ap.add_argument("--cases", default="experiments/rcs77_cases_candidate.jsonl")
     ap.add_argument("--out", default=None)
     ap.add_argument("--energy", action="store_true", help="mesure CodeCarbon par stratégie")
     ap.add_argument("--ablation", action="store_true")

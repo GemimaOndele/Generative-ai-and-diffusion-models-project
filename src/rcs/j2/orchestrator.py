@@ -155,4 +155,4 @@ class Orchestrator:
         ok, reason = G.validate_answer(text, allowed)
         tr.validation = reason
         # sortie invalide : on la conserve pour l'analyse mais on signale un refus explicite
-        tr.answer = text if ok else f"[REFUS VALIDATEUR:{reason}] {text}"
+        tr.answer = text if ok else f"[REFUS VALIDATEUR:{reason}]"
