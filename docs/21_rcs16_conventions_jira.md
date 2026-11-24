@@ -3,7 +3,7 @@
 Pilote : Omar · binôme : Elias · relais : Gémima · relectrice des critères : Aminata.
 
 > **Statut : proposition en attente de validation de l'équipe — statut du ticket Jira inchangé.** Ce document détaille
-> les éléments de méthode à examiner au Sprint 0 avec `docs/06_sprint0_plan.md` (PR #2, RCS-17), dont il reprend la
+> les éléments de méthode à examiner au Sprint 0 avec `docs/15_rcs17_sprint0_demarrage.md` (PR #6, RCS-17), dont il reprend la
 > Definition of Ready et la Definition of Done, et avec `CONTRIBUTING.md` (PR #1, RCS-48) pour les branches et commits.
 > Il s'applique au **workflow existant du projet RCS** créé par Gémima (À faire → En cours → Revue en cours →
 > Terminé(e)), **sans reconfiguration** : les règles ci-dessous disent quand un ticket peut changer de statut.
@@ -56,7 +56,7 @@ ticket est en cause + un commentaire (contexte, tentatives, logs nettoyés, poin
 relais, puis arbitrage en point de coordination (pas d'attente silencieuse). L'indicateur est retiré quand
 l'obstacle est levé.
 
-## 4. Definition of Ready (DoR) — alignée sur `docs/06_sprint0_plan.md`
+## 4. Definition of Ready (DoR) — alignée sur `docs/15_rcs17_sprint0_demarrage.md`
 
 Un ticket passe de **À faire** à **En cours** seulement si :
 - il est référencé `RCS-XX` avec **responsable, binôme, relais, relecteur** et le lien vers le livrable attendu ;
@@ -66,7 +66,7 @@ Un ticket passe de **À faire** à **En cours** seulement si :
 - la taille est **estimée collectivement** et la **capacité** de l'équipe le permet ;
 - aucune tâche d'exécution n'est démarrée si un choix de données, de modèle ou de budget reste bloquant.
 
-## 5. Definition of Done (DoD) — alignée sur `docs/06_sprint0_plan.md`
+## 5. Definition of Done (DoD) — alignée sur `docs/15_rcs17_sprint0_demarrage.md`
 
 Un ticket passe de **Revue en cours** à **Terminé(e)** seulement si :
 - une **preuve est réellement produite** (fichier, code exécuté, log, capture), accessible dans GitHub ou un Drive
@@ -85,7 +85,7 @@ Un ticket passe de **Revue en cours** à **Terminé(e)** seulement si :
 - Branche temporaire par ticket : `docs/`, `feature/`, `data/`, `experiment/`, `fix/`, `test/` + `RCS-XX-sujet`.
 - Commit : `type(RCS-XX): description` (ex. `docs(RCS-46): organiser le dépôt`, `test(RCS-74): préparer les cas TP04`).
 - PR vers `main` : titre `type(RCS-XX): …`, objectif, fichiers, commande de test, résultats réellement obtenus,
-  limites et risques ; fusion squash après revue.
+  limites et risques ; fusion après revue selon la politique du dépôt ; pour PR empilées, intégrer la parente, retargeter et relancer la CI.
 - Étiquettes proposées : `J1`, `J2`, `C3`, `TP04`, `TP05`, `veille`, `bloqué`, `rgpd`.
 
 ## 7. Modèle de ticket
@@ -105,6 +105,9 @@ Preuve attendue au « Terminé(e) » : lien PR + SHA + test/log + limites
 
 Ticket témoin proposé : **RCS-49** (ingestion). Parcours à vérifier dans Jira après adoption de la convention :
 **À faire** (DoR remplie selon §4) → **En cours** (branche `feature/RCS-49-ingestion-csv-validations`) →
-**Revue en cours** (PR + 4 tests `tests/test_rcs49_ingestion.py` verts, relecteur Elias) → **Terminé(e)**
+**Revue en cours** (PR #12 + tests `tests/test_rcs49_ingestion.py` verts, relecteur Elias) → **Terminé(e)**
 (commentaire avec lien PR, SHA, preuve). Aucune configuration Jira n'est nécessaire ; les preuves techniques existent
 sur la branche ; **les transitions de statut restent à faire par l'équipe** après validation de cette convention.
+
+
+Les conventions restent proposées jusqu'au vote et au contrôle du ticket témoin dans Jira. Nouveaux documents : préfixe RCS-XX recommandé ; index central pour conserver les liens historiques.
