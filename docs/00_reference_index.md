@@ -4,12 +4,12 @@
 
 | Domaine | Fichier / branche préparatoire | Propriétaire de travail |
 |---|---|---|
-| Objectif, cours et équipe | [README racine](../README.md), PR #4 | Gémima / équipe |
+| Objectif, cours et équipe | [README racine](../README.md), PR #1 | Gémima / équipe |
 | Conventions GitHub et Pull Requests | `CONTRIBUTING.md`, PR #1 | Ayoub |
 | Cadrage métier | `docs/01_cadrage.md`, PR #1 | Aminata / Gémima |
-| Preuve diffusion C3 | `docs/03_preuve_technique.md`, PR #1 | Elias / Omar |
+| Preuve diffusion C3 | `docs/03_preuve_technique.md`, PR #30/#34 | Elias / Omar |
 | Plan d'expérience C3 | `docs/08_cm03_experiment_readiness.md`, PR #2 | Gémima / Elias |
-| Sprint 0 | `docs/06_sprint0_plan.md`, PR #2 | Gémima |
+| Sprint 0 | `docs/15_rcs17_sprint0_demarrage.md`, PR #6 (plan opérationnel) ; #2 (archive) | Gémima |
 | Architecture / benchmark Multi-LLM | `docs/05_tp04_architecture_v2.md` et `05_tp04_benchmark.md`, PR #1 | Elias |
 | Tests candidats TP04 | `experiments/tp04_cases_draft.jsonl`, PR #2 | Aminata |
 | FinOps, Green AI, éthique TP05 | `docs/06_tp05_finops_green_ethique.md`, PR #3 | Omar / Aminata |
@@ -22,11 +22,11 @@
 
 ## Ordre de passage
 
-1. **PR #1** : obtenir la revue humaine, résoudre les commentaires et fusionner la structure après CI.
+1. **PR #1** : socle déjà intégré.
 2. **PR #2** : adapter à `main` à jour, valider scénarios C3/TP04 puis revue et fusion.
 3. **PR #3** : préciser TP05, CodeCarbon et unité fonctionnelle ; revue après harmonisation du README.
 4. **PR #4** : cartographie/versionning, registres et monitoring continu ; harmoniser README et tests avant fusion.
-5. **Sprint 0** : actuellement futur, doit être estimé et démarré seulement après accord collectif.
+5. **Sprint 0** : vérifier l'état actuel Jira et l'accord collectif ; #6 est la référence opérationnelle.
 
 Les versions de référence à déposer dans le Drive : fiche d'équipe V5.0, bibliothèque V3.6, cahier des charges V1.3. Ces livrables ne doivent pas être copiés dans le dépôt public sans accord de l'équipe.
 
@@ -34,3 +34,12 @@ Les versions de référence à déposer dans le Drive : fiche d'équipe V5.0, bi
 - Jira : https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog
 - Dépôt : https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project
 - PR : https://github.com/GemimaOndele/Generative-ai-and-diffusion-models-project/pulls
+
+
+## Références canoniques supplémentaires (24/11)
+- ADR et risques : #35 ; gabarits #4 uniquement.
+- Contrat de traces : #29, projection #33, audit #27.
+- FinOps : #5, #11 et #26 (résultats historiques non validés).
+- Données : #16, #19 → #12 → #20 → #14 → #23/#25.
+- Monitoring : #31 → #32 ; #8/#22 remplacées.
+- Pour les nouveaux fichiers, préfixer RCS-XX ; conserver les chemins historiques et distinguer documents de référence et gabarits.

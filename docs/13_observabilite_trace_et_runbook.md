@@ -7,8 +7,8 @@
 
 Des ID pseudonymisés liés au run suffisent ; les noms de patients, clés, prompts sensibles et rapports non autorisés **ne doivent pas figurer dans les logs**.
 
-## Contrat événement
-Fichier `governance/trace_event.schema.json` : `trace_id`, `run_id`, `timestamp_utc`, `component`, `code_commit_sha`, `dataset_version`, `model_version`, `strategy`, `case_id`, `duration_s`, `result_status`, `quality_status`, `calls`, `retries`, `cost_eur`, `energy_kwh`, `co2e_kg`, `measurement_status`, `measurement_boundary`, `source_ref` et `reviewer`.
+## Modèle événement historique (non exécutable en production)
+Ancien modèle préparatoire `governance/templates/trace_event_draft.schema.json` : `trace_id`, `run_id`, `timestamp_utc`, `component`, `code_commit_sha`, `dataset_version`, `model_version`, `strategy`, `case_id`, `duration_s`, `result_status`, `quality_status`, `calls`, `retries`, `cost_eur`, `energy_kwh`, `co2e_kg`, `measurement_status`, `measurement_boundary`, `source_ref` et `reviewer`.
 
 `null` pour les métriques absentes ; jamais 0 à la place de « non disponible ». CodeCarbon local peut estimer CO₂e sur l'exécution locale ; il ne mesure pas les serveurs d'une API LLM distante.
 
@@ -33,3 +33,5 @@ Fichier `governance/trace_event.schema.json` : `trace_id`, `run_id`, `timestamp_
 7. Clore avec cause, métriques avant/après et procédure de non-récurrence.
 
 **Contrainte** : aucune métrique de monitoring ne valide la sécurité clinique réelle. La qualification de maintenance appartient au technicien habilité.
+
+Le seul contrat d'intégration exécutable est `data/contracts/trace_event_v1.json` (#29), validé par JSON Schema ; #33 projette les traces et #27 audite les agrégats. Le modèle préparatoire ci-dessus n'est pas un schéma concurrent. Ne pas exporter de texte libre, et appliquer les conditions énergie/ND/frontière du contrat canonique.

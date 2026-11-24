@@ -10,7 +10,7 @@ class TestGovernanceTemplates(unittest.TestCase):
     def test_registres_champs_obligatoires(self):
         checks = {
             "model_registry.csv": {"model_id","dataset_version","code_commit_sha","semantic_version","validation_metrics_ref","approval"},
-            "risk_register.csv": {"risk_id","likelihood_scale","impact_scale","owner","mitigation","review_date"},
+            "templates/risk_register_template.csv": {"risk_id","likelihood_scale","impact_scale","owner","mitigation","review_date"},
             "cost_register.csv": {"cost_category","estimated_or_actual","hours_or_blank","amount_eur_or_blank","source_date"},
         }
         for name, must in checks.items():
@@ -21,7 +21,7 @@ class TestGovernanceTemplates(unittest.TestCase):
                 self.assertTrue(must.issubset(set(rows[0])))
 
     def test_schema_trace_valide_et_prive(self):
-        d=json.loads((BASE/"governance"/"trace_event.schema.json").read_text(encoding="utf-8"))
+        d=json.loads((BASE/"governance"/"templates/trace_event_draft.schema.json").read_text(encoding="utf-8"))
         self.assertEqual(d["type"],"object")
         self.assertFalse(d["additionalProperties"])
         for field in ("trace_id","run_id","component","measurement_status","measurement_boundary"):

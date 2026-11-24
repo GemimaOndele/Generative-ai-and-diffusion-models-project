@@ -3,11 +3,11 @@
 **Gabarit de travail : aucune probabilité ni gravité réelle n'a été approuvée.** Source : TP05 ECE du 20/11/2026 et rappel oral rapporté par le groupe. RCS-18 (registre existant), RCS-66, RCS-84 et RCS-88.
 
 ## Registre vivant
-`governance/risk_register.csv` recense ID, composant et version, danger/événement déclencheur, parties touchées, source du risque, probabilité (échelle à convenir), gravité, matrice d'exposition initiale, contrôle, responsable, binôme, relecteur, test, preuve, exposition résiduelle, statut, échéance de revue, action en cas de dépassement.
+Le registre canonique RCS-18 (#35) recense ID, composant et version, danger/événement déclencheur, parties touchées, source du risque, probabilité (échelle à convenir), gravité, matrice d'exposition initiale, contrôle, responsable, binôme, relecteur, test, preuve, exposition résiduelle, statut, échéance de revue, action en cas de dépassement.
 
 **Méthode proposée :**
-- Coter probabilité et impact de 1 à 3 (rare/possible/probable ; faible/modéré/majeur), **uniquement après consensus et critères écrits**.
-- Positionner les risques dans une matrice 3 × 3, prioriser les risques élevés, avec validation séparée des critères de refus pour risques critiques.
+- Coter probabilité et impact de 1 à 5 selon la proposition RCS-18 (#35), **uniquement après consensus et critères écrits**.
+- Positionner les risques dans une matrice 5 × 5, prioriser les risques élevés, avec validation séparée des critères de refus pour risques critiques.
 - Revoir aux portes de décision, lors d'un changement de modèle/dataset/corpus, d'une anomalie, et à chaque Sprint.
 - Enregistrer risques émergents et incidents, pas seulement une matrice figée au cadrage.
 
@@ -30,3 +30,5 @@ La fiche de données (dataset card) et la fiche de modèle (model card) doivent 
 
 ## Pilotage des risques
 RCS-18 : propriétaire de la matrice et revue ; RCS-88 : biais et model cards ; RCS-89 : signaux d'alerte et incidents ; RCS-90 : risque financier et disponibilité humaine ; RCS-84 : test éthique TP05. L'audit n'est pas une certification RGPD/AI Act.
+
+Le fichier `governance/templates/risk_register_template.csv` est un ancien gabarit de collecte, pas un second registre opérationnel. Les cotations #35 restent proposées jusqu'à ratification.
