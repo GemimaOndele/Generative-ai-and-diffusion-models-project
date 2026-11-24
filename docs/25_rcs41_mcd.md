@@ -2,7 +2,9 @@
 
 Pilote : Omar · binôme : Gémima · relecteur : Elias. Le MLD et le SQL sont livrés par RCS-42.
 
-⚠ **Reste à faire pour clore le ticket** : reporter ce MCD dans **JMerise**, l'exporter (PNG/PDF) dans `docs/jmerise/` et le faire relire avec les besoins métier.
+✅ **MCD saisi dans JMerise (24/11)** : `docs/jmerise/RCS41_MCD_RoboCare.mcd` (fichier JMerise 0.6.3) et son export `docs/jmerise/RCS41_MCD_RoboCare.png`. Il reste la **relecture métier** (Elias) avant de clore le ticket.
+
+![MCD RoboCare Sentinel — export JMerise](jmerise/RCS41_MCD_RoboCare.png)
 
 ## 1. Règles de gestion
 
@@ -14,10 +16,12 @@ Pilote : Omar · binôme : Gémima · relecteur : Elias. Le MLD et le SQL sont l
 | RG4 | Un équipement possède 0..n observations ; une observation concerne un seul équipement ; (équipement, clé source) est unique. |
 | RG5 | Une observation est scorée par 0..n analyses, au plus une par version de modèle. |
 | RG6 | Une analyse produit 0 ou 1 alerte (si score ≥ seuil) ; une alerte provient d'une seule analyse. |
+| RG6b | L'équipement d'une alerte est celui de l'observation analysée (revue d'Aminata, PR #19 : triggers SQL). |
 | RG7 | Une alerte est décidée (validée/rejetée) par 0..1 utilisateur habilité (technicien, responsable). |
+| RG7b | Une alerte validée ou rejetée a obligatoirement un décideur et une date de décision (revue PR #19 : `CHECK`). |
 | RG8 | Une intervention est ouverte sur une alerte **validée** (ou un incident manuel : alerte nulle) ; une alerte peut donner 0..n interventions. |
 | RG9 | Toute action sensible produit une ligne d'audit (acteur, événement, cible, horodatage UTC). |
-| RG10 | Une exécution d'expérience (J1/J2) possède 1..n métriques (nom, valeur, unité, split). |
+| RG10 | Une exécution d'expérience (J1/J2) possède 1..n métriques ; une métrique est identifiée par (run, nom, split), `split` obligatoire (revue PR #19). |
 
 ## 2. MCD (notation Merise : cardinalités min,max côté entité)
 
@@ -32,7 +36,7 @@ UTILISATEUR    (0,n) ── DECIDE ──── (0,1) ALERTE         [date, comm
 ALERTE         (0,n) ── OUVRE ───── (0,1) INTERVENTION
 UTILISATEUR    (0,n) ── RESPONSABLE (1,1) INTERVENTION
 EQUIPEMENT     (0,n) ── CIBLE ───── (1,1) INTERVENTION
-EXPERIMENT_RUN (1,n) ── MESURE_RUN  (1,1) EXPERIMENT_METRIC
+EXPERIMENT_RUN (1,n) ── EVALUE ──── (1,1) EXPERIMENT_METRIC   [identification relative]
 ```
 
 Entités et identifiants : SOURCE_DONNEES(**id**, nom, url, licence, catégorie, date_verif) ;
@@ -42,7 +46,9 @@ OBSERVATION(**id**, clé_source, air_temp_k, process_temp_k, rpm, torque_nm, too
 ANALYSE_MODELE(**id**, model_version, score, seuil, créé_le) ; ALERTE(**id**, gravité, statut, créé_le) ;
 INTERVENTION(**id**, statut, compte_rendu, créé_le) ; UTILISATEUR(**id**, pseudonyme, rôle) ;
 AUDIT(**id**, acteur, événement, cible, horodatage) ; EXPERIMENT_RUN(**id**, jalon, config, seed, matériel, commit, créé_le) ;
-EXPERIMENT_METRIC(nom, valeur, unité, split).
+EXPERIMENT_METRIC(**nom**, **split**, valeur, unité) — identifiant relatif : (run, nom, split), lien `(1,1)` vers EXPERIMENT_RUN.
+
+L'association MESURE_RUN est renommée **EVALUE** pour ne pas être confondue avec MESURE (équipement–observation) dans JMerise.
 
 AUDIT est volontairement non relié par clé étrangère (journal append-only, la cible est textuelle).
 
@@ -62,7 +68,16 @@ erDiagram
  ALERTE o|--o{ INTERVENTION : ouvre
  UTILISATEUR ||--o{ INTERVENTION : responsable
  EQUIPEMENT ||--o{ INTERVENTION : cible
- EXPERIMENT_RUN ||--o{ EXPERIMENT_METRIC : mesure
+ EXPERIMENT_RUN ||--o{ EXPERIMENT_METRIC : evalue
 ```
 
-Diagramme Mermaid, non export JMerise ; l'export original et comparaison restent nécessaires.
+Diagramme Mermaid de lecture rapide ; la référence est l'export JMerise ci-dessus. Les types JMerise reprennent ceux du schéma SQL de la PR #19 (TEXT → VARCHAR borné, REAL → DECIMAL, INTEGER 0/1 → BOOLEAN au niveau conceptuel).
+
+## 3. Export JMerise
+
+| Fichier | Contenu |
+|---|---|
+| `docs/jmerise/RCS41_MCD_RoboCare.mcd` | MCD JMerise 0.6.3 : 11 entités, 11 associations, 22 liens et cardinalités, règles de gestion RG1 à RG10 (avec RG6b et RG7b) dans les propriétés du MCD |
+| `docs/jmerise/RCS41_MCD_RoboCare.png` | Export image du MCD complet depuis JMerise |
+
+Ouvrir : JMerise → Fichier → Ouvrir → `docs/jmerise/RCS41_MCD_RoboCare.mcd`. Le MLD peut être régénéré depuis JMerise et comparé au SQL de la PR #19.
