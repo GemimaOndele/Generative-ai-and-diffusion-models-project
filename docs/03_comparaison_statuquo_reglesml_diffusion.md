@@ -140,3 +140,7 @@ python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.
 - `--acceptance` vérifie **neuf critères sur pièces** : trois approches comparées, cinq axes Jira, hypothèses réfutables, choix justifié et réversible, aucune mesure inventée, sources traçables, champs du ticket Jira (source, phase S1, domaine BIZ, catégorie, compétence, rôles, trois volets, procédure de blocage), alignement du Markdown livré sur ces champs et compétence « Analyse scientifique » démontrée par la méthode. Le livrable `governance/rcs22_acceptance.json` est versionné et contrôlé par `tests/test_compare_approaches.py`.
 - `--doc <chemin>` permet de contrôler une autre copie du document (utile en CI).
 - Tests : `tests/test_compare_approaches.py`, inclus dans la suite `python -m unittest discover -s tests -p 'test_*.py'`.
+
+
+## Clarification de revue du 24/11
+J1 (A/B/C : détection/reconstruction de signaux, C3/RCS-69 et RCS-71) et J2 (mono-LLM vs routage/cascade, RCS-74/81) nécessitent des workloads distincts. Comparer sur les mêmes cas **à l'intérieur de chaque jalon**, jamais une métrique de détection J1 à un score documentaire J2. Les hypothèses H1–H4 sont locales à ce document : leur nomenclature et leurs seuils doivent être alignés avec les protocoles de chaque jalon avant gel. Les observations historiques #25/#26 sont exploratoires et ne valident pas ces hypothèses. V2 est un choix d'orchestration J2, pas une optimisation directe d'un détecteur DDPM. Les critères automatisés sont une preuve de complétude documentaire, non une validation Jira ou métier.
