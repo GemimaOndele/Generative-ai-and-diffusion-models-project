@@ -1,0 +1,1 @@
+artifact_id,artifact_type,semantic_version,parent_id,training_or_provider,model_id,provider_version,code_commit_sha,dataset_id,dataset_version,dataset_hash,prompt_or_index_version,config_hash,seed,license_and_rights,run_id,validation_metrics_ref,risks_ref,approval,promotion_state,rollback_target,last_review_date

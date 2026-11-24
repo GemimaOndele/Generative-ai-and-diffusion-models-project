@@ -1,0 +1,23 @@
+name: "RCS-78 — audit des traces J2"
+on:
+  push:
+    branches: ["feature/RCS-78-traces-audit-20261123"]
+  pull_request:
+    paths:
+      - "tools/rcs78_trace_audit.py"
+      - "tests/test_rcs78_trace_audit.py"
+      - ".github/workflows/rcs78-traces.yml"
+permissions:
+  contents: read
+jobs:
+  audit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Tests des métadonnées, confidentialité et p95
+        run: python -m unittest discover -s tests -p 'test_rcs78_trace_audit.py' -v
+      - name: Syntaxe Python
+        run: python -m py_compile tools/rcs78_trace_audit.py tests/test_rcs78_trace_audit.py
