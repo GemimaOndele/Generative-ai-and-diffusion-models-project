@@ -70,6 +70,16 @@ python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --o
 
 Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
 
+### 🧪 Baseline mono-LLM reproductible (RCS-61)
+
+Le workload défini est `experiments/rcs61_workload.jsonl` (cinq questions, identifiants uniques). La commande ci-dessous exécute deux fois le même workload avec un client déterministe, vérifie l'égalité des digests, puis écrit logs, latence locale, score observable et résumé :
+
+```bash
+python -m src.run_baseline_mono --cases experiments/rcs61_workload.jsonl --out experiments/results/rcs61_baseline_mono
+```
+
+Qualité LLM réelle, latence réseau, coût et CO₂e restent `ND` : ces fichiers valident l'orchestration logicielle, pas un modèle clinique.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
