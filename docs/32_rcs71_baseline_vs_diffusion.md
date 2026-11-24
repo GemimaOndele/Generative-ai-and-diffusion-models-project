@@ -123,3 +123,21 @@ evidence_status,notes` : scores, seuils, alertes et justesse par cas et par mod�
 ## 7. Revue de provenance et intégration
 
 Le manifeste `experiments/j1_diffusion/case_inventory.json` identifie les 10 cas du commit 6506cba et le blob Git du JSONL. Il est établi après les résultats : **il ne prouve pas un gel préalable**. Le champ freeze_commit reste null. Les résultats et hypothèses sont exploratoires ; aucune approbation scientifique n'est revendiquée. Pour une campagne confirmatoire, faire approuver en équipe la règle, les variantes, les seuils et un manifeste daté avant les exécutions, conserver les preuves et reproduire sur un environnement versionné. Les résultats historiques restent intacts dans un fichier J1 distinct, sans remplacer le gabarit commun de main. Dépendances : schéma #19, ingestion #12, stockage #20 et socle J1 #14.
+
+## 8. Reproduction complète et absence de sélection a posteriori (24/11, suite à la revue d'Elias)
+
+**Reproduction** : exécution complète à partir du commit `d163e32` sur un environnement propre (`python scripts/download_ai4i.py` avec vérification SHA-256 des données, puis `python src/run_j1_diffusion.py` et `python src/run_j1_cases.py` ; Windows, Python 3.12.10, CPU). Rapport : `experiments/results/j1_reproduction_2026-11-24.json`.
+
+| Contrôle | Résultat |
+|---|---|
+| PR-AUC, ROC-AUC, rappel, FPR et F1 sur les 12 lignes (2 représentations × 6 modèles, moyenne 3 seeds) | **identiques** (écart maximal 0) |
+| Fichier des 10 cas régénéré par la règle | **identique** (mêmes 10 UDI, même empreinte) |
+| Différences | uniquement les latences (`latency_batch10`), qui dépendent de la machine |
+
+**Pourquoi la sélection des cas n'est pas faite a posteriori** :
+- la fonction `frozen_cases(df, i_test)` ne reçoit **que les données, le split et les labels** : elle n'a accès à aucun score, seuil ni résultat de modèle (vérifié par le test `test_case_selection_rule_does_not_use_model_scores`) ;
+- la règle est déterministe : la relancer redonne exactement les mêmes 10 cas, ce que la reproduction confirme ;
+- les seuils sont calculés sur les normaux de **validation** (`test_threshold_is_computed_on_validation_normals_only`), jamais sur le test ;
+- les variantes G1-A à G1-D et leurs hyperparamètres sont fixés dans `experiments/results/j1_config.json` et identiques pour tous les cas.
+
+**Ce qui reste vrai** : l'**antériorité** du gel (commit de gel avant toute évaluation) ne peut pas être prouvée rétroactivement ; `freeze_commit` reste `null`. Pour une campagne confirmatoire : faire approuver ce fichier de cas en équipe, renseigner `freeze_commit`, puis relancer les commandes ci-dessus après ce commit.

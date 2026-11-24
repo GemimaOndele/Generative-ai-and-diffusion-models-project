@@ -72,3 +72,25 @@ def test_historical_case_inventory_is_not_a_freeze_claim():
     assert manifest["freeze_commit"] is None and not manifest["pre_evaluation_freeze_verified"]
     assert len({case["udi"] for case in cases}) == 10
     assert [(c["id"], c["udi"], c["label"]) for c in manifest["cases"]] == [(c["id"], c["udi"], c["label"]) for c in cases]
+
+
+def test_case_selection_rule_does_not_use_model_scores():
+    """La règle de sélection des 10 cas ne dépend que des données, du split et des labels (pas des scores)."""
+    import ast
+    root = Path(__file__).resolve().parents[1]
+    src = (root / "src" / "run_j1_cases.py").read_text(encoding="utf-8")
+    fn = next(n for n in ast.walk(ast.parse(src)) if isinstance(n, ast.FunctionDef) and n.name == "frozen_cases")
+    assert [a.arg for a in fn.args.args] == ["df", "i_test"]
+    names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)}
+    assert not names & {"scores", "score", "model", "thr", "threshold", "results"}
+
+
+def test_reproduction_report_matches_committed_cases():
+    import hashlib
+    import json
+    root = Path(__file__).resolve().parents[1]
+    rep = json.loads((root / "experiments" / "results" / "j1_reproduction_2026-11-24.json").read_text(encoding="utf-8"))
+    raw = (root / "experiments" / "j1_diffusion" / "test_cases.jsonl").read_bytes()
+    case_sha = hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest()  # LF normalisé (Windows/Linux)
+    assert rep["case_file_sha256"] == case_sha
+    assert rep["max_abs_difference_quality_metrics"] == 0
