@@ -23,3 +23,8 @@ index. Migrations : `sql/NNN_*.sql` appliquées dans l'ordre et tracées dans `s
 
 `test_foreign_keys_enforced`, `test_check_constraints`, `test_migrations_versioned_and_applied_once`,
 `test_unique_lot_hash` — `tests/test_rcs42_sql.py`.
+
+
+## Contraintes complémentaires de revue
+
+Les triggers garantissent la cohérence équipement/observation/analyse/alerte, y compris après modification des références. Une décision terminale requiert décideur et date non vide. Le split de métrique est obligatoire (utiliser une valeur explicite telle que global si hors split). Ces contraintes sont intégrées à la migration initiale encore non fusionnée ; les bases POC déjà créées doivent être reconstruites depuis leurs sources autorisées ou migrées séparément après sauvegarde, jamais modifiées silencieusement. Référence MCD : PR #18, `docs/25_rcs41_mcd.md` ; l'export JMerise et la comparaison restent à produire par Omar.
