@@ -1,0 +1,51 @@
+{
+  "artefact": {
+    "path": "ND",
+    "present": false,
+    "sha256": "ND"
+  },
+  "blocking_reasons": [
+    "Jeu C3 non gelé collectivement (RCS-69/RCS-81) : aucune comparaison validée.",
+    "Source de données autorisée et licence à vérifier avant tout transfert.",
+    "Le démonstrateur porte sur des signaux synthétiques, sans dispositif ni patient.",
+    "Artefact d'exécution à fournir par un humain : aucun résultat n'est généré ici."
+  ],
+  "checks": {
+    "artefact_complet": false,
+    "artefact_present": false,
+    "code_debruitage_reel": true,
+    "denoiser_entraine": true,
+    "echantillonneur_inverse": true,
+    "pas_simple_bruitage": true,
+    "perimetre_synthetique_declare": false,
+    "sans_donnees_patient": true,
+    "seed_explicite": true
+  },
+  "clinical_validation": false,
+  "decision": "A_TESTER",
+  "issue": "RCS-70",
+  "medical_claim": false,
+  "metriques_synthetiques": {
+    "baseline_MAD": "ND",
+    "learned_diffusion_denoiser": "ND"
+  },
+  "note": "Code de débruitage réel ne signifie pas preuve clinique ni transfert médical.",
+  "preuves": {
+    "dataset_sha256": "ND",
+    "diffusion_timesteps": "ND",
+    "generated_samples_count": "ND",
+    "numpy_version": "ND",
+    "sample_finite": "ND",
+    "scientific_status": "ND",
+    "scope": "ND",
+    "seed": "ND",
+    "train_loss_end": "ND",
+    "train_loss_start": "ND",
+    "train_updates": "ND",
+    "training_method": "ND",
+    "training_runtime_seconds": "ND"
+  },
+  "proof_status": "ND",
+  "schema": "rcs70_diffusion_proof/v1",
+  "script": "experiments/rcs69_diffusion_numpy.py"
+}

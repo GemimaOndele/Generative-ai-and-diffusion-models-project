@@ -1,0 +1,31 @@
+name: RCS-70 preuve diffusion
+
+on:
+  push:
+    paths:
+      - "tools/rcs70_diffusion_proof.py"
+      - "tests/test_rcs70_diffusion_proof.py"
+      - "governance/rcs70/**"
+      - "docs/47_rcs70_diffusion_preuve.md"
+      - "experiments/rcs69_diffusion_numpy.py"
+      - ".github/workflows/rcs70-diffusion-proof.yml"
+  pull_request:
+    paths:
+      - "tools/rcs70_diffusion_proof.py"
+      - "tests/test_rcs70_diffusion_proof.py"
+      - "governance/rcs70/**"
+      - "docs/47_rcs70_diffusion_preuve.md"
+      - "experiments/rcs69_diffusion_numpy.py"
+
+jobs:
+  diffusion-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Vérifier débruitage réel et absence de preuve inventée
+        run: python -m unittest tests.test_rcs70_diffusion_proof -v
+      - name: Contrôler le manifeste ND et la décision A_TESTER
+        run: python -m tools.rcs70_diffusion_proof --check
