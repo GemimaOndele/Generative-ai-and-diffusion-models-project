@@ -9,6 +9,9 @@ import csv
 import hashlib
 import json
 import logging
+import math
+import os
+import tempfile
 import sqlite3
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
@@ -74,6 +77,8 @@ def validate_row(row: dict, line_no: int) -> tuple[dict | None, str | None]:
             val = typ(str(raw).strip())
         except ValueError:
             return None, f"ligne {line_no}: type invalide pour '{src}' ({raw!r})"
+        if typ is float and not math.isfinite(val):
+            return None, f"ligne {line_no}: nombre non fini pour '{src}'"
         if lo is not None and val < lo or hi is not None and val > hi:
             return None, f"ligne {line_no}: valeur hors plage pour '{src}' ({val})"
         out[dst] = val
@@ -101,7 +106,6 @@ def import_csv(conn: sqlite3.Connection, path: str | Path, quarantine_dir: str |
                acteur: str = "pipeline") -> ImportReport:
     path = Path(path)
     digest = sha256_file(path)
-    _ensure_reference_rows(conn)
 
     existing = conn.execute("SELECT id FROM lot_import WHERE sha256 = ?", (digest,)).fetchone()
     if existing:
@@ -135,6 +139,22 @@ def import_csv(conn: sqlite3.Connection, path: str | Path, quarantine_dir: str |
         seen.add(key)
         accepted.append(rec)
 
+    if rejected:
+        q = Path(quarantine_dir) if quarantine_dir is not None else Path(os.environ.get("RCS_QUARANTINE_DIR", str(Path.home() / ".local" / "share" / "robocare_sentinel" / "quarantine")))
+        q.mkdir(parents=True, exist_ok=True)
+        target = q / f"{path.stem}_{digest[:8]}_rejets.jsonl"
+        temp = None
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=q, delete=False) as handle:
+                temp = Path(handle.name)
+                for record in rejected:
+                    handle.write(json.dumps(record, ensure_ascii=False) + "\\n")
+            os.replace(temp, target)
+        finally:
+            if temp is not None:
+                temp.unlink(missing_ok=True)
+
+    _ensure_reference_rows(conn)
     cur = conn.execute(
         "INSERT INTO lot_import(source_id, fichier, sha256, nb_lignes, nb_acceptees, nb_rejetees, nb_doublons, importe_le)"
         " VALUES (?,?,?,?,?,?,?,?)",
@@ -156,12 +176,6 @@ def import_csv(conn: sqlite3.Connection, path: str | Path, quarantine_dir: str |
     conn.execute("UPDATE lot_import SET nb_acceptees=?, nb_doublons=? WHERE id=?", (inserted, dup, lot_id))
     audit(conn, acteur, "import_lot", f"lot:{lot_id}")
     conn.commit()
-
-    if quarantine_dir and rejected:
-        q = Path(quarantine_dir)
-        q.mkdir(parents=True, exist_ok=True)
-        (q / f"{path.stem}_{digest[:8]}_rejets.jsonl").write_text(
-            "\n".join(json.dumps(r, ensure_ascii=False) for r in rejected), encoding="utf-8")
 
     log.info("Lot %s : %s acceptées, %s rejetées, %s doublons", lot_id, inserted, len(rejected), dup)
     return ImportReport(path.name, digest, "importe", lot_id, len(rows), inserted, len(rejected), dup,

@@ -37,3 +37,6 @@ Index : `idx_obs_equipement`, `idx_alerte_statut`. Passage PostgreSQL : types co
 `AUTOINCREMENT` par `GENERATED ALWAYS AS IDENTITY` et gérer les migrations (Alembic) — à décider en équipe.
 
 Tests de migrations et de contraintes CHECK : branche RCS-42 (`tests/test_rcs42_sql.py`).
+
+
+Le stockage utilise le schéma canonique RCS-42 (#19) et l'ingestion RCS-49 (#12), sans copie divergente. Les décisions terminales requièrent un acteur et un horodatage ; les alertes restent cohérentes avec leur observation. Le RBAC est une démonstration locale et ne constitue pas une authentification de production.

@@ -3,7 +3,13 @@ import csv
 import sys
 from pathlib import Path
 
-import pytest
+import unittest
+try:
+    import pytest
+except ModuleNotFoundError as exc:
+    if exc.name != 'pytest':
+        raise
+    raise unittest.SkipTest('Suite RCS-50 exécutée par sa CI dédiée') from exc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -31,7 +37,10 @@ def _write(path: Path, rows):
 def conn():
     c = connect(":memory:")
     c.execute("INSERT INTO utilisateur VALUES ('tech-01','T','technicien'),('obs-01','O','admin')")
-    return c
+    try:
+        yield c
+    finally:
+        c.close()
 
 
 def test_foreign_keys_enforced(conn):
@@ -65,3 +74,14 @@ def test_below_threshold_creates_no_alert(conn, tmp_path):
     obs = conn.execute("SELECT id FROM observation").fetchone()["id"]
     _, alerte = A.enregistrer_analyse(conn, obs, "m@v1", score=1.0, seuil=2.0)
     assert alerte is None
+
+
+def test_decision_persists_actor_timestamp_and_audit(conn, tmp_path):
+    import_csv(conn, _write(tmp_path / "b.csv", [_row(1)]))
+    obs = conn.execute("SELECT id FROM observation").fetchone()["id"]
+    _, alert = A.enregistrer_analyse(conn, obs, "m@v1", score=5, seuil=2)
+    A.decider_alerte(conn, alert, "tech-01", "rejetee")
+    row = conn.execute("SELECT statut, decide_par, decide_le FROM alerte WHERE id=?", (alert,)).fetchone()
+    assert row["statut"] == "rejetee" and row["decide_par"] == "tech-01" and row["decide_le"]
+    with pytest.raises(A.TransitionInvalide):
+        A.ouvrir_intervention(conn, alert, "tech-01")
