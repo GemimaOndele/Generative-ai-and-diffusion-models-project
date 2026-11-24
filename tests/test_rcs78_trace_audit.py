@@ -56,6 +56,13 @@ class TraceAuditTests(unittest.TestCase):
         self.write([])
         self.assertEqual(audit_traces(self.path)["decision"], "BLOCKED")
 
+    def test_untrusted_metadata_never_exported(self):
+        for field in ("strategy", "variant", "case_id", "status"):
+            self.write([dict(self.record(), **{field: "SECRET_SENTINEL"})])
+            with self.assertRaises(ValueError) as ctx:
+                audit_traces(self.path)
+            self.assertNotIn("SECRET_SENTINEL", str(ctx.exception))
+
     def test_bad_json_fails(self):
         self.path.write_text("{broken", encoding="utf-8")
         with self.assertRaises(ValueError):

@@ -27,7 +27,7 @@ class TestJointEvaluation(unittest.TestCase):
     def cases(self,frozen=True):
         rows=[dict(case_id=i,category=c,expected_behavior="abstention ou réponse sourcée",
                   approval_state="frozen" if frozen else "pending",
-                  freeze_commit="commit-demo-test" if frozen else "")
+                  freeze_commit="a" * 40 if frozen else "")
               for i,c in zip(IDS,CATS)]
         return self.write("cases.csv",CASE_COLUMNS,rows)
 
@@ -111,3 +111,15 @@ class TestJointEvaluation(unittest.TestCase):
 
 if __name__=="__main__":
     unittest.main()
+
+
+# Test additionnel : un identifiant arbitraire ne doit pas débloquer le calcul.
+class FreezeReferenceTests(TestJointEvaluation):
+    def test_invalid_freeze_reference_is_blocked(self):
+        p = self.cases()
+        with p.open(encoding="utf-8", newline="") as f:
+            rows = list(csv.DictReader(f))
+        for r in rows:
+            r["freeze_commit"] = "not-a-commit"
+        p = self.write("invalid.csv", CASE_COLUMNS, rows)
+        self.assertEqual(summarize(p, self.runs())["decision"], "BLOCKED")

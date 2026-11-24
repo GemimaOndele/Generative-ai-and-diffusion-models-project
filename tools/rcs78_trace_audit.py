@@ -13,6 +13,9 @@ import json
 from pathlib import Path
 
 ALLOWED_STRATEGIES = {"b0_extractive", "mono_a", "mono_b", "routing", "cascade"}
+ALLOWED_VARIANTS = {"default", "noguards", "route8w", "tok60", "unspecified"}
+ALLOWED_STATUSES = {"ok", "error", "fallback", "abstain", "refused", "timeout"}
+ALLOWED_CASE_IDS = {f"T{i:02d}" for i in range(1, 11)}
 REQUIRED = ("case_id", "strategy", "trace_id", "status", "latency_ms")
 SENSITIVE_MARKERS = ("patient_name", "patient_id", "nir", "api_key", "token_secret", "raw_prompt")
 
@@ -44,6 +47,9 @@ def audit_traces(path: str | Path) -> dict:
             missing = [key for key in REQUIRED if key not in rec]
             if missing:
                 raise ValueError(f"Line {lineno}: missing metadata {', '.join(missing)}")
+            identity = rec["trace_id"]
+            if not isinstance(identity, str) or not identity.strip():
+                raise ValueError("Invalid trace identity")
             records.append(rec)
     if not records:
         return {"decision": "BLOCKED", "reason": "no_traces", "count": 0,
@@ -57,12 +63,11 @@ def audit_traces(path: str | Path) -> dict:
     for rec in records:
         strategy = rec["strategy"]
         case = rec["case_id"]
-        variant = str(rec.get("variant", "unspecified"))
+        variant = rec.get("variant", "unspecified")
+        status = rec["status"]
+        if not isinstance(strategy, str) or strategy not in ALLOWED_STRATEGIES or not isinstance(variant, str) or variant not in ALLOWED_VARIANTS or not isinstance(case, str) or case not in ALLOWED_CASE_IDS or not isinstance(status, str) or status not in ALLOWED_STATUSES:
+            raise ValueError("Unexpected metadata value; audit blocked without exporting source values")
         key = (strategy, variant)
-        if strategy not in ALLOWED_STRATEGIES:
-            warnings.append("Unknown strategy present")
-        if not isinstance(case, str) or not case.startswith("T"):
-            warnings.append("Unexpected case identifier")
         if any(marker in str(field).casefold() for field in rec for marker in SENSITIVE_MARKERS):
             sensitive_field_count += 1
         ident = (strategy, variant, case)
@@ -80,7 +85,7 @@ def audit_traces(path: str | Path) -> dict:
         bucket["rows"] += 1
         if isinstance(case, str):
             bucket["case_ids"].add(case)
-        bucket["status"][str(rec["status"])] += 1
+        bucket["status"][status] += 1
         if latency is not None:
             bucket["latencies"].append(latency)
         if rec.get("score") in (0, 1) and not isinstance(rec.get("score"), bool):
