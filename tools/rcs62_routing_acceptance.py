@@ -1,9 +1,16 @@
-"""RCS-62 — acceptation du routage Multi-LLM en mode démo uniquement.
+"""RCS-62 — acceptation du routage Multi-LLM en mode démonstration uniquement.
 
 Le code de routage/cascade existe déjà dans ``src/orchestrator.py`` (RCS-75).
 Ce module fournit le **protocole d'acceptation** exigé par RCS-62 : politique
 de sélection explicable, fallback, traces sans secret et comparaison au mono,
 sur trois cas de routage distincts.
+
+Correction suite à la relecture de ``ff7aad7`` : la route *interne* est
+distinguée de la *décision effective*. ``usual`` -> A, ``complex`` -> B,
+``sensitive`` -> route interne A mais transfert bloqué avant tout appel
+(décision effective ``refused``). Le rapport compare explicitement la route
+observée à l'attendu et exécute réellement ``run_cascade`` (repli autorisé et
+repli refusé).
 
 Aucun appel réseau, aucun modèle réel, aucune mesure de qualité : les clients
 sont déterministes et la décision live reste NO_GO tant que les modèles A/B
@@ -19,7 +26,6 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Dict, List
 
-# Permet aussi `python tools/rcs62_routing_acceptance.py` depuis la racine du dépôt.
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
@@ -85,8 +91,54 @@ def build_orchestrator() -> Orchestrator:
     )
 
 
-def _case(raw: Dict[str, str]) -> CaseInput:
-    return CaseInput(**raw)
+def build_cascade_orchestrators() -> tuple[Orchestrator, Orchestrator]:
+    """Deux orchestrateurs identiques sauf le droit de repli vers B.
+
+    Le client A force un échec afin que ``run_cascade`` tente réellement B.
+    Le client B reste simulé dans les deux cas ; seules ses métadonnées
+    d'autorisation changent. Pour la sonde « autorisée », le consentement
+    historique ``ALLOW_B_DATA`` n'est pas requis : la spec déclare le transfert
+    autorisé et les droits vérifiés, ce qui ouvre réellement le chemin de repli.
+    Pour la sonde « refusée », le transfert est interdit : le repli est bloqué
+    avant tout appel à B.
+    """
+    spec_a = ModelSpec(
+        label="A", model_name="demo-routing-a", provider="demo", version="demo-1",
+        is_demo=True, data_transfer_authorized=True,
+    )
+    spec_b_allowed = ModelSpec(
+        label="B", model_name="demo-routing-b", provider="demo", version="demo-2",
+        is_demo=False, usage_rights_verified=True, data_transfer_authorized=True,
+    )
+    spec_b_blocked = ModelSpec(
+        label="B", model_name="demo-routing-b", provider="demo", version="demo-2",
+        is_demo=False, usage_rights_verified=True, data_transfer_authorized=False,
+    )
+    policy = BenchmarkPolicy(v2_pattern="cascade")
+    client_a = DemoClient(
+        spec_a.model_name, spec_a.provider, spec_a.version,
+        behavior={"force-fallback": "timeout"}, spec=spec_a,
+    )
+    allowed = Orchestrator(
+        client_a,
+        DemoClient(spec_b_allowed.model_name, spec_b_allowed.provider, spec_b_allowed.version,
+                   spec=spec_b_allowed),
+        policy=policy, spec_a=spec_a, spec_b=spec_b_allowed,
+    )
+    blocked = Orchestrator(
+        client_a,
+        DemoClient(spec_b_blocked.model_name, spec_b_blocked.provider, spec_b_blocked.version,
+                   spec=spec_b_blocked),
+        policy=policy, spec_a=spec_a, spec_b=spec_b_blocked,
+    )
+    return allowed, blocked
+
+
+def _case(raw: Dict[str, str], *, force_fallback: bool = False) -> CaseInput:
+    data = dict(raw)
+    if force_fallback:
+        data["input"] = "force-fallback " + data["input"]
+    return CaseInput(**data)
 
 
 def _summary(result: Any) -> Dict[str, Any]:
@@ -105,11 +157,23 @@ def _summary(result: Any) -> Dict[str, Any]:
     }
 
 
+def _expected_route(category: str) -> str:
+    """Route interne attendue : le cas sensible est tout de même routé vers A."""
+    return "B" if category == "complex" else "A"
+
+
+def _expected_decision(category: str) -> str:
+    """Décision effective attendue : le cas sensible est refusé avant appel."""
+    return "refused" if category == "sensitive" else "ok"
+
+
 def build_report() -> Dict[str, Any]:
     orch = build_orchestrator()
+    cascade_allowed, cascade_blocked = build_cascade_orchestrators()
     cases: List[Dict[str, Any]] = []
     for raw in ROUTE_CASES:
         case = _case(raw)
+        route_interne = orch.choose_route(case)
         mono_a = orch.run_mono(case, "A")
         mono_b = orch.run_mono(case, "B")
         routing = orch.run_routing(case)
@@ -119,24 +183,74 @@ def build_report() -> Dict[str, Any]:
         cases.append({
             "case_id": case.case_id,
             "category": case.category,
-            "route_attendue": "A" if case.category in {"usual", "complex"} else "refus",
-            "route_observee": orch.choose_route(case),
+            "route_interne_attendue": _expected_route(case.category),
+            "route_observee": route_interne,
             "route_avec_expected_modifie": orch.choose_route(decoy),
+            "route_attendue": (
+                "refus" if case.category == "sensitive" else _expected_route(case.category)
+            ),
+            "decision_effective_attendue": _expected_decision(case.category),
+            "decision_effective_observee": routing.status,
+            "transfert_bloque_avant_appel": case.category == "sensitive",
             "mono_a": _summary(mono_a),
             "mono_b": _summary(mono_b),
             "routing": _summary(routing),
         })
 
+    cascade_probe = _case(ROUTE_CASES[1], force_fallback=True)  # T05 complexe
+    cascade_autorise = cascade_allowed.run_cascade(cascade_probe)
+    cascade_refuse = cascade_blocked.run_cascade(cascade_probe)
+    cascade_sensible = orch.run_cascade(_case(ROUTE_CASES[2]))  # T10 sensible
+    cascade_probes = {
+        "repli_autorise": _summary(cascade_autorise),
+        "repli_refuse": _summary(cascade_refuse),
+        "cas_sensible": _summary(cascade_sensible),
+    }
+
+    sensitive = [row for row in cases if row["category"] == "sensitive"]
     checks = {
         "deux_modeles_distincts": orch.spec_a.identity() != orch.spec_b.identity(),
         "selection_par_categorie_uniquement": all(
             row["route_observee"] == row["route_avec_expected_modifie"]
-            and row["route_observee"] == ("B" if row["category"] == "complex" else "A")
+            and row["route_observee"] == row["route_interne_attendue"]
+            and (row["category"] == "sensitive" or row["route_observee"] == row["route_attendue"])
+            for row in cases
+        ),
+        "route_effective_conforme_au_rapport": all(
+            row["decision_effective_observee"] == row["decision_effective_attendue"]
+            and (
+                (row["category"] == "sensitive" and row["route_attendue"] == "refus")
+                or (
+                    row["category"] != "sensitive"
+                    and row["route_attendue"] == row["route_observee"]
+                )
+            )
             for row in cases
         ),
         "cas_sensible_refuse_sans_appel": all(
-            row["routing"]["status"] == "refused" and row["routing"]["call_count"] == 0
-            for row in cases if row["category"] == "sensitive"
+            row["strategy_status"] == "refused" and row["call_count"] == 0
+            for row in [
+                {"strategy_status": sensitive[0]["mono_a"]["status"],
+                 "call_count": sensitive[0]["mono_a"]["call_count"]},
+                {"strategy_status": sensitive[0]["mono_b"]["status"],
+                 "call_count": sensitive[0]["mono_b"]["call_count"]},
+                {"strategy_status": sensitive[0]["routing"]["status"],
+                 "call_count": sensitive[0]["routing"]["call_count"]},
+                {"strategy_status": cascade_probes["cas_sensible"]["status"],
+                 "call_count": cascade_probes["cas_sensible"]["call_count"]},
+            ]
+        ) if sensitive else False,
+        "fallback_autorise_effectif": (
+            cascade_probes["repli_autorise"]["status"] == "ok"
+            and cascade_probes["repli_autorise"]["reason"] == "validated_by_b"
+            and cascade_probes["repli_autorise"]["call_count"] == 2
+            and "fallback_to_b" in cascade_probes["repli_autorise"]["decisions"]
+        ),
+        "fallback_refuse_sans_appel_b": (
+            cascade_probes["repli_refuse"]["status"] == "abstain"
+            and cascade_probes["repli_refuse"]["reason"] == "fallback_blocked"
+            and cascade_probes["repli_refuse"]["call_count"] == 1
+            and "fallback_to_b" not in cascade_probes["repli_refuse"]["decisions"]
         ),
         "comparaison_mono_presente": all(
             row["mono_a"]["trace_count"] == 1
@@ -151,11 +265,18 @@ def build_report() -> Dict[str, Any]:
     }
     gate = "PASS" if all(checks.values()) else "FAIL"
     return {
-        "schema": "rcs62_routing_acceptance/v1",
+        "schema": "rcs62_routing_acceptance/v2",
         "issue": ISSUE,
         "mode": "demo_orchestration_only",
         "qualite_llm_mesuree": False,
+        "politique": {
+            "usual": {"route_interne": "A", "decision_effective": "ok"},
+            "complex": {"route_interne": "B", "decision_effective": "ok"},
+            "sensitive": {"route_interne": "A", "decision_effective": "refused",
+                          "note": "transfert bloqué avant tout appel"},
+        },
         "cases": cases,
+        "cascade_probes": cascade_probes,
         "checks": checks,
         "demo_gate": gate,
         "live_decision": "NO_GO",
@@ -164,7 +285,11 @@ def build_report() -> Dict[str, Any]:
             "Cas TP04 non gelés collectivement (freeze_commit vide dans planning/rcs81_case_manifest.csv).",
             "Aucune mesure de qualité, latence, coût ou énergie en mode démo.",
         ],
-        "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles.",
+        "note": (
+            "Le mode démo valide l'orchestration, jamais la qualité des modèles. "
+            "La route interne sélectionnée n'est pas la décision effective : "
+            "un cas sensitive reste routé vers A mais est refusé avant tout appel."
+        ),
     }
 
 
@@ -181,26 +306,45 @@ def render_doc(report: Dict[str, Any]) -> str:
         "",
         "## Politique de sélection et garde-fous",
         "",
-        "- Routage explicable fondé sur la **catégorie** du cas uniquement : "
-        "`usual` → A, `complex` → B, `sensitive` → refus avant tout appel.",
+        "- Route **interne** fondée sur la **catégorie** du cas uniquement : "
+        "`usual` → A, `complex` → B, `sensitive` → A (route sélectionnée).",
+        "- Décision **effective** distincte de la route : `usual`/`complex` → exécution, "
+        "`sensitive` → **refus avant tout appel** (`transfert_bloque_avant_appel = true`).",
         "- Le champ `expected_behavior` est réservé au scoring hors ligne et ne "
         "participe jamais au routage.",
-        "- Repli (fallback) A→B disponible dans `Orchestrator.run_cascade()` ; "
+        "- Repli (fallback) A→B réellement exécuté par `Orchestrator.run_cascade()` ; "
         "bloqué si le transfert vers B n'est pas autorisé.",
         "- `max_calls_per_case = 2`, `allow_paid_calls = false`, budget réservé "
         "avant appel, traces minimisées (hash de prompt, sans donnée patient).",
         "",
         "## Comparaison sur trois cas (mono-A / mono-B / routage)",
         "",
-        "| Cas | Catégorie | Route attendue | Route observée | mono-A | mono-B | Routage | Appels routage |",
-        "|---|---|---|---|---|---|---|---:|",
+        "| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | mono-A | mono-B | Routage | Appels routage |",
+        "|---|---|---|---|---|---|---|---|---|---:|",
     ]
     for row in report["cases"]:
         lines.append(
-            f"| {row['case_id']} | {row['category']} | {row['route_attendue']} | "
-            f"{row['route_observee']} | {row['mono_a']['status']} | "
+            f"| {row['case_id']} | {row['category']} | {row['route_interne_attendue']} | "
+            f"{row['route_observee']} | {row['route_attendue']} | "
+            f"{row['decision_effective_observee']} | {row['mono_a']['status']} | "
             f"{row['mono_b']['status']} | {row['routing']['status']} | "
             f"{row['routing']['call_count']} |"
+        )
+    lines += [
+        "",
+        "Pour T10, la route sélectionnée reste A : le refus porte sur le transfert, "
+        "pas sur le choix interne. Aucun appel n'est émis sur `mono-A`, `mono-B`, "
+        "`routing_a_b` ni `cascade_a_b`.",
+        "",
+        "## Sondes de repli (exécutées)",
+        "",
+        "| Sonde | Statut | Raison | Appels | Décisions |",
+        "|---|---|---|---:|---|",
+    ]
+    for name, item in report["cascade_probes"].items():
+        lines.append(
+            f"| {name} | {item['status']} | {item['reason']} | {item['call_count']} | "
+            f"{', '.join(item['decisions'])} |"
         )
     lines += ["", "## Contrôles", "", "| Contrôle | Résultat |", "|---|---|"]
     for name, value in report["checks"].items():
@@ -214,6 +358,7 @@ def render_doc(report: Dict[str, Any]) -> str:
     ]
     lines += [f"- {reason}" for reason in report["blocking_reasons"]]
     lines += [
+        f"- {report['note']}",
         "",
         "## Reproduction",
         "",
@@ -256,6 +401,8 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
         reasons.append("porte démo en échec")
     if report["live_decision"] != "NO_GO":
         reasons.append("décision live non conforme : NO_GO exigé sans preuve réelle")
+    if report["qualite_llm_mesuree"]:
+        reasons.append("aucune mesure qualité ne peut être revendiquée en démo")
     return not reasons, reasons
 
 

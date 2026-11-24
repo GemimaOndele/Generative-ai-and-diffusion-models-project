@@ -7,13 +7,17 @@ import unittest
 from pathlib import Path
 
 from tools.rcs62_routing_acceptance import (
+    ACCEPTANCE_REL,
+    DOC_REL,
     ROUTE_CASES,
+    build_cascade_orchestrators,
     build_orchestrator,
     build_report,
     check_outputs,
     serialize,
     write_outputs,
 )
+from src.orchestrator import CaseInput
 
 
 class Rcs62RoutingAcceptanceTests(unittest.TestCase):
@@ -46,6 +50,82 @@ class Rcs62RoutingAcceptanceTests(unittest.TestCase):
         for row in self.report["cases"]:
             self.assertEqual(row["route_observee"], row["route_avec_expected_modifie"])
         self.assertTrue(self.report["checks"]["selection_par_categorie_uniquement"])
+
+    def test_report_reconciles_expected_route_selected_route_and_effective_status(self) -> None:
+        """Régression relecture ff7aad7 : T05 devait annoncer B, pas A."""
+        by_id = {row["case_id"]: row for row in self.report["cases"]}
+        self.assertEqual(by_id["T01"]["route_attendue"], "A")
+        self.assertEqual(by_id["T05"]["route_interne_attendue"], "B")
+        self.assertEqual(by_id["T05"]["route_attendue"], "B")
+        self.assertEqual(by_id["T10"]["route_interne_attendue"], "A")
+        self.assertEqual(by_id["T10"]["route_attendue"], "refus")
+        for row in self.report["cases"]:
+            self.assertEqual(row["route_observee"], row["route_interne_attendue"])
+            self.assertEqual(row["decision_effective_observee"], row["decision_effective_attendue"])
+            if row["category"] == "sensitive":
+                self.assertEqual(row["decision_effective_observee"], "refused")
+                self.assertTrue(row["transfert_bloque_avant_appel"])
+                self.assertEqual(row["routing"]["call_count"], 0)
+            else:
+                self.assertEqual(row["route_attendue"], row["route_observee"])
+                self.assertEqual(row["decision_effective_observee"], "ok")
+        self.assertTrue(self.report["checks"]["route_effective_conforme_au_rapport"])
+        self.assertTrue(self.report["checks"]["selection_par_categorie_uniquement"])
+
+    def test_cascade_fallback_actually_runs_allowed_and_blocked(self) -> None:
+        """Le rapport ne se contente pas de déclarer le repli : il l'exécute."""
+        allowed, blocked = build_cascade_orchestrators()
+        probe = dict(ROUTE_CASES[1])
+        probe["input"] = "force-fallback " + probe["input"]
+        case = CaseInput(**probe)
+
+        ok = allowed.run_cascade(case)
+        self.assertEqual(ok.status, "ok")
+        self.assertEqual(ok.reason, "validated_by_b")
+        self.assertEqual(sum(trace.call_count for trace in ok.traces), 2)
+        self.assertEqual([trace.decision for trace in ok.traces], ["try_a", "fallback_to_b"])
+
+        refused = blocked.run_cascade(case)
+        self.assertEqual(refused.status, "abstain")
+        self.assertEqual(refused.reason, "fallback_blocked")
+        self.assertEqual(sum(trace.call_count for trace in refused.traces), 1)
+        self.assertEqual([trace.decision for trace in refused.traces], ["try_a"])
+        self.assertNotIn("fallback_to_b", [trace.decision for trace in refused.traces])
+
+        sensitive = build_orchestrator().run_cascade(CaseInput(**ROUTE_CASES[2]))
+        self.assertEqual(sensitive.status, "refused")
+        self.assertEqual(sensitive.reason, "transfer_blocked")
+        self.assertEqual(sum(trace.call_count for trace in sensitive.traces), 0)
+
+        probes = self.report["cascade_probes"]
+        self.assertEqual(probes["repli_autorise"]["status"], ok.status)
+        self.assertEqual(probes["repli_autorise"]["reason"], ok.reason)
+        self.assertEqual(probes["repli_autorise"]["call_count"], 2)
+        self.assertEqual(probes["repli_refuse"]["status"], refused.status)
+        self.assertEqual(probes["repli_refuse"]["reason"], refused.reason)
+        self.assertEqual(probes["repli_refuse"]["call_count"], 1)
+        self.assertEqual(probes["cas_sensible"]["status"], sensitive.status)
+        self.assertEqual(probes["cas_sensible"]["call_count"], 0)
+        self.assertTrue(self.report["checks"]["fallback_autorise_effectif"])
+        self.assertTrue(self.report["checks"]["fallback_refuse_sans_appel_b"])
+
+    def test_generated_doc_matches_report_route_columns(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_outputs(root, self.report)
+            doc = (root / DOC_REL).read_text(encoding="utf-8")
+            rows = {
+                line.split("|")[1].strip(): line
+                for line in doc.splitlines()
+                if line.startswith("| T") and "|" in line
+            }
+            self.assertIn("| B | B | B |", rows["T05"])
+            self.assertIn("| A | refus | refused |", rows["T10"])
+            json_text = (root / ACCEPTANCE_REL).read_text(encoding="utf-8")
+            self.assertIn('"route_attendue": "B"', json_text)
+            self.assertIn('"route_attendue": "refus"', json_text)
+            ok, reasons = check_outputs(root, self.report)
+            self.assertTrue(ok, reasons)
 
     def test_sensitive_case_refused_before_any_call(self) -> None:
         sensible = [row for row in self.report["cases"] if row["category"] == "sensitive"]
