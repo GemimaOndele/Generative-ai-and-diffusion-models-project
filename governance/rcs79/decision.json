@@ -1,14 +1,17 @@
 {
   "blocking_reasons": [
     "Cas RCS-81 non gelés collectivement : freeze_commit absent ou invalide.",
-    "Modèles A/B réels non validés (identité, licence, droits, région, rétention).",
-    "Aucune exécution live réelle sur dix cas : le mode démo ne mesure pas la qualité.",
-    "Gain V2 inférieur au seuil approuvé ou seuil ND.",
-    "p95 V2 supérieure au seuil approuvé ou seuil ND.",
-    "Coût V2 supérieur au seuil approuvé ou seuil ND.",
+    "Modèles A/B non conformes : schéma strict, identités canoniques, licence/droits/région/rétention, preuve de validation, manifeste commun et hash de config requis.",
+    "Résultats live non conformes : dix cas et empreintes du manifeste, run, commit, config, valeurs finies bornées et schéma strict exigés.",
+    "Preuves non liées au même manifeste/config/run/commit.",
+    "Seuils approuvés absents, non sourcés ou approuvés après l'exécution.",
+    "Revue indépendante non attestée (pièce signée, rôle et auteurs requis).",
+    "Commit de référence absent, tronqué ou différent de celui du run.",
+    "Gain V2 inférieur au seuil approuvé ou donnée invalide.",
+    "p95 V2 supérieure au seuil approuvé ou donnée invalide.",
+    "Coût V2 supérieur au seuil approuvé ou donnée invalide.",
     "Énergie/CO₂e non documentée ou non calculée sur un périmètre commun.",
-    "Relecteur humain absent.",
-    "Commit de référence absent.",
+    "Autorisation collective non vérifiée : l'outil ne peut émettre qu'une recommandation à ratifier par l'équipe, jamais un GO.",
     "T01: non gelé",
     "T01: référence de gel absente ou SHA complet invalide"
   ],
@@ -38,20 +41,25 @@
   },
   "decision": "NO_GO",
   "gates": {
+    "autorisation_collective": false,
     "cas_geles": false,
     "commit_reference": false,
     "cout_conforme": false,
     "energie_documentee": false,
     "latence_conforme": false,
     "modeles_ab_valides": false,
+    "preuves_manifeste_config_run": false,
     "qualite_v2_superieure": false,
     "resultats_live_reels": false,
-    "revue_humaine": false
+    "revue_independante_attestee": false,
+    "seuils_approuves_avant_resultats": false
   },
   "inputs": {
     "manifest": "planning/rcs81_case_manifest.csv",
+    "manifest_sha256": "7b6d48857184f8ef3efe1d5b949ccc4cf2cb8bcb962dab8cdf4e0406fcc889b6",
     "models": "ND",
-    "results": "ND"
+    "results": "ND",
+    "review_evidence": "ND"
   },
   "issue": "RCS-79",
   "liens": [
@@ -60,7 +68,7 @@
     "planning/rcs81_case_manifest.csv",
     "README.md"
   ],
-  "note": "Un mock ou le mode démo ne peut jamais étayer un GO.",
+  "note": "Aucune décision GO automatisée : même avec toutes les portes techniques OK, le résultat est une recommandation à ratifier collectivement. Un mock ou le mode démo ne peut jamais étayer une recommandation.",
   "reviewer": "ND",
-  "schema": "rcs79_benchmark_decision/v1"
+  "schema": "rcs79_benchmark_decision/v2"
 }
