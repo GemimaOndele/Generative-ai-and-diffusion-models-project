@@ -13,13 +13,13 @@
   "checks": {
     "artefact_complet": false,
     "artefact_present": false,
-    "code_debruitage_reel": true,
-    "denoiser_entraine": true,
-    "echantillonneur_inverse": true,
-    "pas_simple_bruitage": true,
+    "champs_exportes_autorises": true,
+    "indices_textuels_reverse": true,
+    "indices_textuels_sampler": true,
+    "indices_textuels_train": true,
     "perimetre_synthetique_declare": false,
-    "sans_donnees_patient": true,
-    "seed_explicite": true
+    "seed_explicite": true,
+    "structure_textuelle_presente": true
   },
   "clinical_validation": false,
   "decision": "A_TESTER",
@@ -29,7 +29,7 @@
     "baseline_MAD": "ND",
     "learned_diffusion_denoiser": "ND"
   },
-  "note": "Code de débruitage réel ne signifie pas preuve clinique ni transfert médical.",
+  "note": "Contrôles structurels uniquement : le hash du fichier ne prouve pas son exécution ni une validation clinique.",
   "preuves": {
     "dataset_sha256": "ND",
     "diffusion_timesteps": "ND",

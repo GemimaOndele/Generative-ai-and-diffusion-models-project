@@ -10,6 +10,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
+import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
@@ -35,14 +37,50 @@ FORBIDDEN_KEYS = ("patient", "diagnostic", "identifier", "nom", "surname")
 
 
 def structure_checks(source: str) -> Dict[str, bool]:
-    """Différencie un débruiteur entraîné d'un simple bruitage."""
+    """Indices lexicaux uniquement : ne prouvent ni entraînement ni exécution."""
     lowered = source.lower()
     return {
-        "denoiser_entraine": "denoiser" in lowered and "def train(" in lowered and "epsilon" in lowered,
-        "echantillonneur_inverse": "def sample(" in lowered and "reverse" in lowered and "ddpm" in lowered,
+        "indices_textuels_train": "denoiser" in lowered and "def train(" in lowered and "epsilon" in lowered,
+        "indices_textuels_sampler": "def sample(" in lowered and "reverse" in lowered and "ddpm" in lowered,
         "seed_explicite": "seed" in lowered,
-        "pas_simple_bruitage": "learned" in lowered and "reverse" in lowered,
+        "indices_textuels_reverse": "learned" in lowered and "reverse" in lowered,
     }
+
+
+def _finite(value: Any, maximum: float | None = None) -> bool:
+    return (type(value) in (int, float) and math.isfinite(value)
+            and value >= 0 and (maximum is None or value <= maximum))
+
+
+def _valid_evidence(key: str, value: Any) -> bool:
+    if key in {"seed", "diffusion_timesteps", "train_updates", "generated_samples_count"}:
+        return type(value) is int and value >= (0 if key == "seed" else 1)
+    if key in {"training_runtime_seconds", "train_loss_start", "train_loss_end"}:
+        return _finite(value)
+    if key == "sample_finite":
+        return value is True
+    if key == "dataset_sha256":
+        return isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value) is not None
+    if key == "numpy_version":
+        return isinstance(value, str) and re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,3}", value) is not None
+    return value == {
+        "scope": "synthetic_signal_research_only_not_medical",
+        "scientific_status": "illustrative_experiment_not_clinical_validation",
+        "training_method": "learned_epsilon_MLP_Adam_DDPM_reverse_sampler",
+    }.get(key)
+
+
+def _valid_metrics(value: Any) -> bool:
+    if not isinstance(value, dict):
+        return False
+    counts = {"TP", "FP", "TN", "FN"}
+    ratios = {"precision", "recall", "f1", "false_alarm_rate"}
+    threshold = "threshold_validation_normal_95pct"
+    return (set(value) == counts | ratios | {threshold}
+            and all(type(value[k]) is int and value[k] >= 0 for k in counts)
+            and sum(value[k] for k in counts) > 0
+            and all(value[k] is None or _finite(value[k], 1) for k in ratios)
+            and _finite(value[threshold]))
 
 
 def read_artifact(path: Path) -> Dict[str, Any]:
@@ -74,31 +112,31 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
             "present": True,
         }
         for key in EVIDENCE_KEYS:
-            if key in payload:
+            if key in payload and _valid_evidence(key, payload[key]):
                 evidence[key] = payload[key]
         for key in METRIC_KEYS:
-            if key in payload:
+            if key in payload and _valid_metrics(payload[key]):
                 metrics[key] = payload[key]
 
     forbidden = [
         key for key in evidence if any(marker in key.lower() for marker in FORBIDDEN_KEYS)
     ]
     checks.update({
-        "code_debruitage_reel": all(structure_checks(source).values()),
+        "structure_textuelle_presente": all(structure_checks(source).values()),
         "artefact_present": artifact_info["present"],
         "artefact_complet": artifact_info["present"] and all(
             evidence[key] not in (ND, None, "") for key in EVIDENCE_KEYS
-        ),
+        ) and all(metrics[key] != ND for key in METRIC_KEYS),
         "perimetre_synthetique_declare": str(evidence["scope"]).startswith("synthetic")
         and "not_clinical" in str(evidence["scientific_status"]),
-        "sans_donnees_patient": not forbidden and "patient" not in json.dumps(metrics, ensure_ascii=False).lower(),
+        "champs_exportes_autorises": not forbidden and "patient" not in json.dumps(metrics, ensure_ascii=False).lower(),
     })
-    if not checks["code_debruitage_reel"]:
+    if not checks["structure_textuelle_presente"]:
         proof_status = "BLOQUE"
     elif not artifact_info["present"]:
         proof_status = "ND"
     elif all(checks.values()):
-        proof_status = "DEMO_SYNTHETIQUE"
+        proof_status = "DECLARATION_NON_AUTHENTIFIEE"
     else:
         proof_status = "INCOMPLET"
     return {
@@ -119,7 +157,7 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
             "Le démonstrateur porte sur des signaux synthétiques, sans dispositif ni patient.",
             "Artefact d'exécution à fournir par un humain : aucun résultat n'est généré ici.",
         ],
-        "note": "Code de débruitage réel ne signifie pas preuve clinique ni transfert médical.",
+        "note": "Contrôles structurels uniquement : le hash du fichier ne prouve pas son exécution ni une validation clinique.",
     }
 
 
@@ -129,16 +167,15 @@ def serialize(report: Dict[str, Any]) -> str:
 
 def render_doc(report: Dict[str, Any]) -> str:
     lines = [
-        f"# {ISSUE} — Preuve de diffusion réelle (débruitage, pas simple bruitage)",
+        f"# {ISSUE} — Manifeste de diffusion (contrôles structurels)",
         "",
-        "> Décision : **A_TESTER**. Le code vérifie un débruiteur DDPM entraîné "
-        "sur signaux synthétiques ; aucune mesure clinique ni artifact fabriqué "
-        "n'est revendiqué ici.",
+        "> Décision : **A_TESTER**. Les indices textuels ne prouvent pas un entraînement ; "
+        "les artefacts fournis restent des déclarations non authentifiées.",
         "",
-        "## Chaîne minimale vérifiée",
+        "## Chaîne à vérifier par exécution",
         "",
         "- `q_sample` / bruit gaussien puis prédiction de `epsilon` par un MLP entraîné ;",
-        "- échantillonneur inverse DDPM (`sample`) réellement exécuté ;",
+        "- échantillonneur inverse DDPM (`sample`) à exécuter ;",
         "- seuil fixé sur validation indépendante, détection comparée à une baseline MAD ;",
         "- seed, versions, hash du jeu et temps d'entraînement consignés dans l'artefact si fourni.",
         "",
@@ -203,8 +240,8 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
             reasons.append(f"{rel.as_posix()} absent")
         elif path.read_text(encoding="utf-8") != content:
             reasons.append(f"{rel.as_posix()} obsolète : relancer --write")
-    if not report["checks"]["code_debruitage_reel"]:
-        reasons.append("code de débruitage non vérifié")
+    if not report["checks"]["structure_textuelle_presente"]:
+        reasons.append("structure textuelle de débruitage absente")
     if report["medical_claim"] or report["clinical_validation"]:
         reasons.append("aucune revendication médicale n'est autorisée")
     if report["decision"] != "A_TESTER":

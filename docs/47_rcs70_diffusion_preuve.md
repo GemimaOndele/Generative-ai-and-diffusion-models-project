@@ -1,11 +1,11 @@
-# RCS-70 — Preuve de diffusion réelle (débruitage, pas simple bruitage)
+# RCS-70 — Manifeste de diffusion (contrôles structurels)
 
-> Décision : **A_TESTER**. Le code vérifie un débruiteur DDPM entraîné sur signaux synthétiques ; aucune mesure clinique ni artifact fabriqué n'est revendiqué ici.
+> Décision : **A_TESTER**. Les indices textuels ne prouvent pas un entraînement ; les artefacts fournis restent des déclarations non authentifiées.
 
-## Chaîne minimale vérifiée
+## Chaîne à vérifier par exécution
 
 - `q_sample` / bruit gaussien puis prédiction de `epsilon` par un MLP entraîné ;
-- échantillonneur inverse DDPM (`sample`) réellement exécuté ;
+- échantillonneur inverse DDPM (`sample`) à exécuter ;
 - seuil fixé sur validation indépendante, détection comparée à une baseline MAD ;
 - seed, versions, hash du jeu et temps d'entraînement consignés dans l'artefact si fourni.
 
@@ -36,15 +36,15 @@
 
 | Contrôle | Résultat |
 |---|---|
-| denoiser_entraine | OK |
-| echantillonneur_inverse | OK |
+| indices_textuels_train | OK |
+| indices_textuels_sampler | OK |
 | seed_explicite | OK |
-| pas_simple_bruitage | OK |
-| code_debruitage_reel | OK |
+| indices_textuels_reverse | OK |
+| structure_textuelle_presente | OK |
 | artefact_present | ÉCHEC / ND |
 | artefact_complet | ÉCHEC / ND |
 | perimetre_synthetique_declare | ÉCHEC / ND |
-| sans_donnees_patient | OK |
+| champs_exportes_autorises | OK |
 
 **Statut de preuve : ND — décision : A_TESTER.**
 

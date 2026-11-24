@@ -48,17 +48,23 @@ def make_root(directory: Path, script: str = REAL_SCRIPT) -> Path:
     return directory
 
 
+def metric_fixture() -> dict:
+    return {"TP": 4, "FP": 1, "TN": 4, "FN": 1, "precision": 0.8,
+            "recall": 0.8, "f1": 0.8, "false_alarm_rate": 0.2,
+            "threshold_validation_normal_95pct": 1.0}
+
+
 def artifact_payload() -> dict:
     return {
         "seed": 42, "numpy_version": "2.2.6", "diffusion_timesteps": 24,
-        "train_updates": 250, "dataset_sha256": "abc123",
+        "train_updates": 250, "dataset_sha256": "a" * 64,
         "training_runtime_seconds": 1.234, "generated_samples_count": 3,
         "sample_finite": True,
         "scope": "synthetic_signal_research_only_not_medical",
         "scientific_status": "illustrative_experiment_not_clinical_validation",
         "training_method": "learned_epsilon_MLP_Adam_DDPM_reverse_sampler",
         "train_loss_start": 1.0, "train_loss_end": 0.2,
-        "baseline_MAD": {"f1": 0.57}, "learned_diffusion_denoiser": {"f1": 0.97},
+        "baseline_MAD": metric_fixture(), "learned_diffusion_denoiser": metric_fixture(),
     }
 
 
@@ -70,7 +76,7 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def test_real_denoising_script_is_detected(self) -> None:
+    def test_textual_indices_do_not_prove_denoising(self) -> None:
         checks = structure_checks(REAL_SCRIPT)
         self.assertTrue(all(checks.values()))
         self.assertFalse(any(structure_checks(NOISE_ONLY_SCRIPT).values()))
@@ -78,7 +84,7 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
     def test_no_artifact_means_every_evidence_is_nd(self) -> None:
         report = build_report(self.root)
         self.assertEqual(report["proof_status"], "ND")
-        self.assertTrue(report["checks"]["code_debruitage_reel"])
+        self.assertTrue(report["checks"]["structure_textuelle_presente"])
         self.assertFalse(report["checks"]["artefact_present"])
         for value in report["preuves"].values():
             self.assertEqual(value, "ND")
@@ -95,9 +101,22 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
         )
         self.assertEqual(report["preuves"]["seed"], 42)
         self.assertEqual(report["preuves"]["numpy_version"], "2.2.6")
-        self.assertEqual(report["proof_status"], "DEMO_SYNTHETIQUE")
+        self.assertEqual(report["proof_status"], "DECLARATION_NON_AUTHENTIFIEE")
         for value in report["checks"].values():
             self.assertTrue(value, value)
+
+    def test_invalid_artifact_values_are_not_exported(self) -> None:
+        path = self.root / "run.json"
+        for key, value in (("dataset_sha256", "bad"), ("sample_finite", False),
+                           ("train_updates", 0), ("training_runtime_seconds", float("inf")),
+                           ("baseline_MAD", {"unknown": "unexpected"})):
+            with self.subTest(key=key):
+                payload = artifact_payload()
+                payload[key] = value
+                path.write_text(json.dumps(payload), encoding="utf-8")
+                report = build_report(self.root, str(path))
+                self.assertEqual(report["proof_status"], "INCOMPLET")
+                self.assertFalse(report["checks"]["artefact_complet"])
 
     def test_incomplete_artifact_stays_incomplete(self) -> None:
         path = self.root / "partial.json"
