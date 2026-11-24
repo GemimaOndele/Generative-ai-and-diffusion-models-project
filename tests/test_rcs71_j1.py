@@ -2,8 +2,14 @@
 import sys
 from pathlib import Path
 
+import unittest
+try:
+    import pytest
+except ModuleNotFoundError as exc:
+    if exc.name != 'pytest':
+        raise
+    raise unittest.SkipTest('Suite RCS-71 exécutée par sa CI dédiée') from exc
 import numpy as np
-import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -49,10 +55,20 @@ def test_threshold_is_computed_on_validation_normals_only():
 
 def test_results_csv_common_schema_and_ten_cases():
     import csv
-    p = Path(__file__).resolve().parents[1] / "experiments" / "results.csv"
+    p = Path(__file__).resolve().parents[1] / "experiments" / "results" / "j1_cases_results.csv"
     with open(p, encoding="utf-8") as f:
         r = list(csv.DictReader(f))
     assert list(r[0].keys()) == ["case_id", "strategy", "metric", "value", "unit", "evidence_status", "notes"]
     assert len({x["case_id"] for x in r}) == 10
     assert {x["evidence_status"] for x in r} == {"mesuré"}
     assert {"B0a_zscore", "G1-A_ddpm_elbo_nt10"} <= {x["strategy"] for x in r}
+
+
+def test_historical_case_inventory_is_not_a_freeze_claim():
+    import json
+    p = Path(__file__).resolve().parents[1] / "experiments" / "j1_diffusion"
+    manifest = json.loads((p / "case_inventory.json").read_text(encoding="utf-8"))
+    cases = [json.loads(line) for line in (p / "test_cases.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert manifest["freeze_commit"] is None and not manifest["pre_evaluation_freeze_verified"]
+    assert len({case["udi"] for case in cases}) == 10
+    assert [(c["id"], c["udi"], c["label"]) for c in manifest["cases"]] == [(c["id"], c["udi"], c["label"]) for c in cases]

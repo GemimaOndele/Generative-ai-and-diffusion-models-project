@@ -5,7 +5,7 @@ Pilote : Omar · binôme : Elias · relais : Ayoub · relecteur : Gémima.
 Commande : `python src/run_j1_diffusion.py` (3 seeds, ~6 min CPU). Résultats bruts : `experiments/results/j1_runs.jsonl`,
 agrégats : `j1_summary.csv`, configuration : `j1_config.json`, preuve de génération : `j1_generation.json`.
 
-## 1. Protocole (figé avant les essais)
+## 1. Protocole rapporté (chronologie du gel à vérifier)
 
 | Élément | Choix | Justification |
 |---|---|---|
@@ -91,7 +91,7 @@ mémorisation**.
 - Une anomalie détectée ne prouve pas une panne imminente ; ce n'est pas de la « maintenance prédictive ».
 - Matériel : CPU uniquement (12 cœurs logiques, PyTorch 2.x CPU) ; temps mesurés sur une machine partagée.
 
-## 6. Les 10 cas gelés (`experiments/results.csv`)
+## 6. Les 10 cas historiques (`experiments/results/j1_cases_results.csv`)
 
 Seuils (quantile 95 % des normaux de validation) : B0a_zscore = 2.322, B0b_isolation_forest = 0.583, G1-A_ddpm_elbo_nt10 = 0.781, G1-B_ddpm_elbo_nt3 = 0.878.
 
@@ -116,5 +116,10 @@ chaque mesure reste individuellement dans la plage normale, sont manquées par t
 complet (2 000 observations, 3 seeds) où G1-A double le rappel d'IForest et dépasse le z-score (docs/32_rcs71_baseline_vs_diffusion.md).
 
 Commande : `python src/run_j1_cases.py` → `experiments/j1_diffusion/test_cases.jsonl` (définition des cas, règle de
-sélection écrite avant exécution) et `experiments/results.csv` (format commun `case_id,strategy,metric,value,unit,
+sélection déterministe, antériorité non attestée) et `experiments/results/j1_cases_results.csv` (format commun `case_id,strategy,metric,value,unit,
 evidence_status,notes` : scores, seuils, alertes et justesse par cas et par modèle, statut **mesuré**).
+
+
+## 7. Revue de provenance et intégration
+
+Le manifeste `experiments/j1_diffusion/case_inventory.json` identifie les 10 cas du commit 6506cba et le blob Git du JSONL. Il est établi après les résultats : **il ne prouve pas un gel préalable**. Le champ freeze_commit reste null. Les résultats et hypothèses sont exploratoires ; aucune approbation scientifique n'est revendiquée. Pour une campagne confirmatoire, faire approuver en équipe la règle, les variantes, les seuils et un manifeste daté avant les exécutions, conserver les preuves et reproduire sur un environnement versionné. Les résultats historiques restent intacts dans un fichier J1 distinct, sans remplacer le gabarit commun de main. Dépendances : schéma #19, ingestion #12, stockage #20 et socle J1 #14.

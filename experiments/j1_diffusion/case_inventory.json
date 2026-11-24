@@ -1,0 +1,83 @@
+{
+  "source": "AI4I 2020 UCI CC BY 4.0, non-medical",
+  "source_sha256": "dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e",
+  "split": "stratified 60/20/20 seed 42",
+  "case_file": "experiments/j1_diffusion/test_cases.jsonl",
+  "case_blob_git_sha": "b18078c74f86bdc5aa18eb7eb295aa90fe02c62d",
+  "observed_commit": "6506cba8bfedd43a5609f498af187ea818eba184",
+  "freeze_commit": null,
+  "approval_state": "historical_inventory_only",
+  "pre_evaluation_freeze_verified": false,
+  "cases": [
+    {
+      "id": "J01",
+      "udi": 3081,
+      "label": 0,
+      "category": "normal_typique",
+      "mode": "-"
+    },
+    {
+      "id": "J02",
+      "udi": 736,
+      "label": 0,
+      "category": "normal_typique",
+      "mode": "-"
+    },
+    {
+      "id": "J03",
+      "udi": 2682,
+      "label": 0,
+      "category": "normal_typique",
+      "mode": "-"
+    },
+    {
+      "id": "J04",
+      "udi": 33,
+      "label": 0,
+      "category": "normal_typique",
+      "mode": "-"
+    },
+    {
+      "id": "J05",
+      "udi": 3813,
+      "label": 0,
+      "category": "normal_difficile (proche frontière HDF)",
+      "mode": "-"
+    },
+    {
+      "id": "J06",
+      "udi": 6257,
+      "label": 1,
+      "category": "panne_TWF",
+      "mode": "TWF"
+    },
+    {
+      "id": "J07",
+      "udi": 4392,
+      "label": 1,
+      "category": "panne_HDF",
+      "mode": "HDF"
+    },
+    {
+      "id": "J08",
+      "udi": 2016,
+      "label": 1,
+      "category": "panne_PWF",
+      "mode": "PWF"
+    },
+    {
+      "id": "J09",
+      "udi": 3936,
+      "label": 1,
+      "category": "panne_OSF",
+      "mode": "OSF"
+    },
+    {
+      "id": "J10",
+      "udi": 6961,
+      "label": 1,
+      "category": "panne_RNF",
+      "mode": "RNF"
+    }
+  ]
+}

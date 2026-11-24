@@ -1,11 +1,11 @@
-"""RCS-71 / TP03 — Baseline vs diffusion sur 10 cas gelés (mêmes entrées, mêmes critères).
+"""RCS-71 / TP03 — Baseline vs diffusion sur 10 cas historiques (mêmes entrées, mêmes critères).
 
-Les 10 cas sont tirés du TEST (split figé seed 42) par une règle déterministe écrite AVANT exécution :
+Les 10 cas sont tirés du TEST (split figé seed 42) par une règle déterministe ; le gel antérieur aux résultats n'est pas vérifié :
 4 normaux typiques, 1 normal « difficile » proche de la frontière HDF, 1 panne par mode (TWF, HDF, PWF, OSF, RNF).
 Seuils : quantile 95 % des normaux de validation (jamais le test). Représentation : `raw`.
 
     python src/run_j1_cases.py
-Sorties : experiments/j1_diffusion/test_cases.jsonl (définition des cas) et experiments/results.csv
+Sorties : experiments/j1_diffusion/test_cases.jsonl (définition des cas) et experiments/results/j1_cases_results.csv
 (format commun du dépôt : case_id,strategy,metric,value,unit,evidence_status,notes)
 """
 from __future__ import annotations
@@ -96,7 +96,7 @@ def main() -> None:
                                         ("latency_batch10", round(dt, 2), "ms")):
                 rows.append({"case_id": base["case_id"], "strategy": name, "metric": metric, "value": value,
                              "unit": unit, "evidence_status": "mesuré", "notes": base["notes"]})
-    out = ROOT / "experiments" / "results.csv"
+    out = ROOT / "experiments" / "results" / "j1_cases_results.csv"
     with open(out, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["case_id", "strategy", "metric", "value", "unit", "evidence_status", "notes"])
         w.writeheader()
