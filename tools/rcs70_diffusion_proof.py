@@ -33,7 +33,17 @@ EVIDENCE_KEYS = (
     "train_loss_start", "train_loss_end",
 )
 METRIC_KEYS = ("baseline_MAD", "learned_diffusion_denoiser")
-ALLOWED_PAYLOAD_KEYS = frozenset(EVIDENCE_KEYS) | frozenset(METRIC_KEYS)
+# Métadonnées produites par experiment() : facultatives, contrôlées, jamais exportées.
+OPTIONAL_COUNTS = frozenset({"signal_length", "train_normal", "validation_normal",
+                             "test_normal", "test_anomaly"})
+ALLOWED_LIMITATIONS = (
+    "All signals and labels artificial; no clinical transfer.",
+    "No superiority asserted beyond this synthetic fixture.",
+    "Thresholds fixed on independent validation normals.",
+    "No energy or API cost measurements.",
+)
+ALLOWED_PAYLOAD_KEYS = (frozenset(EVIDENCE_KEYS) | frozenset(METRIC_KEYS)
+                        | OPTIONAL_COUNTS | {"dataset_source", "limitations"})
 FORBIDDEN_KEYS = ("patient", "diagnostic", "identifier", "nom", "surname")
 
 
@@ -82,6 +92,17 @@ def _valid_metrics(value: Any) -> bool:
             and sum(value[k] for k in counts) > 0
             and all(value[k] is None or _finite(value[k], 1) for k in ratios)
             and _finite(value[threshold]))
+
+
+def _valid_optional_metadata(payload: Dict[str, Any]) -> bool:
+    for key in OPTIONAL_COUNTS:
+        if key in payload and (type(payload[key]) is not int or payload[key] < 1):
+            return False
+    if "dataset_source" in payload and payload["dataset_source"] != "generated_sine_signals_in_code":
+        return False
+    if "limitations" in payload and payload["limitations"] != list(ALLOWED_LIMITATIONS):
+        return False
+    return True
 
 
 def forbidden_markers(node: Any) -> List[str]:
@@ -139,7 +160,9 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
 
     forbidden = forbidden_markers(payload) if payload is not None else []
     unexpected = sorted(set(payload) - ALLOWED_PAYLOAD_KEYS) if payload is not None else []
-    strict_schema = not artifact_info["present"] or (not unexpected and not forbidden)
+    strict_schema = not artifact_info["present"] or (
+        not unexpected and not forbidden and _valid_optional_metadata(payload)
+    )
     checks.update({
         "structure_textuelle_presente": all(structure_checks(source).values()),
         "artefact_present": artifact_info["present"],

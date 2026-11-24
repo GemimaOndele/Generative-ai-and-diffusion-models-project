@@ -145,6 +145,33 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
                 self.assertFalse(ok)
                 self.assertTrue(any("schéma d'artefact" in reason for reason in reasons))
 
+    def test_native_experiment_metadata_is_accepted_without_export(self) -> None:
+        payload = artifact_payload()
+        payload.update(
+            dataset_source="generated_sine_signals_in_code", signal_length=32,
+            train_normal=320, validation_normal=96, test_normal=64, test_anomaly=64,
+            limitations=[
+                "All signals and labels artificial; no clinical transfer.",
+                "No superiority asserted beyond this synthetic fixture.",
+                "Thresholds fixed on independent validation normals.",
+                "No energy or API cost measurements.",
+            ],
+        )
+        path = self.root / "native.json"
+        path.write_text(json.dumps(payload), encoding="utf-8")
+        report = build_report(self.root, str(path))
+        self.assertTrue(report["checks"]["schema_artefact_strict"])
+        self.assertTrue(report["checks"]["artefact_complet"])
+        self.assertEqual(report["proof_status"], "DECLARATION_NON_AUTHENTIFIEE")
+        self.assertNotIn("limitations", report["preuves"])
+        for key, value in (("limitations", ["arbitrary free text"]),
+                           ("dataset_source", "arbitrary source"),
+                           ("train_normal", True)):
+            with self.subTest(key=key):
+                changed = dict(payload, **{key: value})
+                path.write_text(json.dumps(changed), encoding="utf-8")
+                self.assertFalse(build_report(self.root, str(path))["checks"]["schema_artefact_strict"])
+
     def test_incomplete_artifact_stays_incomplete(self) -> None:
         path = self.root / "partial.json"
         path.write_text(json.dumps({"seed": 42}), encoding="utf-8")
