@@ -50,6 +50,23 @@ class OrchestratorTests(unittest.TestCase):
         self.assertEqual(len(res.traces), 1)
         self.assertEqual(res.reason, "validated_by_a")
 
+    def test_cascade_respects_max_calls_per_case(self):
+        policy = BenchmarkPolicy(max_calls_per_case=1)
+        a = CountingClient("a", behavior={"case_id=T08": "invalid"})
+        b = CountingClient("b")
+        spec_b = ModelSpec(
+            label="B", model_name="b", provider="demo", version="1",
+            is_demo=False, data_transfer_authorized=True, usage_rights_verified=True,
+        )
+        orch = Orchestrator(a, b, policy=policy, spec_b=spec_b)
+        case = CaseInput(case_id="T08", task="qa", input="conflict", category="contradiction")
+        res = orch.run_cascade(case)
+        self.assertEqual(res.status, "abstain")
+        self.assertEqual(res.reason, "max_calls_per_case_reached")
+        self.assertEqual(len(a.calls), 1)
+        self.assertEqual(len(b.calls), 0)
+        self.assertEqual(res.traces[0].call_count, 1)
+
     def test_cascade_fallback_blocked_without_authorization(self):
         # A fails validation, B not authorized -> abstain
         case = CaseInput(case_id="T08", task="qa", input="conflict", category="contradiction")

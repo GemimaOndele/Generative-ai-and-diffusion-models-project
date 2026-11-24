@@ -146,7 +146,7 @@ Ne pas réessayer indéfiniment. Le fallback est une abstention explicite ou une
 
 - Aucun transfert non autorisé à un second fournisseur : droits, région, contrat et rétention doivent être validés pour A et B avant tout appel.
 - Aucune instruction exécutée depuis le contenu RAG : le contexte est traité comme une donnée, jamais comme une consigne.
-- Aucune boucle illimitée : une seule tentative bornée par modèle, avec timeouts, budget et conditions d'arrêt explicites.
+- Aucune boucle illimitée : `max_calls_per_case` est contrôlé avant chaque requête ; avec une limite à 1, le fallback B est bloqué après l'appel A, même si sa réponse n'est pas validée. Timeouts, budget et conditions d'arrêt restent explicites.
 - Les mocks ne sont autorisés que pour les **tests du logiciel** (orchestration, traçabilité, gestion d'erreurs) ; jamais pour les mesures de qualité des LLM.
 
 ## Frontière des preuves (Omar local ≠ RCS-81 collectif)

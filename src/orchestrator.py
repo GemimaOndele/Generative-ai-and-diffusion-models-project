@@ -351,7 +351,12 @@ class Orchestrator:
         spec: ModelSpec,
         ledger: CostLedger,
     ) -> Tuple[Optional[TraceRecord], Optional[float]]:
-        """Bloque avant le réseau : arrêt d'urgence, solde et montant prévisionnel."""
+        """Bloque avant le réseau : limite d'appels, arrêt d'urgence, solde et montant prévisionnel."""
+        if ledger.calls >= self.policy.max_calls_per_case:
+            trace = self._blocked_trace(
+                case, strategy, decision, spec, "abstain", "max_calls_per_case_reached"
+            )
+            return trace, None
         if budget_exceeded():
             trace = self._blocked_trace(case, strategy, decision, spec, "abstain", "budget_exceeded")
             return trace, None
