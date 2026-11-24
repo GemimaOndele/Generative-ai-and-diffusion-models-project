@@ -74,3 +74,8 @@ Après correction : `python -m unittest discover -s tests -v` → 10 tests réus
 Aucun cas n'a été gelé, aucun appel LLM ni benchmark réel n'a été produit.
 Les fixtures des tests restent des fixtures logicielles ; aucune approbation
 scientifique ne peut en être déduite. La revue des modèles/traces demeure humaine.
+
+
+## Revue et gel collectif
+
+Le comparateur exige un SHA Git complet de 40 ou 64 caractères hexadécimaux ; la syntaxe ne prouve ni son existence ni son antériorité. L'équipe doit vérifier le commit de référence, le contenu exact du workload et les jugements attendus, consigner l'accord avant les essais et rattacher les traces à cette version. Le commit historique RCS-77 proposé par Omar est une piste, non une validation collective antérieure. Les résultats RCS-64 (#26) sont exploratoires et ne suffisent pas à remplir rétroactivement freeze_commit. Les champs du manifeste restent vides tant que la décision n'est pas établie.

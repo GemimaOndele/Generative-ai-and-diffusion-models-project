@@ -11,6 +11,7 @@ import csv
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import json
 import math
+import re
 from pathlib import Path
 
 CASE_COLUMNS = {"case_id", "category", "expected_behavior", "approval_state", "freeze_commit"}
@@ -83,8 +84,8 @@ def check_manifest(rows: list[dict[str, str]]) -> tuple[bool, list[str]]:
     for row in rows:
         if row["approval_state"].strip() != "frozen":
             blocked.append(f"{row['case_id']}: non gelé")
-        if not row["freeze_commit"].strip():
-            blocked.append(f"{row['case_id']}: référence de gel absente")
+        if not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', row["freeze_commit"].strip()):
+            blocked.append(f"{row['case_id']}: référence de gel absente ou SHA complet invalide")
         if not row["expected_behavior"].strip():
             blocked.append(f"{row['case_id']}: comportement attendu manquant")
     hashes={r["freeze_commit"].strip() for r in rows}
@@ -183,7 +184,7 @@ def summarize(manifest: str | Path, results: str | Path) -> dict:
         "unit_of_analysis":"demande documentaire correctement traitée, citation ou abstention selon attendu gelé",
         "results":metrics,
         "notes":[
-            "La présence d'un fichier prétendument live ne prouve pas sa provenance : relecture des traces obligatoire.",
+            "La présence d'un SHA valide syntaxiquement ou d'un fichier prétendument live ne prouve pas sa provenance : vérifier le commit, son contenu, son antériorité et les preuves de revue humaine.",
             "Cost euro calculé seulement lorsque les dix coûts sont disponibles ; zéro succès -> coût unitaire ND.",
             "Les valeurs d'énergie API distante restent ND, aucune conversion depuis les tokens/tarifs.",
             "Aucune décision biomédicale autonome, aucune certification réglementaire.",
