@@ -39,13 +39,22 @@ dominant attendu). Pas de double comptage : aucune infrastructure n'est incluse 
 | Énergie de l'échantillon (Wh) | 0,47 | 0,87 | 1,15 | 1,32 | estimé |
 | Coût variable élec. de l'échantillon (€) | 0,000116 | 0,000217 | 0,000288 | 0,000330 | calculé (hyp. tarif) |
 | Autres coûts alloués (€) | ND (revue humaine, amortissement) | ND | ND | ND | ND |
-| **Coût élec. par tâche réussie (€)** ⚠ électricité seule | **0,000029** | 0,000036 | **0,000041** | 0,000047 | calculé |
+| **Coût électrique estimé par succès (€)** ⚠ électricité seule | **0,000029** | 0,000036 | **0,000041** | 0,000047 | calculé |
 | p95 (s) / taux d'échec technique | 11,7 / 0 % | 11,8 / 0 % | 23,4 / 0 % | 33,5 / 0 % | mesuré |
 | Projection 2 000 questions/mois (€ élec.) | 0,02 | 0,04 | 0,06 | 0,07 | calculé (hyp. volume + tarif) |
 
 > ⚠ **Ce n'est pas le coût complet d'une tâche.** Ces montants ne couvrent que l'électricité estimée du poste, avec un tarif **hypothétique**. Le temps de revue humaine et l'amortissement du matériel sont **ND** ; le coût complet est suivi dans RCS-90 (PR #5).
 
-Formules : coût élec = kWh × 0,25 € ; **coût par succès = coût élec du périmètre / nombre de tâches réussies** (ND si 0
+**Deux indicateurs distincts, à ne pas confondre (harmonisation avec RCS-90, revue de la PR #5)** :
+
+| Indicateur | Ticket | Numérateur | Statut du chiffre | Ici |
+|---|---|---|---|---|
+| **Coût électrique estimé par succès** | RCS-82 (ce document) | électricité du poste estimée par CodeCarbon × tarif hypothétique | estimé / hypothèse | renseigné |
+| **Coût décaissé observé par succès** | RCS-90 (`tools/rcs90_finops.py`, champ `partial_unit_cost`) | dépenses réellement payées et justifiées (facture, preuve) | observé | **ND** : aucune dépense réelle (modèles locaux, aucun fournisseur) |
+
+Le coût complet par succès additionnera les deux, plus la main d'œuvre valorisée (hypothétique, séparée de la trésorerie) et l'amortissement, dans le tableau RCS-90. La colonne `cout_par_succes_eur` de `experiments/results/rcs82_tp05_mesures.csv` correspond au **coût électrique estimé par succès**.
+
+Formules : coût élec = kWh × 0,25 € ; **coût électrique estimé par succès = coût élec du périmètre / nombre de tâches réussies** (ND si 0
 succès) ; projection mensuelle = coût élec moyen par question × 2 000 questions/mois (**hypothèse** de volume).
 Si l'on passait à des API payantes : coût API = Σ (tokens_in/10⁶ × tarif_in + tokens_out/10⁶ × tarif_out) avec le
 tarif **daté et sourcé** du fournisseur — **ND ici** (aucun tarif vérifié, aucune facture).
@@ -130,7 +139,7 @@ vérification par un juriste/DPO est nécessaire avant tout usage réel.
 
 | Question finale | Réponse courte |
 |---|---|
-| FinOps : coût par tâche réussie et source ? | V2 cascade : **0,000041 € d'électricité / succès — électricité seule, pas un coût complet** (7 succès, 1,15 Wh estimés × 0,25 €/kWh hypothèse) ; coût API 0 € (local) ; revue humaine **ND** — c'est le poste à mesurer en priorité. Source : `rcs82_tp05_mesures.csv` |
+| FinOps : coût par tâche réussie et source ? | V2 cascade : **coût électrique estimé par succès = 0,000041 € — électricité seule, pas un coût complet ; coût décaissé observé (RCS-90) = ND** (7 succès, 1,15 Wh estimés × 0,25 €/kWh hypothèse) ; coût API 0 € (local) ; revue humaine **ND** — c'est le poste à mesurer en priorité. Source : `rcs82_tp05_mesures.csv` |
 | Green : mesuré / estimé / ND, limites ? | **Estimé** (CodeCarbon, TDP, France, PUE 1) : 0,065 g CO₂e pour 10 questions en cascade ; limites : pas de wattmètre, machine partagée, amont (entraînement, matériel) hors périmètre |
 | Éthique : principal risque résiduel ? | **Hallucination sourcée** : le modèle B invente un prix en citant un document réel (T07) et toutes les stratégies retiennent une note obsolète (T08) → contrôle de fidélité + validation humaine obligatoires |
 | GO / NO-GO / À TESTER : pourquoi ? | **GO conditionnel** pour la cascade (meilleure qualité, B appelé 1 fois sur 10, coût négligeable en local) ; **NO-GO** pour le levier 60 tokens (−3 succès) ; **À TESTER** : contexte réduit, cache, validateur de fidélité, puis mesure du temps de revue humaine |
