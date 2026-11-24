@@ -80,6 +80,18 @@ python -m src.governance docs/registre_decisions_risques.md --export-dir governa
 
 Les fichiers `governance/adr_register.csv` et `governance/risk_register.csv` sont générés, jamais ressaisis. La preuve [acceptance_rcs18.json](governance/acceptance_rcs18.json) vérifie les neuf critères Jira sur pièces : `python -m src.governance docs/registre_decisions_risques.md --export-dir governance --acceptance`. Exposition résiduelle et GO/NO-GO restent `ND` tant qu'une décision humaine n'est pas consignée en revue Sprint.
 
+### 🧪 Smoke test mono-LLM déterministe (RCS-61)
+
+Le workload défini est `experiments/rcs61_workload.jsonl` (cinq questions, identifiants uniques). La commande ci-dessous exécute deux fois le même workload avec un client déterministe, vérifie l'égalité des digests, puis écrit logs, latence locale, score observable et résumé :
+
+```bash
+python -m src.run_baseline_mono --cases experiments/rcs61_workload.jsonl --out experiments/results/rcs61_baseline_mono
+```
+
+Qualité LLM réelle, latence réseau, coût et CO₂e restent `ND` : ces fichiers valident l'orchestration logicielle, pas un modèle clinique.
+
+Les cinq fixtures M01–M05 sont volontairement indépendantes : elles couvrent la logique mono, l'abstention et le refus, sans appel LLM. Elles ne sont ni les dix cas candidats RCS-77 (#37), ni le futur workload gelé RCS-81 (#9). Aucun classement entre stratégies ne peut être déduit de ces deux jeux distincts. La comparaison J2 exige les mêmes dix cas, une version et une empreinte approuvées en amont. Le code de détection règles/ML J1 relève de RCS-55 (#40), avec calibration train-only ; la comparaison industrielle reste portée par RCS-71 (#25). Les journaux de cette démo sont locaux et ne doivent pas contenir de données réelles.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |
