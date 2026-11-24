@@ -6,6 +6,7 @@ data, no network download, no real medical records).
 """
 from __future__ import annotations
 
+from contextlib import closing
 import csv
 import hashlib
 import sqlite3
@@ -92,7 +93,7 @@ class RealSchemaIntegration(unittest.TestCase):
     def test_readonly_mode_enforced(self):
         import_csv(self.conn, self.csv_path)
         self.assertTrue(preview_ai4i(self.db)["read_only"])
-        with sqlite3.connect(self.db) as conn:
+        with closing(sqlite3.connect(self.db)) as conn:
             self.assertEqual(conn.execute("SELECT count(*) FROM observation").fetchone()[0], 2)
 
 
