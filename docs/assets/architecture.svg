@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="290" viewBox="0 0 1200 290" role="img" aria-label="Architecture cible RoboCare Sentinel: sources autorisées, qualité des données, deux jalons IA, application web, validation par technicien, observabilité transverse">
+<defs>
+  <linearGradient id="top" x2="1" y2="1"><stop stop-color="#0b2b44"/><stop offset="1" stop-color="#184963"/></linearGradient>
+  <linearGradient id="light" x2="1" y2="1"><stop stop-color="#f8fcfc"/><stop offset="1" stop-color="#e9f4f6"/></linearGradient>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#1d9fad"/></marker>
+</defs>
+<rect width="1200" height="290" rx="22" fill="#eef6f8"/>
+<text x="35" y="39" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="#0f3449">Architecture cible · Validation humaine obligatoire</text>
+<g font-family="Arial,sans-serif" font-size="13" fill="#183449">
+  <rect x="33" y="71" width="188" height="106" rx="13" fill="#fff" stroke="#c6dce5" stroke-width="2"/>
+  <text x="53" y="99" font-size="17" font-weight="700">01 · Sources</text>
+  <text x="53" y="125">Capteurs / historiques</text>
+  <text x="53" y="146">Notices autorisées</text>
+  <rect x="267" y="71" width="188" height="106" rx="13" fill="#fff" stroke="#c6dce5" stroke-width="2"/>
+  <text x="287" y="99" font-size="17" font-weight="700">02 · Qualité</text>
+  <text x="287" y="125">Provenance &amp; licence</text>
+  <text x="287" y="146">Validation des données</text>
+  <rect x="501" y="71" width="188" height="106" rx="13" fill="url(#top)"/>
+  <text x="521" y="99" font-size="17" font-weight="700" fill="#fff">03 · IA</text>
+  <text x="521" y="125" fill="#b8fff1">J1 · Diffusion + ML</text>
+  <text x="521" y="146" fill="#b8fff1">J2 · RAG / Multi-LLM</text>
+  <rect x="735" y="71" width="188" height="106" rx="13" fill="#fff" stroke="#c6dce5" stroke-width="2"/>
+  <text x="755" y="99" font-size="17" font-weight="700">04 · Plateforme</text>
+  <text x="755" y="125">4 vues de monitoring</text>
+  <text x="755" y="146">Alertes &amp; historique</text>
+  <rect x="969" y="71" width="198" height="106" rx="13" fill="#e5f7f2" stroke="#47b6a2" stroke-width="2"/>
+  <text x="989" y="99" font-size="17" font-weight="700">05 · Technicien</text>
+  <text x="989" y="125">Revue et arbitrage</text>
+  <text x="989" y="146">Aucune action autonome</text>
+</g>
+<g stroke="#1d9fad" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+ <path d="M223 124H263"/><path d="M457 124H497"/><path d="M691 124H731"/><path d="M925 124H965"/>
+</g>
+<rect x="34" y="208" width="1132" height="52" rx="13" fill="#d9eeed"/>
+<path d="M51 235H1148" stroke="#4cb9b8" stroke-width="1" stroke-dasharray="7 7"/>
+<rect x="124" y="218" width="955" height="34" rx="11" fill="#f5ffff" stroke="#75d5cf"/>
+<text x="142" y="240" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#176d75">Observabilité continue :</text>
+<text x="319" y="240" font-family="Arial,sans-serif" font-size="13" fill="#28546a">versions · risques &amp; biais · traces · coût &amp; temps · énergie locale / ND API distante</text>
+</svg>

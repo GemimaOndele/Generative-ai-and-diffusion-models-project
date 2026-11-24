@@ -1,0 +1,111 @@
+{
+  "schema_version": "0.1.0",
+  "data_mode": "fictional_demo_only",
+  "privacy": "no_patient_data_no_real_telemetry",
+  "source": "Fixtures inventées uniquement pour valider la navigation et la présentation",
+  "units": {
+    "cost": "EUR",
+    "energy": "kWh",
+    "duration": "ms"
+  },
+  "devices": [
+    {
+      "id": "DEMO-001",
+      "family": "Pompe de démonstration",
+      "site": "Site démo A",
+      "status": "En observation"
+    },
+    {
+      "id": "DEMO-002",
+      "family": "Pompe de démonstration",
+      "site": "Site démo A",
+      "status": "À vérifier"
+    },
+    {
+      "id": "DEMO-003",
+      "family": "Capteur fictif",
+      "site": "Site démo B",
+      "status": "En observation"
+    },
+    {
+      "id": "DEMO-004",
+      "family": "Capteur fictif",
+      "site": "Site démo B",
+      "status": "À vérifier"
+    }
+  ],
+  "readings": [
+    {
+      "device": "DEMO-001",
+      "site": "Site démo A",
+      "value": 9.8,
+      "unit": "u.a.",
+      "quality": "valide",
+      "anomaly": false
+    },
+    {
+      "device": "DEMO-002",
+      "site": "Site démo A",
+      "value": 13.2,
+      "unit": "u.a.",
+      "quality": "valide",
+      "anomaly": true
+    },
+    {
+      "device": "DEMO-003",
+      "site": "Site démo B",
+      "value": null,
+      "unit": "u.a.",
+      "quality": "invalide",
+      "anomaly": false
+    },
+    {
+      "device": "DEMO-004",
+      "site": "Site démo B",
+      "value": 6.2,
+      "unit": "u.a.",
+      "quality": "valide",
+      "anomaly": true
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-DEMO-01",
+      "device": "DEMO-002",
+      "site": "Site démo A",
+      "reason": "Vérification humaine suggérée",
+      "state": "En attente"
+    },
+    {
+      "id": "ACT-DEMO-02",
+      "device": "DEMO-004",
+      "site": "Site démo B",
+      "reason": "Revue documentaire fictive",
+      "state": "En attente"
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "RUN-DEMO-01",
+      "site": "Site démo A",
+      "model": "mono-A fictif",
+      "version": "illustration-v0",
+      "latency_ms": 850,
+      "cost_eur": 0.002,
+      "energy_kwh": null,
+      "co2e_kg": null,
+      "boundary": "API distante : ND"
+    },
+    {
+      "run_id": "RUN-DEMO-02",
+      "site": "Site démo B",
+      "model": "routing fictif",
+      "version": "illustration-v0",
+      "latency_ms": 1270,
+      "cost_eur": 0.007,
+      "energy_kwh": null,
+      "co2e_kg": null,
+      "boundary": "API distante : ND"
+    }
+  ]
+}
