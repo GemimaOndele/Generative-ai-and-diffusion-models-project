@@ -55,6 +55,7 @@ experiments/results/*.json
 !experiments/results/rcs57_diffusion_variants.json
 experiments/results/*.csv
 !experiments/results/tp05_mesures.csv
+!experiments/results/rcs55_baseline_rules_ml.json
 experiments/results/live/
 
 # Exécution locale / temporaire
