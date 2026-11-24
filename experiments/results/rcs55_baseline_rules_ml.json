@@ -1,0 +1,141 @@
+{
+  "schema": "rcs55_baseline_rules_ml/v1",
+  "status": "computed",
+  "source": "synthetic_smoke_test",
+  "config": {
+    "seed": 42,
+    "test_size": 0.2,
+    "contamination": 0.05,
+    "z_threshold": 3.0,
+    "data_path": null,
+    "synthetic": true,
+    "n_samples": 2000,
+    "n_features": 8
+  },
+  "protocol": {
+    "dataset": "dataset indépendant à sélectionner ; --synthetic = smoke test non médical",
+    "split": "train/test stratifié",
+    "seed": 42,
+    "test_size": 0.2,
+    "rule_calibration": "StandardScaler ajusté sur le train uniquement ; moyenne et écart-type train (ddof=0) appliqués au test, sans recalcul sur le test",
+    "metrics": [
+      "precision",
+      "recall",
+      "f1",
+      "confusion_matrix"
+    ]
+  },
+  "thresholds": {
+    "z_threshold": {
+      "value": 3.0,
+      "calibration": "statistiques du z-score calibrées sur le train uniquement",
+      "frozen": false,
+      "status": "ND (seuil de détection non gelé)"
+    },
+    "isolation_forest_contamination": {
+      "value": 0.05,
+      "frozen": false,
+      "status": "ND (seuil de détection non gelé)"
+    },
+    "decision_threshold": "ND (à définir avant campagne)"
+  },
+  "dataset": {
+    "rows": 2000,
+    "features": [
+      "f1",
+      "f2",
+      "f3",
+      "f4",
+      "f5",
+      "f6",
+      "f7",
+      "f8"
+    ],
+    "label_distribution": {
+      "0": 1900,
+      "1": 100
+    },
+    "train_rows": 1600,
+    "test_rows": 400
+  },
+  "rules_calibration": {
+    "fitted_on": "train_only",
+    "features": [
+      "f1",
+      "f2",
+      "f3",
+      "f4",
+      "f5",
+      "f6",
+      "f7",
+      "f8"
+    ],
+    "means": [
+      0.17140870079344647,
+      0.21179025796075646,
+      0.2197572706687432,
+      0.14102622695135036,
+      0.16451859250796702,
+      0.1841482996175153,
+      0.1826762527877954,
+      0.1848974283819061
+    ],
+    "stds": [
+      1.30459469750556,
+      1.359339724256777,
+      1.3145821863567977,
+      1.4022714008318078,
+      1.3084901878737485,
+      1.3763108554686256,
+      1.3512429219110988,
+      1.3805070859097162
+    ],
+    "std_ddof": 0
+  },
+  "rules_baseline": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "confusion_matrix_labels": [
+      "normal",
+      "anomaly"
+    ],
+    "confusion_matrix": [
+      [
+        380,
+        0
+      ],
+      [
+        0,
+        20
+      ]
+    ],
+    "report": "              precision    recall  f1-score   support\n\n      normal       1.00      1.00      1.00       380\n     anomaly       1.00      1.00      1.00        20\n\n    accuracy                           1.00       400\n   macro avg       1.00      1.00      1.00       400\nweighted avg       1.00      1.00      1.00       400\n"
+  },
+  "isolation_forest_baseline": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "confusion_matrix_labels": [
+      "normal",
+      "anomaly"
+    ],
+    "confusion_matrix": [
+      [
+        380,
+        0
+      ],
+      [
+        0,
+        20
+      ]
+    ],
+    "report": "              precision    recall  f1-score   support\n\n      normal       1.00      1.00      1.00       380\n     anomaly       1.00      1.00      1.00        20\n\n    accuracy                           1.00       400\n   macro avg       1.00      1.00      1.00       400\nweighted avg       1.00      1.00      1.00       400\n"
+  },
+  "notes": [
+    "Résultats calculés uniquement sur les données chargées/générées lors de cette exécution.",
+    "Le mode synthetic est un smoke test, pas une preuve de performance médicale.",
+    "Aucun seuil de détection n'est gelé : la valeur de configuration n'est pas un seuil validé.",
+    "Aucun résultat ne doit être interprété comme validation clinique."
+  ]
+}
