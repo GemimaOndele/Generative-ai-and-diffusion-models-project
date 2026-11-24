@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "RoboCare Sentinel — Jira RCS (suivi de projet)"
+    url: "https://gemimakerenondelepourou.atlassian.net/jira/software/projects/RCS/boards/1/backlog"
+    about: "Utiliser Jira pour les tâches, décisions et incidents sans données sensibles. Ne pas dupliquer le backlog dans GitHub Issues."
