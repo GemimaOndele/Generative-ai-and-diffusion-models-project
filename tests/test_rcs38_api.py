@@ -105,6 +105,17 @@ class TestRCS38LocalAPI(unittest.TestCase):
         self.assertEqual(self.request(path, p, origin="https://external.example")[0], 403)
         self.assertEqual(self.request(path, p, content_type="text/plain")[0], 415)
 
+    def test_repeated_early_rejections_do_not_abort_or_mutate(self):
+        path = "/api/v1/demo/actions/ACT-DEMO-01/decision"
+        payload = {"decision": "approved", "reason_code": "controle_confirme",
+                   "acknowledge_simulation": True}
+        for _ in range(12):
+            self.assertEqual(self.request(path, payload, origin="https://external.example")[0], 403)
+            self.assertEqual(self.request(path, payload, host="external.example")[0], 403)
+            self.assertEqual(self.request(path, payload, content_type="text/plain")[0], 415)
+            self.assertEqual(self.request("/api/v1/unknown", payload)[0], 404)
+        self.assertEqual(self.request("/api/v1/demo/overview")[1]["events"], [])
+
     def test_state_persists_in_sqlite_restart(self):
         path = "/api/v1/demo/actions/ACT-DEMO-01/decision"
         p = {"decision": "approved", "reason_code": "controle_confirme",

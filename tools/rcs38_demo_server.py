@@ -240,6 +240,24 @@ def make_handler(store: DemoStore):
             }
 
         def do_POST(self):
+            # Consume only a bounded body before any early rejection. Closing
+            # a socket with unread request bytes can abort the response on Windows.
+            self.close_connection = True
+            lengths = self.headers.get_all("Content-Length", [])
+            if self.headers.get("Transfer-Encoding") is not None or len(lengths) != 1:
+                return self._json(400, {"error": "Encadrement de requête invalide"})
+            if not re.fullmatch(r"[0-9]{1,4}", lengths[0]):
+                return self._json(413, {"error": "Taille de requête invalide"})
+            length = int(lengths[0])
+            if not 1 <= length <= 1024:
+                return self._json(413, {"error": "Taille de requête invalide"})
+            self.connection.settimeout(2.0)
+            try:
+                raw_body = self.rfile.read(length)
+            except (TimeoutError, OSError):
+                return
+            if len(raw_body) != length:
+                return self._json(400, {"error": "Corps de requête incomplet"})
             if not self._local_host():
                 return self._json(403, {"error": "Hôte local obligatoire"})
             path = urlsplit(self.path).path
@@ -258,13 +276,7 @@ def make_handler(store: DemoStore):
             if self.headers.get_content_type() != "application/json":
                 return self._json(415, {"error": "Content-Type application/json obligatoire"})
             try:
-                length = int(self.headers.get("Content-Length", "0"))
-            except ValueError:
-                length = 0
-            if not 1 <= length <= 1024:
-                return self._json(413, {"error": "Taille de requête invalide"})
-            try:
-                body = json.loads(self.rfile.read(length))
+                body = json.loads(raw_body)
                 if not isinstance(body, dict):
                     raise ValueError("Objet JSON attendu")
                 if set(body) != {"decision", "reason_code", "acknowledge_simulation"}:
