@@ -6,11 +6,15 @@ Durcissement appliqué à la suite de la relecture de ``5a1cf06`` :
 - identités de modèles canoniques (ni ``ND``/``None``, ni espaces) ;
 - résultats liés au manifeste RCS-81 (dix identifiants et empreintes), à la config,
   au run et au commit réels ; approbation des seuils antérieure à l'exécution ;
-- revue indépendante attestée par une pièce signée ;
-- aucune décision GO automatisée : au mieux RECOMMANDATION_A_RATIFIER,
-  tant que l'autorisation collective n'est pas vérifiée par l'équipe.
+- revue indépendante **déclarée** (rôle, auteurs, date et commit cohérents),
+  sans qualifier une chaîne textuelle de signature vérifiée ;
+- porte bloquée sur la vérification humaine externe de la revue et sur
+  l'autorisation collective ; aucune décision GO automatisée.
 
-Sans preuves conformes, la décision reste NO_GO.
+Une chaîne de signature n'est pas vérifiée cryptographiquement par cet outil :
+elle ne peut pas lever la porte de vérification. Sans preuves conformes, la
+décision reste NO_GO ; avec des preuves conformes mais sans vérification
+humaine externe documentée, elle reste A_TESTER.
 """
 from __future__ import annotations
 
@@ -36,7 +40,7 @@ ISSUE = "RCS-79"
 SCHEMA_DECISION = "rcs79_benchmark_decision/v2"
 SCHEMA_MODELS = "rcs79_models/v1"
 SCHEMA_RESULTS = "rcs79_live_results/v1"
-SCHEMA_REVIEW = "rcs79_independent_review/v1"
+SCHEMA_REVIEW = "rcs79_independent_review_declaration/v2"
 DEFAULT_MANIFEST = Path("planning") / "rcs81_case_manifest.csv"
 ACCEPTANCE_REL = Path("governance") / "rcs79" / "decision.json"
 DOC_REL = Path("docs") / "48_rcs79_benchmark_decision.md"
@@ -288,11 +292,19 @@ def results_valid(
     )
 
 
-def review_valid(
+def review_declaration_valid(
     payload: Optional[Dict[str, Any]], *, reviewer: str, commit: str, executed_at: Optional[date]
 ) -> bool:
+    """Présence d'une déclaration de revue indépendante, pas preuve de signature.
+
+    Le champ ``declaration`` est un texte libre : il ne fait l'objet d'aucune
+    vérification cryptographique. Cette fonction contrôle uniquement la
+    cohérence formelle (rôle indépendant, relecteur absent des auteurs, date,
+    commit et avis). La vérification de l'identité et du document signé reste
+    une porte humaine externe, toujours bloquée dans cet outil hors ligne.
+    """
     if not _strict(payload, {
-        "schema", "reviewer", "role", "reviewed_at", "decision", "signature", "commit", "authors",
+        "schema", "reviewer", "role", "reviewed_at", "decision", "declaration", "commit", "authors",
     }):
         return False
     assert payload is not None
@@ -305,8 +317,7 @@ def review_valid(
         return False
     if payload["decision"] not in REVIEW_DECISIONS:
         return False
-    signature = _canonical_text(payload["signature"])
-    if signature is None or len(signature) < 16:
+    if _canonical_text(payload["declaration"]) is None:
         return False
     reviewed_at = _date(payload["reviewed_at"])
     authors = payload["authors"]
@@ -319,6 +330,13 @@ def review_valid(
     return reviewed_at is not None and executed_at is not None and reviewed_at >= executed_at
 
 
+def recommendation_ready(gates: Dict[str, bool]) -> bool:
+    """Vrai seulement si toutes les portes, y compris la vérification humaine, sont levées."""
+    return bool(gates) and not gates.get("autorisation_collective", True) and all(
+        value for key, value in gates.items() if key != "autorisation_collective"
+    )
+
+
 def build_report(
     root: Path,
     manifest: Optional[str] = None,
@@ -326,7 +344,7 @@ def build_report(
     models: Optional[str] = None,
     reviewer: Optional[str] = None,
     commit: Optional[str] = None,
-    review_evidence: Optional[str] = None,
+    review_declaration: Optional[str] = None,
 ) -> Dict[str, Any]:
     manifest_path = Path(manifest) if manifest else root / DEFAULT_MANIFEST
     if not manifest_path.is_absolute():
@@ -341,7 +359,7 @@ def build_report(
 
     models_payload = _load_json(models)
     results_payload = _load_json(results)
-    review_payload = _load_json(review_evidence)
+    review_payload = _load_json(review_declaration)
     reviewer = _canonical_text(reviewer, NAME_PATTERN) or ND
     commit = _sha(commit) or ND
     config_sha256 = models_payload.get("config_sha256") if models_payload else None
@@ -355,7 +373,7 @@ def build_report(
         config_sha256=config_sha256 if valid_models else None,
         commit=commit,
     )
-    valid_review = review_valid(
+    declared_review = review_declaration_valid(
         review_payload, reviewer=reviewer, commit=commit, executed_at=executed_at
     )
     linked_cases = cases_linked(results_payload, rows, fingerprint)
@@ -376,9 +394,12 @@ def build_report(
         "resultats_live_reels": valid_results,
         "preuves_manifeste_config_run": linked_cases and linked_run,
         "seuils_approuves_avant_resultats": approved_thresholds,
-        "revue_independante_attestee": valid_review,
+        "declaration_revue_independante": declared_review,  # présence seulement, pas une preuve
         "commit_reference": bool(commit != ND and linked_run and results_payload
                                  and results_payload.get("commit") == commit),
+        # Une chaîne textuelle n'est pas une signature vérifiable : la porte
+        # reste bloquée jusqu'à une vérification humaine externe documentée.
+        "verification_humaine_externe_signature": False,
         "autorisation_collective": False,  # hors ligne : jamais vérifiable par cet outil
         "qualite_v2_superieure": False,
         "latence_conforme": False,
@@ -400,10 +421,9 @@ def build_report(
             for name in STRATEGIES
         )
 
-    technical_gates = [key for key in gates if key != "autorisation_collective"]
     if not (gates["cas_geles"] and gates["modeles_ab_valides"]):
         decision = "NO_GO"
-    elif all(gates[key] for key in technical_gates):
+    elif recommendation_ready(gates):
         decision = "RECOMMANDATION_A_RATIFIER"
     else:
         decision = "A_TESTER"
@@ -425,8 +445,16 @@ def build_report(
         blocking_reasons.append("Preuves non liées au même manifeste/config/run/commit.")
     if not gates["seuils_approuves_avant_resultats"]:
         blocking_reasons.append("Seuils approuvés absents, non sourcés ou approuvés après l'exécution.")
-    if not gates["revue_independante_attestee"]:
-        blocking_reasons.append("Revue indépendante non attestée (pièce signée, rôle et auteurs requis).")
+    if not gates["declaration_revue_independante"]:
+        blocking_reasons.append(
+            "Déclaration de revue indépendante absente ou non conforme : rôle indépendant, "
+            "relecteur absent des auteurs, date et commit requis."
+        )
+    if not gates["verification_humaine_externe_signature"]:
+        blocking_reasons.append(
+            "Vérification humaine externe de la revue non documentée : une déclaration ou une "
+            "chaîne de signature textuelle n'est pas une preuve vérifiable."
+        )
     if not gates["commit_reference"]:
         blocking_reasons.append("Commit de référence absent, tronqué ou différent de celui du run.")
     for key, reason in (
@@ -452,7 +480,7 @@ def build_report(
             "manifest_sha256": fingerprint or ND,
             "results": results or ND,
             "models": models or ND,
-            "review_evidence": review_evidence or ND,
+            "review_declaration": review_declaration or ND,
         },
         "comparatif": comparatif,
         "gates": gates,
@@ -467,9 +495,10 @@ def build_report(
             "README.md",
         ],
         "note": (
-            "Aucune décision GO automatisée : même avec toutes les portes techniques OK, "
-            "le résultat est une recommandation à ratifier collectivement. "
-            "Un mock ou le mode démo ne peut jamais étayer une recommandation."
+            "Aucune décision GO automatisée. Une déclaration de revue n'est pas une signature "
+            "vérifiée : la vérification humaine externe et l'autorisation collective restent à "
+            "documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode démo ne peut "
+            "jamais étayer une recommandation."
         ),
     }
 
@@ -484,9 +513,10 @@ def render_doc(report: Dict[str, Any]) -> str:
         "",
         "> Ce document est généré à partir de preuves strictement validées. "
         "Sans gel RCS-81 ni modèles conformes, la décision est **NO_GO** ; "
-        "sans exécution live conforme, elle reste **A_TESTER**. Même avec toutes "
-        "les portes techniques OK, l'outil ne produit qu'une **RECOMMANDATION_A_RATIFIER** : "
-        "l'autorisation collective doit être vérifiée par l'équipe. Aucune valeur n'est simulée.",
+        "avec des preuves conformes mais sans vérification humaine externe documentée, "
+        "elle reste **A_TESTER**. La revue indépendante n'est qu'une déclaration : "
+        "aucune chaîne de signature n'est vérifiée ici et aucune recommandation ne peut "
+        "être émise sans vérification humaine et ratification collective. Aucune valeur n'est simulée.",
         "",
         "## Comparatif mono / V2",
         "",
@@ -520,8 +550,10 @@ def render_doc(report: Dict[str, Any]) -> str:
         "- Numériques : types JSON uniquement, booléens refusés, finis, ≥ 0 et bornés "
         "(qualité et delta ∈ [0, 1] ; p95 ≤ 86 400 000 ms).",
         "- Preuves : hash du manifeste, hash de config, `run_id`, commit complet, "
-        "dix `case_id`/`freeze_commit`, approbation des seuils avant `executed_at`, "
-        "pièce de revue signée par un relecteur absent des auteurs.",
+        "dix `case_id`/`freeze_commit`, approbation des seuils avant `executed_at` et "
+        "déclaration de revue indépendante (relecteur absent des auteurs). "
+        "Le champ `declaration` n'est pas vérifié cryptographiquement : une signature "
+        "textuelle ne lève pas la porte `verification_humaine_externe_signature`.",
         "",
         "## Limites et bloquants",
         "",
@@ -540,7 +572,7 @@ def render_doc(report: Dict[str, Any]) -> str:
         "python -m tools.rcs79_benchmark_decision --write",
         "python -m tools.rcs79_benchmark_decision --manifest <manifeste_gelé.csv> "
         "--models <modeles.json> --results <resultats_live.json> "
-        "--review-evidence <revue.json> --reviewer <nom> --commit <sha40|sha64> --write",
+        "--review-declaration <declaration.json> --reviewer <nom> --commit <sha40|sha64> --write",
         "python -m tools.rcs79_benchmark_decision --check",
         "python -m unittest tests.test_rcs79_benchmark_decision -v",
         "```",
@@ -577,14 +609,15 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
         reasons.append("GO interdit : seule une recommandation à ratifier peut être émise")
     if report["decision"] not in {"NO_GO", "A_TESTER", "RECOMMANDATION_A_RATIFIER"}:
         reasons.append("décision inconnue")
-    technical = [key for key in report["gates"] if key != "autorisation_collective"]
-    if report["decision"] == "RECOMMANDATION_A_RATIFIER" and (
-        not all(report["gates"][key] for key in technical)
-        or report["gates"]["autorisation_collective"]
-    ):
-        reasons.append("recommandation sans toutes les portes techniques ou avec ratification simulée")
-    if report["decision"] == "A_TESTER" and all(report["gates"][key] for key in technical):
-        reasons.append("portes techniques OK : la recommandation à ratifier est attendue")
+    gates = report["gates"]
+    if gates.get("revue_independante_attestee") is not None:
+        reasons.append("porte « revue attestée » supprimée : la revue n'est qu'une déclaration")
+    if gates.get("verification_humaine_externe_signature") is not False:
+        reasons.append("vérification humaine externe non vérifiable hors ligne : porte bloquée obligatoire")
+    if report["decision"] == "RECOMMANDATION_A_RATIFIER" and not recommendation_ready(gates):
+        reasons.append("recommandation sans toutes les portes ou avec vérification/ratification simulée")
+    if report["decision"] == "A_TESTER" and recommendation_ready(gates):
+        reasons.append("portes levées : la recommandation à ratifier est attendue")
     return not reasons, reasons
 
 
@@ -594,7 +627,9 @@ def main(argv: List[str] | None = None) -> int:
     parser.add_argument("--manifest")
     parser.add_argument("--results")
     parser.add_argument("--models")
-    parser.add_argument("--review-evidence")
+    parser.add_argument("--review-declaration", dest="review_declaration")
+    parser.add_argument("--review-evidence", dest="review_declaration",
+                        help="alias historique de --review-declaration")
     parser.add_argument("--reviewer")
     parser.add_argument("--commit")
     parser.add_argument("--write", action="store_true")
@@ -603,7 +638,7 @@ def main(argv: List[str] | None = None) -> int:
     try:
         report = build_report(
             args.root, args.manifest, args.results, args.models,
-            args.reviewer, args.commit, args.review_evidence,
+            args.reviewer, args.commit, args.review_declaration,
         )
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(str(exc))

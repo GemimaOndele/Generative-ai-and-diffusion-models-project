@@ -2,8 +2,8 @@
 
 Chaque porte ajoutée après la relecture possède au moins un test négatif :
 booléens/infini/bornes, ND/espaces dans les identités, résultats autoproclamés live,
-lien manifeste/config/run/commit, antériorité des seuils, revue indépendante
-attestée et interdiction d'un GO automatisé.
+lien manifeste/config/run/commit, antériorité des seuils, déclaration de revue
+indépendante et interdiction d'un GO automatisé.
 """
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import json
 import tempfile
 import unittest
 from copy import deepcopy
+from datetime import date
 from pathlib import Path
 
 from tools.rcs79_benchmark_decision import (
@@ -28,7 +29,7 @@ from tools.rcs79_benchmark_decision import (
     manifest_fingerprint,
     models_valid,
     results_valid,
-    review_valid,
+    review_declaration_valid,
     serialize,
     write_outputs,
 )
@@ -131,7 +132,7 @@ def review_payload(commit: str = COMMIT, reviewer: str = "Omar") -> dict:
         "role": "independent",
         "reviewed_at": "2026-11-24",
         "decision": "GO_WITH_RESERVATIONS",
-        "signature": "signature-attestee-20261124",
+        "declaration": "Je declare avoir relu le benchmark et ses preuves",
         "commit": commit,
         "authors": ["Aminata", "Gémima"],
     }
@@ -162,7 +163,7 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
             "manifest": str(self.manifest),
             "models": str(self.models),
             "results": str(self.results),
-            "review_evidence": str(self.review),
+            "review_declaration": str(self.review),
             "reviewer": "Omar",
             "commit": COMMIT,
         }
@@ -189,13 +190,15 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertEqual(report["decision"], "NO_GO")
         self.assertFalse(report["gates"]["cas_geles"])
 
-    def test_all_valid_inputs_only_produce_recommendation(self) -> None:
+    def test_all_valid_inputs_require_human_verification(self) -> None:
         report = self.report()
+        deferred = {"autorisation_collective", "verification_humaine_externe_signature"}
         for name, value in report["gates"].items():
-            if name != "autorisation_collective":
+            if name not in deferred:
                 self.assertTrue(value, name)
-        self.assertFalse(report["gates"]["autorisation_collective"])
-        self.assertEqual(report["decision"], "RECOMMANDATION_A_RATIFIER")
+        for name in deferred:
+            self.assertFalse(report["gates"][name], name)
+        self.assertEqual(report["decision"], "A_TESTER")
         self.assertEqual(report["schema"], SCHEMA_DECISION)
         write_outputs(self.root, report)
         ok, reasons = check_outputs(self.root, report)
@@ -323,18 +326,18 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
                 )
                 self.assertFalse(self.report(results=str(path))["gates"]["seuils_approuves_avant_resultats"])
 
-    # --- Revue indépendante attestée ----------------------------------------
-    def test_arbitrary_reviewer_name_without_attestation_is_rejected(self) -> None:
-        report = self.report(review_evidence=None, reviewer="Nimportequi")
-        self.assertFalse(report["gates"]["revue_independante_attestee"])
+    # --- Déclaration de revue indépendante (non vérifiée) --------------------
+    def test_arbitrary_reviewer_name_without_declaration_is_rejected(self) -> None:
+        report = self.report(review_declaration=None, reviewer="Nimportequi")
+        self.assertFalse(report["gates"]["declaration_revue_independante"])
         self.assertEqual(report["decision"], "A_TESTER")
-        self.assertEqual(report["reviewer"], "Nimportequi")  # nom canonique mais non attesté
+        self.assertEqual(report["reviewer"], "Nimportequi")  # nom canonique mais non déclaré
 
-    def test_review_attestation_must_be_independent_signed_and_current(self) -> None:
+    def test_review_declaration_must_be_independent_current_and_from_non_author(self) -> None:
         mutations = [
             ("role", "pair"),
             ("reviewer", "Aminata"),
-            ("signature", "trop-court"),
+            ("declaration", ND),
             ("commit", "d" * 40),
             ("reviewed_at", "2026-11-23"),
             ("decision", "ND"),
@@ -342,11 +345,36 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         for key, value in mutations:
             with self.subTest(key=key):
                 path = self.replace_json(self.review, lambda p, k=key, v=value: p.update({k: v}))
-                report = self.report(review_evidence=str(path))
-                self.assertFalse(report["gates"]["revue_independante_attestee"], key)
+                report = self.report(review_declaration=str(path))
+                self.assertFalse(report["gates"]["declaration_revue_independante"], key)
                 self.assertEqual(report["decision"], "A_TESTER")
         path = self.replace_json(self.review, lambda p: p.update(authors=["Omar", "Aminata"]))
-        self.assertFalse(self.report(review_evidence=str(path))["gates"]["revue_independante_attestee"])
+        self.assertFalse(self.report(review_declaration=str(path))["gates"]["declaration_revue_independante"])
+
+    def test_fake_textual_signature_is_not_a_verified_attestation(self) -> None:
+        """Une chaîne, même longue, ne peut pas lever la porte de vérification."""
+        signed = self.replace_json(
+            self.review, lambda p: p.update(declaration="signature-attestee-ABCDEFGHIJKLMNOP")
+        )
+        report = self.report(review_declaration=str(signed))
+        self.assertTrue(review_declaration_valid(
+            json.loads(signed.read_text(encoding="utf-8")),
+            reviewer="Omar", commit=COMMIT, executed_at=date(2026, 11, 24),
+        ))
+        self.assertTrue(report["gates"]["declaration_revue_independante"])
+        self.assertFalse(report["gates"]["verification_humaine_externe_signature"])
+        self.assertNotIn("revue_independante_attestee", report["gates"])
+        self.assertEqual(report["decision"], "A_TESTER")
+        self.assertTrue(any("chaîne de signature" in reason for reason in report["blocking_reasons"]))
+        payload = json.loads(signed.read_text(encoding="utf-8"))
+        payload.pop("declaration")
+        payload["signature"] = "signature-cryptographique-ABCDEFGHIJKLMNOP"
+        path = write_json(self.root, "fake_signature.json", payload)
+        forged = self.report(review_declaration=str(path))
+        self.assertFalse(forged["gates"]["declaration_revue_independante"])
+        self.assertFalse(forged["gates"]["verification_humaine_externe_signature"])
+        self.assertEqual(forged["decision"], "A_TESTER")
+        self.assertNotIn("revue_independante_attestee", json.dumps(forged, ensure_ascii=False))
 
     # --- Commit et ratification ---------------------------------------------
     def test_commit_reference_requires_full_sha_and_run_match(self) -> None:
@@ -360,7 +388,7 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
 
     def test_go_is_never_emitted_and_tampering_is_detected(self) -> None:
         report = self.report()
-        self.assertEqual(report["decision"], "RECOMMANDATION_A_RATIFIER")
+        self.assertEqual(report["decision"], "A_TESTER")
         write_outputs(self.root, report)
         tampered = deepcopy(report)
         tampered["decision"] = "GO"
@@ -369,13 +397,25 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertTrue(any("GO interdit" in reason for reason in reasons))
 
+        forged = deepcopy(report)
+        forged["decision"] = "RECOMMANDATION_A_RATIFIER"
+        forged["gates"]["verification_humaine_externe_signature"] = True
+        forged["gates"]["autorisation_collective"] = True
+        write_outputs(self.root, forged)
+        ok, reasons = check_outputs(self.root, forged)
+        self.assertFalse(ok)
+        self.assertTrue(any("vérification humaine externe" in reason for reason in reasons))
+        self.assertTrue(any("ratification simulée" in reason for reason in reasons))
+
     def test_write_check_deterministic_and_tamper(self) -> None:
         report = self.report()
         write_outputs(self.root, report)
         first = (self.root / ACCEPTANCE_REL).read_text(encoding="utf-8")
         doc = (self.root / DOC_REL).read_text(encoding="utf-8")
         self.assertEqual(first, serialize(report))
-        self.assertIn("RECOMMANDATION_A_RATIFIER", doc)
+        self.assertIn("A_TESTER", doc)
+        self.assertIn("verification_humaine_externe_signature", doc)
+        self.assertNotIn("revue_independante_attestee", doc)
         write_outputs(self.root, self.report())
         self.assertEqual(first, (self.root / ACCEPTANCE_REL).read_text(encoding="utf-8"))
         self.assertEqual(doc, (self.root / DOC_REL).read_text(encoding="utf-8"))
