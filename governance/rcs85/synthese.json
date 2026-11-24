@@ -111,7 +111,7 @@
     "Statut énergie = le plus faible des statuts déclarés ; zéro n'est jamais substitué à ND.",
     "Les tests éthiques ND ne valident aucune conformité RGPD/AI Act."
   ],
-  "note": "La synthèse ne remplace ni la revue humaine ni le gel collectif des cas TP04/TP05.",
+  "note": "La synthèse ne peut pas émettre un GO : les cas, preuves éthiques, périmètres et ratification humaine doivent être vérifiés séparément.",
   "reviewer": "ND",
   "risque_principal": "ND",
   "risques_residuels": [

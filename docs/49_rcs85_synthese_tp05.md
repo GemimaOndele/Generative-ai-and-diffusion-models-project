@@ -39,7 +39,7 @@ Risque principal : **ND**. Un test `ND` signifie non exécuté, pas `PASS`.
 - Coût par succès ND si succès = 0, coût incomplet ou source absente (jamais 0 €).
 - Statut énergie = le plus faible des statuts déclarés ; zéro n'est jamais substitué à ND.
 - Les tests éthiques ND ne valident aucune conformité RGPD/AI Act.
-- La synthèse ne remplace ni la revue humaine ni le gel collectif des cas TP04/TP05.
+- La synthèse ne peut pas émettre un GO : les cas, preuves éthiques, périmètres et ratification humaine doivent être vérifiés séparément.
 
 ## Fichiers versionnés et reproduction
 

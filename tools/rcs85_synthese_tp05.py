@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+from datetime import date
 import hashlib
 import json
 import re
@@ -29,6 +30,7 @@ DOC_REL = Path("docs") / "49_rcs85_synthese_tp05.md"
 STRATEGIES = ("mono-A", "mono-B", "V2")
 STATUS_ORDER = {ND: 0, "estimé": 1, "calculé": 2, "mesuré": 3}
 SUCCESS_VALUES = {"1", "true", "oui", "yes", "success", "succès", "réussi"}
+FAILURE_VALUES = {"0", "false", "non", "no", "failure", "échec", "failed", "refused", "abstain"}
 PRECISION = Decimal("0.000001")
 MEASURE_COLUMNS = {
     "case_id", "run_id", "strategy", "model_version", "model_source",
@@ -73,6 +75,14 @@ def read_measures(root: Path) -> tuple[List[Dict[str, str]], Dict[str, Any]]:
             missing = MEASURE_COLUMNS - set(reader.fieldnames or [])
             raise ValueError("Colonnes de mesures absentes : " + ", ".join(sorted(missing)))
         rows = [{key: _text(value) for key, value in row.items()} for row in reader]
+    seen = set()
+    for row in rows:
+        key = (row.get("case_id"), row.get("run_id"), row.get("strategy"))
+        if not all(key) or key[2] not in STRATEGIES or key in seen:
+            raise ValueError("Identifiant de mesure invalide ou dupliqué")
+        seen.add(key)
+        if row.get("status_success", "").lower() not in SUCCESS_VALUES | FAILURE_VALUES:
+            raise ValueError("Statut de succès inconnu")
     # Normalisation CRLF -> LF : Git stocke le CSV en LF, Windows le restitue
     # en CRLF. Le hash doit être identique sur tous les systèmes.
     normalized = path.read_bytes().replace(b"\r\n", b"\n")
@@ -85,7 +95,19 @@ def read_measures(root: Path) -> tuple[List[Dict[str, str]], Dict[str, Any]]:
 
 
 def _sourced(row: Dict[str, str]) -> bool:
-    return _text(row.get("source_url")) not in ("", ND) and _text(row.get("source_date")) not in ("", ND)
+    source = _text(row.get("source_url"))
+    stamp = _text(row.get("source_date"))
+    try:
+        return source not in ("", ND) and date.fromisoformat(stamp).isoformat() == stamp
+    except ValueError:
+        return False
+
+
+def _count_total(rows: List[Dict[str, str]], key: str) -> str:
+    numbers = [_number(row.get(key)) for row in rows]
+    if not numbers or any(v is None or v != v.to_integral_value() for v in numbers):
+        return ND
+    return str(sum(int(v) for v in numbers))
 
 
 def cost_summary(rows: List[Dict[str, str]]) -> Dict[str, Dict[str, Any]]:
@@ -111,12 +133,12 @@ def cost_summary(rows: List[Dict[str, str]]) -> Dict[str, Dict[str, Any]]:
         summary[strategy] = {
             "cas": len(selected),
             "succes": successes if selected else ND,
-            "appels": str(sum(int(_number(r.get("calls")) or 0) for r in selected)) if selected else ND,
-            "retries": str(sum(int(_number(r.get("retries")) or 0) for r in selected)) if selected else ND,
+            "appels": _count_total(selected, "calls"),
+            "retries": _count_total(selected, "retries"),
             "cout_variable_eur": _fmt(sum((_number(r.get("variable_cost_eur")) or Decimal("0") for r in selected), Decimal("0"))) if complete else ND,
             "cout_alloue_eur": _fmt(sum((_number(r.get("allocated_cost_eur")) or Decimal("0") for r in selected), Decimal("0"))) if complete else ND,
             "cout_par_succes_eur": _fmt(value),
-            "statut": "calculé" if value is not None else ND,
+            "statut": ("estimé" if any(_status(r.get("measurement_status")) == "estimé" for r in selected) else "calculé") if value is not None and all(_status(r.get("measurement_status")) != ND for r in selected) else ND,
             "source": sources[0] if len(sources) == 1 else (sources if sources else ND),
             "source_date": dates[0] if len(dates) == 1 else (dates if dates else ND),
         }
@@ -132,9 +154,12 @@ def emission_summary(rows: List[Dict[str, str]]) -> Dict[str, Dict[str, Any]]:
         energy = [number for row in selected if (number := _number(row.get("energy_kwh"))) is not None]
         co2 = [number for row in selected if (number := _number(row.get("co2e_kg"))) is not None]
         boundary = sorted({_text(row.get("boundary")) for row in selected if _text(row.get("boundary"))})
+        compatible = bool(selected) and len(boundary) == 1 and all(_text(row.get("boundary")) == boundary[0] and boundary[0] != ND for row in selected)
+        if not compatible or len(energy) != len(selected) or len(co2) != len(selected):
+            status = ND
         summary[strategy] = {
-            "energie_kwh": _fmt(sum(energy, Decimal("0"))) if len(energy) == len(selected) and selected else ND,
-            "co2e_kg": _fmt(sum(co2, Decimal("0"))) if len(co2) == len(selected) and selected else ND,
+            "energie_kwh": _fmt(sum(energy, Decimal("0"))) if compatible and len(energy) == len(selected) else ND,
+            "co2e_kg": _fmt(sum(co2, Decimal("0"))) if compatible and len(co2) == len(selected) else ND,
             "statut": status,
             "frontiere": boundary[0] if len(boundary) == 1 else (boundary if boundary else ND),
             "note": "API distante non instrumentée par CodeCarbon local ; aucune valeur n'est mise à zéro.",
@@ -177,15 +202,6 @@ def build_report(root: Path, reviewer: Optional[str] = None) -> Dict[str, Any]:
 
     if any(risk["resultat"] == "FAIL" for risk in risks):
         decision = "NO_GO"
-    elif (
-        rows
-        and reviewer != ND
-        and all(costs[name]["cout_par_succes_eur"] != ND and costs[name]["statut"] in {"mesuré", "calculé"} for name in STRATEGIES)
-        and all(emissions[name]["statut"] in {"mesuré", "calculé"} and emissions[name]["co2e_kg"] != ND for name in STRATEGIES)
-        and risks
-        and all(risk["resultat"] == "PASS" for risk in risks)
-    ):
-        decision = "GO"
     else:
         decision = "À TESTER"
 
@@ -227,7 +243,7 @@ def build_report(root: Path, reviewer: Optional[str] = None) -> Dict[str, Any]:
             "Statut énergie = le plus faible des statuts déclarés ; zéro n'est jamais substitué à ND.",
             "Les tests éthiques ND ne valident aucune conformité RGPD/AI Act.",
         ],
-        "note": "La synthèse ne remplace ni la revue humaine ni le gel collectif des cas TP04/TP05.",
+        "note": "La synthèse ne peut pas émettre un GO : les cas, preuves éthiques, périmètres et ratification humaine doivent être vérifiés séparément.",
     }
 
 
@@ -335,11 +351,11 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
             reasons.append(f"{rel.as_posix()} absent")
         elif path.read_text(encoding="utf-8") != content:
             reasons.append(f"{rel.as_posix()} obsolète : relancer --write")
-    if report["decision"] == "GO" and report["reviewer"] == ND:
-        reasons.append("GO sans relecteur humain")
-    if report["decision"] not in {"GO", "NO_GO", "À TESTER"}:
+    if report["decision"] == "GO":
+        reasons.append("GO automatique interdit : preuves et ratification externe nécessaires")
+    if report["decision"] not in {"NO_GO", "À TESTER"}:
         reasons.append("décision inconnue")
-    if report["inputs"]["rows"] == 0 and report["decision"] != "À TESTER":
+    if report["inputs"]["rows"] == 0 and report["decision"] not in {"À TESTER", "NO_GO"}:
         reasons.append("synthèse non À TESTER sans mesure versée")
     return not reasons, reasons
 

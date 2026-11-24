@@ -148,14 +148,14 @@ class Rcs85SyntheseTests(unittest.TestCase):
         self.assertEqual(report["risque_principal"], ND)
         self.assertEqual(report["decision"], "À TESTER")
 
-    def test_fail_risk_is_no_go_and_all_pass_can_reach_go(self) -> None:
+    def test_fail_risk_is_no_go_and_declared_pass_cannot_authorize(self) -> None:
         write_measures(self.root, [measure_row(name) for name in STRATEGIES])
         write_doc(self.root, result="FAIL")
         self.assertEqual(build_report(self.root)["decision"], "NO_GO")
 
         write_doc(self.root, result="PASS")
         report = build_report(self.root, reviewer="Omar")
-        self.assertEqual(report["decision"], "GO")
+        self.assertEqual(report["decision"], "À TESTER")
         write_measures(self.root, [
             measure_row(name, measurement_status="estimé") for name in STRATEGIES
         ])
@@ -168,11 +168,29 @@ class Rcs85SyntheseTests(unittest.TestCase):
         write_measures(self.root, [measure_row(name) for name in STRATEGIES])
         write_doc(self.root, result="PASS")
         report = build_report(self.root, reviewer="Omar")
-        report["reviewer"] = ND  # tentative de falsification d'un GO
+        report["reviewer"] = ND
+        report["decision"] = "GO"  # tentative de falsification
         write_outputs(self.root, report)
         ok, reasons = check_outputs(self.root, report)
         self.assertFalse(ok)
-        self.assertTrue(any("relecteur" in reason for reason in reasons))
+        self.assertTrue(any("GO automatique interdit" in reason for reason in reasons))
+
+    def test_duplicate_and_unknown_status_are_rejected(self) -> None:
+        for rows in ([measure_row("V2")] * 2, [measure_row("V2", status_success="unknown")]):
+            write_measures(self.root, rows)
+            with self.assertRaises(ValueError):
+                build_report(self.root)
+
+    def test_missing_counts_invalid_dates_and_mixed_boundaries(self) -> None:
+        write_measures(self.root, [
+            measure_row("V2", calls="", source_date="2026-02-30"),
+            measure_row("V2", case_id="T02", boundary="remote_api"),
+        ])
+        report = build_report(self.root)
+        self.assertEqual(report["detail_couts"]["V2"]["appels"], ND)
+        self.assertEqual(report["detail_couts"]["V2"]["cout_par_succes_eur"], ND)
+        self.assertEqual(report["detail_emissions"]["V2"]["energie_kwh"], ND)
+        self.assertEqual(report["decision"], "À TESTER")
 
     def test_missing_measure_file_is_reported(self) -> None:
         with self.assertRaises(ValueError):
