@@ -70,6 +70,16 @@ python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --o
 
 Le mode démo valide l'orchestration (clients simulés), **jamais la qualité des LLM**. Aucun appel live n'est lancé sans configuration validée (modèle/version/fournisseur/licence/région/rétention/budget) ; voir [l'architecture TP04](docs/05_tp04_architecture_v2.md), le [benchmark](docs/05_tp04_benchmark.md) et le [manifeste de données](data/manifest.md). Les cas et évaluations [RCS-81](https://gemimakerenondelepourou.atlassian.net/browse/RCS-81) ne sont **pas gelés collectivement** ; les exécutions locales d'Omar restent des vérifications logicielles, pas une preuve scientifique.
 
+### 📊 Comparaison des approches (RCS-22)
+
+La [comparaison A/B/C](docs/03_comparaison_statuquo_reglesml_diffusion.md) couvre qualité, diversité, coût, limites et faisabilité, avec un choix **provisoire** (B règles/ML comme référence, C diffusion en POC cadré, V2 routage à mesurer) et des hypothèses réfutables. La preuve d'acceptation est versionnée dans [rcs22_acceptance.json](governance/rcs22_acceptance.json) :
+
+```bash
+python -m src.compare_approaches --acceptance --out governance/rcs22_acceptance.json
+```
+
+Aucun résultat chiffré n'est revendiqué : toutes les mesures restent `ND` jusqu'au benchmark sur cas figés RCS-81.
+
 ## 👥 L'équipe
 
 | Membre | Domaine de référence | Missions initiales / binômes |

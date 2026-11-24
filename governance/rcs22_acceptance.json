@@ -1,0 +1,152 @@
+{
+  "ok": true,
+  "ticket": "RCS-22",
+  "errors": [],
+  "criteria": [
+    {
+      "id": "THREE_APPROACHES_BENCHMARKED",
+      "ok": true,
+      "evidence": "A statu quo, B règles/ML, C diffusion (+ V2 optimisation)"
+    },
+    {
+      "id": "FIVE_JIRA_AXES",
+      "ok": true,
+      "evidence": "qualite, diversite, cout, limites, faisabilite"
+    },
+    {
+      "id": "FALSIFIABLE_HYPOTHESES",
+      "ok": true,
+      "evidence": "H1–H4 : métrique, condition de réfutation et statut ND"
+    },
+    {
+      "id": "JUSTIFIED_CHOICE",
+      "ok": true,
+      "evidence": "B. règles / ML / C. diffusion en POC cadré ; renversement : Revoir le choix si H1/H2/H4 sont confirmés sur cas figés avec coût/latence acceptés"
+    },
+    {
+      "id": "NO_INVENTED_RESULTS",
+      "ok": true,
+      "evidence": "aucune mesure chiffrée, tous les statuts de protocole à ND"
+    },
+    {
+      "id": "TRACEABLE_SOURCES",
+      "ok": true,
+      "evidence": "preuve par approche et source par axe de protocole"
+    }
+  ],
+  "choice": {
+    "reference": "B. règles / ML",
+    "research": "C. diffusion en POC cadré",
+    "optimization": "V2 routage multi-LLM, à mesurer",
+    "status": "provisoire — GO/NO-GO après benchmark RCS-81",
+    "rationale": "Hypothèses réfutables, reproductibilité, H3",
+    "reversal": "Revoir le choix si H1/H2/H4 sont confirmés sur cas figés avec coût/latence acceptés"
+  },
+  "matrix": {
+    "axes": [
+      "qualite",
+      "diversite",
+      "cout",
+      "limites",
+      "faisabilite"
+    ],
+    "approaches": [
+      {
+        "id": "A",
+        "name": "Statu quo (manuel)",
+        "axes": {
+          "qualite": {
+            "quality": "Bon sur cas connus"
+          },
+          "diversite": {
+            "diversity": "Faible"
+          },
+          "cout": {
+            "cost_initial": "Faible",
+            "cost_ops": "Élevé",
+            "latency": "Variable"
+          },
+          "limites": {
+            "limits": "Oubli, charge"
+          },
+          "faisabilite": {
+            "feasibility": "Élevée"
+          }
+        },
+        "preuve": "Retours terrain"
+      },
+      {
+        "id": "B",
+        "name": "Règles / ML classique",
+        "axes": {
+          "qualite": {
+            "quality": "Bonne baseline"
+          },
+          "diversite": {
+            "diversity": "Moyenne"
+          },
+          "cout": {
+            "cost_initial": "Moyen",
+            "cost_ops": "Faible à moyen",
+            "latency": "Faible"
+          },
+          "limites": {
+            "limits": "Biais, dérive"
+          },
+          "faisabilite": {
+            "feasibility": "Élevée"
+          }
+        },
+        "preuve": "Notebook reproductible"
+      },
+      {
+        "id": "C",
+        "name": "Diffusion / GenAI (J1)",
+        "axes": {
+          "qualite": {
+            "quality": "À prouver"
+          },
+          "diversite": {
+            "diversity": "Potentielle"
+          },
+          "cout": {
+            "cost_initial": "Moyen à élevé",
+            "cost_ops": "Moyen à élevé",
+            "latency": "Moyenne à élevée"
+          },
+          "limites": {
+            "limits": "Artefacts"
+          },
+          "faisabilite": {
+            "feasibility": "Moyenne"
+          }
+        },
+        "preuve": "Cas figés, seed, logs"
+      },
+      {
+        "id": "V2",
+        "name": "Routage multi-LLM (non validé)",
+        "axes": {
+          "qualite": {
+            "quality": "À mesurer"
+          },
+          "diversite": {
+            "diversity": "À mesurer"
+          },
+          "cout": {
+            "cost_initial": "Moyen",
+            "cost_ops": "À mesurer",
+            "latency": "À mesurer"
+          },
+          "limites": {
+            "limits": "Supériorité non démontrée"
+          },
+          "faisabilite": {
+            "feasibility": "Démo seule"
+          }
+        },
+        "preuve": "RCS-75"
+      }
+    ]
+  }
+}
