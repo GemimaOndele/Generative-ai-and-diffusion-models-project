@@ -1,5 +1,6 @@
 """Read-only AI4I adapter tests using an isolated synthetic SQLite fixture."""
 import sqlite3
+from contextlib import closing
 import tempfile
 import unittest
 from pathlib import Path
@@ -24,7 +25,7 @@ class TestAI4IReadOnlyAdapter(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.db = Path(self.tmp.name) / "proxy.sqlite3"
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             con.executescript(DDL)
             con.execute("INSERT INTO source_donnees VALUES (?,?,?,?,?,?)",
                         ("S04", "AI4I", "https://example.invalid/fixture", "test-only",
@@ -53,20 +54,20 @@ class TestAI4IReadOnlyAdapter(unittest.TestCase):
         self.assertNotIn("label", result["observations"][0])
 
     def test_no_scores_must_not_be_interpreted_as_no_anomaly(self):
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             con.execute("DELETE FROM analyse_modele")
         r = preview_ai4i(self.db)
         self.assertIsNone(r["observations"][0]["anomaly"]["flag"])
         self.assertIsNone(r["observations"][0]["anomaly"]["score"])
 
     def test_reject_non_medical_flag_missing(self):
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             con.execute("UPDATE source_donnees SET categorie = 'Dispositif patient'")
         with self.assertRaises(ValueError):
             preview_ai4i(self.db)
 
     def test_reject_real_equipment_even_if_id_prefix_matches(self):
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             con.execute("UPDATE equipement SET est_fictif = 0")
         with self.assertRaises(ValueError):
             preview_ai4i(self.db)
@@ -78,11 +79,11 @@ class TestAI4IReadOnlyAdapter(unittest.TestCase):
                     preview_ai4i(self.db, limit=limit)
 
     def test_read_only_no_database_mutation(self):
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             before = con.total_changes
             snapshot = con.execute("SELECT COUNT(*) FROM observation").fetchone()[0]
         preview_ai4i(self.db)
-        with sqlite3.connect(self.db) as con:
+        with closing(sqlite3.connect(self.db)) as con, con:
             self.assertEqual(con.execute("SELECT COUNT(*) FROM observation").fetchone()[0],
                              snapshot)
             self.assertEqual(con.execute("SELECT COUNT(*) FROM audit").fetchone()[0]
