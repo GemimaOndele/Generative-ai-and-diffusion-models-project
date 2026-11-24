@@ -1,0 +1,29 @@
+name: RCS-65 business case ROI
+
+on:
+  push:
+    paths:
+      - "tools/rcs65_business_case.py"
+      - "tests/test_rcs65_business_case.py"
+      - "governance/rcs65/**"
+      - "docs/45_rcs65_business_case_roi.md"
+      - ".github/workflows/rcs65-business-case.yml"
+  pull_request:
+    paths:
+      - "tools/rcs65_business_case.py"
+      - "tests/test_rcs65_business_case.py"
+      - "governance/rcs65/**"
+      - "docs/45_rcs65_business_case_roi.md"
+
+jobs:
+  roi-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Vérifier les formules et la propagation de ND
+        run: python -m unittest tests.test_rcs65_business_case -v
+      - name: Refuser toute décision financière automatique
+        run: python -m tools.rcs65_business_case --check
