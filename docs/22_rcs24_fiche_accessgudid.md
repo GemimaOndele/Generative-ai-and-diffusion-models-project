@@ -18,3 +18,8 @@ produit. **Pas** de télémétrie, de taux de panne ni d'historique de maintenan
 **Décision proposée** : usage optionnel en enrichissement (lookup ponctuel par DI d'un équipement fictif/de démo),
 sans stocker les champs GMDN au-delà du strict nécessaire et avec la mention NLM. Pas d'ingestion de la release
 complète (524 Mo, hors besoin du POC).
+
+**Suites après revue (Aminata, 23/11)** :
+- Aucun appel réel à l'API n'a été effectué pour cet audit documentaire : un **test d'appel réel** (Device Lookup sur un DI public) est requis avant toute intégration technique.
+- Licence **GMDN** : à revérifier avant tout usage des catégories GMDN dans les fonctionnalités IA (pas de stockage au-delà du strict nécessaire).
+- Le contrôle automatique est séparé en deux tests : `test_no_secret` (motifs de clés) et `test_no_patient_identifier` (NIR, nom de patient), avec un test qui vérifie que ces motifs détectent bien des exemples.
