@@ -1,0 +1,34 @@
+name: RCS — TP04 orchestration Multi-LLM (tests logiciels)
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'experiments/tp04_cases.jsonl'
+      - '.github/workflows/tp04-tests.yml'
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  tp04:
+    name: Imports uniques, tests unitaires et smoke test démo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Vérifier qu'il n'existe qu'un seul src/, tests/ et data/
+        run: |
+          test ! -d src/src
+          test ! -d tests/tests
+          test ! -d data/data
+      - name: Syntaxe Python
+        run: python -m compileall -q src tests
+      - name: Tests unitaires TP04 et socle
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Smoke test démo (orchestration uniquement)
+        run: python -m src.run_benchmark --mode demo --cases experiments/tp04_cases.jsonl --out experiments/results/tp04_demo_ci
+      - name: Portée de la vérification
+        run: echo "Le mode démo valide le routage, la cascade et les traces avec des clients simulés. Aucune qualité LLM, latence réelle, coût ou CO2e n'est mesuré ici."

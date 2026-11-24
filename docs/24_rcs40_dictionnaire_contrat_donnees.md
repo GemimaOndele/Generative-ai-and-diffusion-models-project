@@ -24,7 +24,7 @@ Colonnes manquantes dans l'en-tête → **lot entier rejeté** (`statut = rejete
 
 - **Idempotence** : empreinte SHA-256 du fichier ; un fichier déjà importé n'écrit rien (`deja_importe`).
 - **Traçabilité** : `lot_import` (source, fichier, sha256, compteurs, horodatage UTC) + `audit`.
-- **Quarantaine** : `data/quarantine/<fichier>_<sha8>_rejets.jsonl` (ligne, erreur, brut) — hors Git.
+- **Quarantaine** : `~/.local/share/robocare_sentinel/quarantine/<fichier>_<sha8>_rejets.jsonl` (ligne, erreur, brut) — hors Git.
 - **Manifeste** : `data/manifests/ai4i_import.json` (source, licence, compteurs, erreurs).
 
 ## 3. Dictionnaire des attributs standard (cible multi-sources, Bibliothèque §7.4)
@@ -78,3 +78,5 @@ Manifeste d'import machine : `data/manifests/ai4i_import.json` (généré par `s
 
 
 Les tests du contrat utilisent des exemples synthétiques et ne prouvent pas la conformité du pipeline réel ; contrôler la concordance avec RCS-49 et RCS-42 après intégration.
+
+Le répertoire de quarantaine peut être surchargé par RCS_QUARANTINE_DIR ou quarantine_dir ; conserver les rejets hors Git.

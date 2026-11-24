@@ -17,7 +17,8 @@
       "cle_source"
     ],
     "rejet_lot_si_colonne_manquante": true,
-    "quarantaine": "data/quarantine/<fichier>_<sha8>_rejets.jsonl"
+    "quarantaine": "~/.local/share/robocare_sentinel/quarantine/<fichier>_<sha8>_rejets.jsonl",
+    "quarantaine_configuration": "RCS_QUARANTINE_DIR ou quarantine_dir ; hors Git"
   },
   "champs": [
     {
