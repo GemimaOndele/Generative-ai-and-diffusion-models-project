@@ -1,6 +1,6 @@
 # RCS-70 — Manifeste de diffusion (contrôles structurels)
 
-> Décision : **A_TESTER**. Les indices textuels ne prouvent pas un entraînement ; les artefacts fournis restent des déclarations non authentifiées.
+> Décision : **A_TESTER**. Les indices textuels sont informatifs et ne prouvent pas un entraînement ; les artefacts fournis restent des déclarations non authentifiées. Le rejeu CI du module DDPM est la seule exécution constatée.
 
 ## Chaîne à vérifier par exécution
 
@@ -40,7 +40,8 @@
 | indices_textuels_sampler | OK |
 | seed_explicite | OK |
 | indices_textuels_reverse | OK |
-| structure_textuelle_presente | OK |
+| script_present | OK |
+| indices_textuels_informatifs | OK |
 | artefact_present | ÉCHEC / ND |
 | schema_artefact_strict | OK |
 | artefact_complet | ÉCHEC / ND |
@@ -60,7 +61,8 @@
 
 ```bash
 python -m tools.rcs70_diffusion_proof --write
-python -m tools.rcs70_diffusion_proof --artifact <artefact.json> --write
+# --artifact est une inspection : il n'écrit jamais les fichiers d'acceptation
+python -m tools.rcs70_diffusion_proof --artifact <artefact.json>
 python -m tools.rcs70_diffusion_proof --check
 python -m experiments.rcs69_diffusion_numpy --seed 42 --updates 250 --json <artefact.json>
 python -m unittest tests.test_rcs70_diffusion_proof -v

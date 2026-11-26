@@ -1,9 +1,12 @@
-"""RCS-70 — manifeste de preuve pour une diffusion réellement débruitée.
+"""RCS-70 — manifeste de contrôles structurels d'un script de diffusion.
 
-L'outil n'entraîne rien et n'invente aucun résultat : il audite le code de
-débruitage déjà fusionné (PR #7) et, si un artefact JSON réel est fourni,
-copie uniquement les champs qu'il contient avec son SHA-256. Sans artefact,
-toutes les preuves restent `ND` et la décision reste `A_TESTER`.
+L'outil n'entraîne rien et n'invente aucun résultat : il constate la présence
+du script, signale des indices textuels à titre purement informatif et, si un
+artefact JSON déclaré est fourni, copie uniquement les champs qu'il contient
+avec son SHA-256. Les indices textuels ne sont ni nécessaires ni suffisants
+pour prouver un entraînement : seule l'exécution rejouée en CI apporte une
+preuve logicielle. Sans artefact authentifié, toutes les preuves restent `ND`
+et la décision reste `A_TESTER`.
 """
 from __future__ import annotations
 
@@ -167,7 +170,8 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
         not unexpected and not forbidden and _valid_optional_metadata(payload)
     )
     checks.update({
-        "structure_textuelle_presente": all(structure_checks(source).values()),
+        "script_present": script.is_file(),
+        "indices_textuels_informatifs": all(structure_checks(source).values()),
         "artefact_present": artifact_info["present"],
         "schema_artefact_strict": strict_schema,
         "artefact_complet": artifact_info["present"] and strict_schema and all(
@@ -177,11 +181,17 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
         and "not_clinical" in str(evidence["scientific_status"]),
         "champs_exportes_autorises": not forbidden and "patient" not in json.dumps(metrics, ensure_ascii=False).lower(),
     })
-    if not checks["structure_textuelle_presente"]:
+    # Les indices textuels sont informatifs : ils ne bloquent pas la porte et
+    # ne la lèvent pas non plus. Seule la présence du script est exigée ici ;
+    # l'exécution réelle est démontrée par le rejeu CI, pas par ces indices.
+    if not checks["script_present"]:
         proof_status = "BLOQUE"
     elif not artifact_info["present"]:
         proof_status = "ND"
-    elif all(checks.values()):
+    elif all(checks[key] for key in (
+        "script_present", "artefact_present", "schema_artefact_strict",
+        "artefact_complet", "perimetre_synthetique_declare", "champs_exportes_autorises",
+    )):
         proof_status = "DECLARATION_NON_AUTHENTIFIEE"
     else:
         proof_status = "INCOMPLET"
@@ -204,9 +214,11 @@ def build_report(root: Path, artifact: str | None = None) -> Dict[str, Any]:
             "Artefact d'exécution à fournir par un humain : aucun résultat n'est généré ici.",
         ],
         "note": (
-            "Contrôles structurels uniquement : le schéma strict rejette les clés inattendues "
-            "et les marqueurs sensibles imbriqués, mais le hash du fichier ne prouve ni son "
-            "exécution, ni l'authenticité de l'expérience, ni une validation clinique."
+            "Script requis, indices textuels purement informatifs : le schéma strict rejette "
+            "les clés inattendues et les marqueurs sensibles imbriqués, mais ni le hash du "
+            "fichier ni les indices textuels ne prouvent son exécution, l'authenticité de "
+            "l'expérience ou une validation clinique. Seul le rejeu CI apporte une preuve "
+            "logicielle, sans portée clinique."
         ),
     }
 
@@ -219,8 +231,9 @@ def render_doc(report: Dict[str, Any]) -> str:
     lines = [
         f"# {ISSUE} — Manifeste de diffusion (contrôles structurels)",
         "",
-        "> Décision : **A_TESTER**. Les indices textuels ne prouvent pas un entraînement ; "
-        "les artefacts fournis restent des déclarations non authentifiées.",
+        "> Décision : **A_TESTER**. Les indices textuels sont informatifs et ne prouvent "
+        "pas un entraînement ; les artefacts fournis restent des déclarations non "
+        "authentifiées. Le rejeu CI du module DDPM est la seule exécution constatée.",
         "",
         "## Chaîne à vérifier par exécution",
         "",
@@ -256,7 +269,8 @@ def render_doc(report: Dict[str, Any]) -> str:
         "",
         "```bash",
         "python -m tools.rcs70_diffusion_proof --write",
-        "python -m tools.rcs70_diffusion_proof --artifact <artefact.json> --write",
+        "# --artifact est une inspection : il n'écrit jamais les fichiers d'acceptation",
+        "python -m tools.rcs70_diffusion_proof --artifact <artefact.json>",
         "python -m tools.rcs70_diffusion_proof --check",
         "python -m experiments.rcs69_diffusion_numpy --seed 42 --updates 250 --json <artefact.json>",
         "python -m unittest tests.test_rcs70_diffusion_proof -v",
@@ -290,8 +304,8 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
             reasons.append(f"{rel.as_posix()} absent")
         elif path.read_text(encoding="utf-8") != content:
             reasons.append(f"{rel.as_posix()} obsolète : relancer --write")
-    if not report["checks"]["structure_textuelle_presente"]:
-        reasons.append("structure textuelle de débruitage absente")
+    if not report["checks"]["script_present"]:
+        reasons.append("script de débruitage absent")
     if not report["checks"]["schema_artefact_strict"]:
         reasons.append("schéma d'artefact non strict : clé inattendue ou donnée sensible détectée")
     if report["medical_claim"] or report["clinical_validation"]:
@@ -313,10 +327,14 @@ def main(argv: List[str] | None = None) -> int:
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(str(exc))
         return 1
+    # Les fichiers d'acceptation restent ND et reproductibles même quand un
+    # artefact est fourni pour inspection : --write et --check portent toujours
+    # sur le rapport sans artefact, seul stdout affiche l'artefact déclaré.
+    baseline = build_report(args.root)
     if args.write:
-        write_outputs(args.root, report)
+        write_outputs(args.root, baseline)
     if args.check:
-        ok, reasons = check_outputs(args.root, report)
+        ok, reasons = check_outputs(args.root, baseline)
         if not ok:
             print("\n".join(reasons))
             return 1

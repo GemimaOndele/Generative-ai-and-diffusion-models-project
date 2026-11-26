@@ -14,13 +14,14 @@
     "artefact_complet": false,
     "artefact_present": false,
     "champs_exportes_autorises": true,
+    "indices_textuels_informatifs": true,
     "indices_textuels_reverse": true,
     "indices_textuels_sampler": true,
     "indices_textuels_train": true,
     "perimetre_synthetique_declare": false,
     "schema_artefact_strict": true,
-    "seed_explicite": true,
-    "structure_textuelle_presente": true
+    "script_present": true,
+    "seed_explicite": true
   },
   "clinical_validation": false,
   "decision": "A_TESTER",
@@ -30,7 +31,7 @@
     "baseline_MAD": "ND",
     "learned_diffusion_denoiser": "ND"
   },
-  "note": "Contrôles structurels uniquement : le schéma strict rejette les clés inattendues et les marqueurs sensibles imbriqués, mais le hash du fichier ne prouve ni son exécution, ni l'authenticité de l'expérience, ni une validation clinique.",
+  "note": "Script requis, indices textuels purement informatifs : le schéma strict rejette les clés inattendues et les marqueurs sensibles imbriqués, mais ni le hash du fichier ni les indices textuels ne prouvent son exécution, l'authenticité de l'expérience ou une validation clinique. Seul le rejeu CI apporte une preuve logicielle, sans portée clinique.",
   "preuves": {
     "dataset_sha256": "ND",
     "diffusion_timesteps": "ND",

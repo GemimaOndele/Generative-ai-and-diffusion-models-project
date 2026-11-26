@@ -13,6 +13,7 @@ from tools.rcs70_diffusion_proof import (
     SCRIPT_REL,
     build_report,
     check_outputs,
+    main,
     serialize,
     structure_checks,
     write_outputs,
@@ -84,7 +85,8 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
     def test_no_artifact_means_every_evidence_is_nd(self) -> None:
         report = build_report(self.root)
         self.assertEqual(report["proof_status"], "ND")
-        self.assertTrue(report["checks"]["structure_textuelle_presente"])
+        self.assertTrue(report["checks"]["script_present"])
+        self.assertTrue(report["checks"]["indices_textuels_informatifs"])
         self.assertTrue(report["checks"]["schema_artefact_strict"])
         self.assertFalse(report["checks"]["artefact_present"])
         for value in report["preuves"].values():
@@ -183,12 +185,61 @@ class Rcs70DiffusionProofTests(unittest.TestCase):
     def test_missing_artifact_or_script_is_an_error_or_block(self) -> None:
         with self.assertRaises(ValueError):
             build_report(self.root, str(self.root / "absent.json"))
-        empty = make_root(Path(tempfile.mkdtemp()), script=NOISE_ONLY_SCRIPT)
+        empty = Path(tempfile.mkdtemp())
         report = build_report(empty)
         self.assertEqual(report["proof_status"], "BLOQUE")
         ok, reasons = check_outputs(empty, report)
         self.assertFalse(ok)
-        self.assertTrue(any("débruitage" in reason for reason in reasons))
+        self.assertTrue(any("script de débruitage absent" in reason for reason in reasons))
+
+    def test_fake_lexical_script_is_not_proof(self) -> None:
+        """Un script qui contient les bons mots n'est pas une preuve d'entraînement."""
+        fake = make_root(
+            Path(tempfile.mkdtemp()),
+            script=REAL_SCRIPT.replace("epsilon = rng.normal(size=x.shape)",
+                                       "epsilon = x  # aucun entraînement"),
+        )
+        report = build_report(fake)
+        self.assertTrue(report["checks"]["indices_textuels_informatifs"])
+        self.assertEqual(report["proof_status"], "ND")
+        self.assertEqual(report["decision"], "A_TESTER")
+        self.assertTrue(all(value == "ND" for value in report["preuves"].values()))
+
+    def test_refactored_real_script_without_tokens_is_not_blocked(self) -> None:
+        """Le renommage d'une fonction ne doit pas faire échouer le manifeste."""
+        renamed = make_root(
+            Path(tempfile.mkdtemp()),
+            script=REAL_SCRIPT.replace("def train(", "def fit("),
+        )
+        report = build_report(renamed)
+        self.assertFalse(report["checks"]["indices_textuels_informatifs"])
+        self.assertTrue(report["checks"]["script_present"])
+        self.assertEqual(report["proof_status"], "ND")
+        write_outputs(renamed, report)
+        ok, reasons = check_outputs(renamed, report)
+        self.assertTrue(ok, reasons)
+
+    def test_artifact_write_does_not_change_nd_baseline(self) -> None:
+        """--artifact est une inspection : il ne doit pas rendre --check obsolète."""
+        payload = self.root / "run.json"
+        payload.write_text(json.dumps(artifact_payload()), encoding="utf-8")
+        self.assertEqual(main(["--root", str(self.root), "--artifact", str(payload), "--write"]), 0)
+        manifest = json.loads((self.root / ACCEPTANCE_REL).read_text(encoding="utf-8"))
+        self.assertEqual(manifest["proof_status"], "ND")
+        self.assertTrue(all(value == "ND" for value in manifest["preuves"].values()))
+        ok, reasons = check_outputs(self.root, build_report(self.root))
+        self.assertTrue(ok, reasons)
+
+    def test_workflow_triggers_include_workflow_file(self) -> None:
+        """Le rejeu exécutable ne doit pas pouvoir être retiré sans déclencher CI."""
+        workflow = Path(__file__).resolve().parents[1] / ".github/workflows/rcs70-diffusion-proof.yml"
+        if not workflow.is_file():
+            self.skipTest("workflow absent de ce worktree")
+        text = workflow.read_text(encoding="utf-8")
+        push, pull_request = text.split("  pull_request:", 1)
+        for name, block in (("push", push), ("pull_request", pull_request)):
+            with self.subTest(trigger=name):
+                self.assertIn(".github/workflows/rcs70-diffusion-proof.yml", block)
 
     def test_no_medical_claim_no_clinical_validation(self) -> None:
         report = build_report(self.root)
