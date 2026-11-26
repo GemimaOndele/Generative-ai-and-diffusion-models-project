@@ -16,9 +16,9 @@ Métadonnées historiques minimisées : `experiments/results/tp04_local_traces.j
 | Énergie | CodeCarbon `OfflineEmissionsTracker` (France), une mesure par stratégie — **estimation** (modèle TDP/RAM, pas de wattmètre) |
 | Coût | modèles locaux : coût API = 0 € ; coût calcul : voir TP05 |
 
-## 2. Résultats observés (même entrée, mêmes critères)
+## 2. Résultats historiques exploratoires (même entrée historique, mêmes critères rapportés)
 
-| Stratégie | Qualité (10) | Usuels (4) | Complexes (2) | Stress (4) | p50 (s) | p95 (s) | Appels LLM | dont B | Tokens in/out | Énergie (Wh, estimée) |
+| Stratégie | Score proxy (10) | Usuels (4) | Complexes (2) | Stress (4) | p50 (s) | p95 (s) | Appels LLM | dont B | Tokens in/out | Énergie (Wh, estimée) |
 |---|---|---|---|---|---|---|---|---|---|---|
 | B0 extractif (sans LLM) | 0,60 | 0,75 | 0,50 | 0,50 | 0,001 | 0,006 | 0 | 0 | 0 / 0 | ≈ 0 |
 | mono-A | 0,60 | 0,75 | 0,50 | 0,50 | 10,9 | 11,8 | 9 | 0 | 4 082 / 1 077 | 0,87 |
@@ -31,7 +31,7 @@ Ablations (une variable) :
 | Variante | Qualité | Stress | p95 (s) | Constat |
 |---|---|---|---|---|
 | `noguards` mono-A | 0,50 | 0,25 | 19,9 | T10 : A recopie la politique RGPD au lieu de bloquer |
-| `noguards` mono-B | 0,30 | 0,25 | 28,3 | T10 : **B reproduit le nom et le NIR du patient** dans sa réponse |
+| `noguards` mono-B | 0,30 | 0,25 | 28,3 | T10 : **B reproduit un contenu de type identifiant sensible** ; caractère synthétique à attester |
 | `noguards` cascade | 0,50 | 0,25 | 37,6 | sans validateur, plus d'escalade : T05 perdu |
 | `route8w` routing (seuil 8 mots) | 0,40 | 0,50 | 23,1 | 9/9 cas envoyés à B → retombe au niveau mono-B |
 
@@ -66,9 +66,7 @@ H2 : « cascade : qualité ≥ mono-B, appels B −30 %, p95 ≤ 1,2 × p95(mono
 | p95 ≤ 1,2 × mono-B (14,0 s) | 23,4 s | ❌ |
 | Énergie ≤ mono-B | 1,15 vs 0,47 Wh | ❌ |
 
-**H2 est réfutée telle que formulée** (latence et énergie). **Décision : GO conditionnel pour la cascade** comme
-architecture V2 de l'assistant, car c'est la seule stratégie qui conserve les cas complexes **et** les cas usuels, et
-parce qu'une réponse rapide mais refusée n'a pas de valeur métier. Conditions : (a) réduire la latence de A
+**H2 n'est pas satisfaite dans ces résultats historiques** (latence et énergie), sans réfutation confirmatoire faute de gel préalable attesté. **Décision : À TESTER** pour la cascade comme candidate d'architecture V2 ; aucun GO opérationnel. Les scores proxy rapportés ne démontrent pas un succès métier. L'intérêt de la cascade est à vérifier sur les cas et critères gelés avant une nouvelle campagne. Conditions : (a) réduire la latence de A
 (`max_new_tokens`, levier TP05), (b) ajouter le contrôle de fidélité pour T07/T08, (c) garder la revue humaine :
 aucune réponse n'est une action. Les garde-fous déterministes sont **indispensables** (ablation : fuite PII).
 
@@ -82,8 +80,7 @@ qui recopie un passage pertinent.
 ## 6. Prochaine expérience
 
 Validateur de fidélité (vérifier que les nombres de la réponse figurent dans le passage cité) + préférence de la
-source la plus récente en cas de version ; relancer les 4 stratégies, puis passer en mode `live` avec deux API si un
-budget est autorisé.
+source la plus récente en cas de version ; relancer les 4 stratégies sur un jeu et protocole gelés préalablement. Le passage en mode `live` reste bloqué jusqu'à vérification de la confidentialité, intégration des garde-fous, autorisation des ressources et preuve d'inférence réelle (RCS-92 / TP08).
 
 
 ## Revue du 24/11 — limites et confidentialité
