@@ -22,9 +22,7 @@ Modèles : A = `HuggingFaceTB/SmolLM2-360M-Instruct@a10cc15`, B = `Qwen/Qwen2.5-
 | routing A/B | 0,70 | 33,5 s | 2 | 1,32 Wh | 0,000047 |
 | **cascade A→B (V2)** | **0,70** | 23,4 s | **1** | 1,15 Wh | 0,000041 |
 
-Décisions : cascade = **candidat GO conditionnel, à arbitrer** (H2 réfutée sur la latence/énergie, mais seule stratégie qui réussit usuels
-et complexes) ; levier `max_new_tokens=60` = **rejeté** (qualité 0,70 → 0,40) ; garde-fous indispensables (sans eux, le
-modèle B recopie le nom et le NIR d'un patient). Risque résiduel : hallucination sourcée (T07) et source obsolète (T08).
+Décisions exploratoires : cascade = **candidate À TESTER, aucun GO opérationnel** (critères H2 non satisfaits sur la latence/énergie ; score proxy rapporté, pas de réfutation confirmatoire faute de gel préalable attesté) ; levier `max_new_tokens=60` = **défavorable dans ce run** (score 0,70 → 0,40) ; garde-fous indispensables (sans eux, le modèle B reproduit un contenu de type identifiant sensible, dont le caractère synthétique reste à attester). Risque résiduel : hallucination sourcée (T07) et source obsolète (T08).
 
 Statuts : qualité = **score proxy automatique, non validé métier** ; p95, appels, tokens = **rapportés comme mesurés** ; énergie = **estimée** (CodeCarbon, TDP, France) ;
 € = **calculé** avec un tarif électrique **hypothétique** ; coût API = 0 € (local, hors coût complet) ; temps de revue humaine = **ND**.
