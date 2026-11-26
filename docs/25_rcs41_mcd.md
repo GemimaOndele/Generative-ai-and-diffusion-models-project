@@ -45,7 +45,7 @@ EQUIPEMENT(**id**, type, modèle, site, criticité, état, est_fictif) ;
 OBSERVATION(**id**, clé_source, air_temp_k, process_temp_k, rpm, torque_nm, tool_wear_min, label, label_origine) ;
 ANALYSE_MODELE(**id**, model_version, score, seuil, créé_le) ; ALERTE(**id**, gravité, statut, créé_le) ;
 INTERVENTION(**id**, statut, compte_rendu, créé_le) ; UTILISATEUR(**id**, pseudonyme, rôle) ;
-AUDIT(**id**, acteur, événement, cible, horodatage) ; EXPERIMENT_RUN(**id**, jalon, config, seed, matériel, commit, créé_le) ;
+AUDIT(**id**, acteur, événement, cible, horodatage) ; EXPERIMENT_RUN(**id**, jalon, config, seed, matériel, commit_sha, créé_le) ;
 EXPERIMENT_METRIC(**nom**, **split**, valeur, unité) — identifiant relatif : (run, nom, split), lien `(1,1)` vers EXPERIMENT_RUN.
 
 L'association MESURE_RUN est renommée **EVALUE** pour ne pas être confondue avec MESURE (équipement–observation) dans JMerise.
@@ -54,6 +54,7 @@ AUDIT est volontairement non relié par clé étrangère (journal append-only, l
 
 
 ## Alignement SQL canonique (#19)
+Le champ documentaire `EXPERIMENT_RUN.commit_sha` reprend le nom SQL canonique. Le binaire JMerise et le PNG ci-dessus n'ont pas été modifiés par cette correction : Omar doit contrôler/aligner leur attribut, régénérer le MLD depuis JMerise puis comparer au SQL, et Elias doit valider visuellement la v1.
 Alerte et observation liée doivent partager l'équipement ; décision terminale avec acteur et date ; clé métrique (run_id, nom, split non nul). Run sans métrique possible avant clôture : 0..n en SQL, 1..n exigé à la clôture. Intervention manuelle sans alerte : concept cible, pas implémenté par l'API RCS-50. Audit append-only par convention, non garanti en SQL.
 
 ```mermaid
@@ -81,3 +82,7 @@ Diagramme Mermaid de lecture rapide ; la référence est l'export JMerise ci-des
 | `docs/jmerise/RCS41_MCD_RoboCare.png` | Export image du MCD complet depuis JMerise |
 
 Ouvrir : JMerise → Fichier → Ouvrir → `docs/jmerise/RCS41_MCD_RoboCare.mcd`. Le MLD peut être régénéré depuis JMerise et comparé au SQL de la PR #19.
+
+## Périmètre v1 et évolution v2
+
+Le guide BDD du 25/11/2026 reçu d'Omar propose une cible PostgreSQL 16 / stockage objet / Parquet (médaillon Bronze/Silver/Gold) et un brouillon SQL multimodal de 30 tables. Ce brouillon n'est pas une livraison de cette PR, ni une preuve de migration ou de validation collective. Conserver la v1 SQLite/AI4I, traiter MCD v2 et MPD PostgreSQL dans les compléments RCS-41/RCS-42 ou un ticket dédié après arbitrage d'équipe ; aucun nouveau branchement TP08 avant feu vert collectif. La comparaison JMerise v1/SQL reste requise.
