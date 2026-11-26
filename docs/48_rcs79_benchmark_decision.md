@@ -52,7 +52,7 @@
 - p95 V2 supérieure au seuil approuvé ou donnée invalide.
 - Coût V2 supérieur au seuil approuvé ou donnée invalide.
 - Énergie/CO₂e non documentée ou non calculée sur un périmètre commun.
-- Autorisation collective non vérifiée : l'outil ne peut émettre qu'une recommandation à ratifier par l'équipe, jamais un GO.
+- Autorisation collective non vérifiée : l'outil ne peut émettre qu'un avis A_TESTER à ratifier par l'équipe, jamais une recommandation ni un GO.
 - T01: non gelé
 - T01: référence de gel absente ou SHA complet invalide
 - Aucune décision GO automatisée. Une déclaration de revue n'est pas une signature vérifiée, et la cohérence interne des références (commit, config, run) n'est pas une authentification : la vérification humaine externe et l'autorisation collective restent à documenter, donc au mieux A_TESTER dans cet outil. Un mock ou le mode démo ne peut jamais étayer une recommandation.

@@ -26,6 +26,7 @@ from tools.rcs79_benchmark_decision import (
     _number,
     build_report,
     check_outputs,
+    main,
     manifest_fingerprint,
     models_valid,
     results_valid,
@@ -224,6 +225,19 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertFalse(report["gates"]["resultats_live_reels"])
         self.assertEqual(report["decision"], "A_TESTER")
 
+    def test_unhashable_energy_status_fails_closed_without_traceback(self) -> None:
+        """Un JSON retourné par un humain ne doit jamais faire planter la CLI."""
+        path = self.replace_json(
+            self.results, lambda p: p["strategies"]["V2"].update(energy_status=[])
+        )
+        report = self.report(results=str(path))
+        self.assertFalse(report["gates"]["resultats_live_reels"])
+        self.assertEqual(report["decision"], "A_TESTER")
+        self.assertEqual(main(["--root", str(self.root), "--results", str(path)]), 0)
+        self.assertFalse(review_declaration_valid(
+            {"decision": []}, reviewer="Omar", commit=COMMIT, executed_at=date(2026, 11, 24)
+        ))
+
     def test_infinite_and_out_of_bounds_metrics_are_rejected(self) -> None:
         payload = json.loads(self.results.read_text(encoding="utf-8"))
         payload["strategies"]["V2"]["cost_eur"] = float("inf")
@@ -345,6 +359,7 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
             ("commit", "d" * 40),
             ("reviewed_at", "2026-11-23"),
             ("decision", "ND"),
+            ("decision", []),  # type non hachable : doit échouer, pas planter
         ]
         for key, value in mutations:
             with self.subTest(key=key):
@@ -422,14 +437,16 @@ class Rcs79BenchmarkDecisionTests(unittest.TestCase):
         self.assertTrue(any("GO interdit" in reason for reason in reasons))
 
         forged = deepcopy(report)
+        # État autrefois « atteignable » mais impossible à authentifier hors ligne :
+        # il est désormais explicitement interdit.
         forged["decision"] = "RECOMMANDATION_A_RATIFIER"
         forged["gates"]["verification_humaine_externe_signature"] = True
         forged["gates"]["autorisation_collective"] = True
         write_outputs(self.root, forged)
         ok, reasons = check_outputs(self.root, forged)
         self.assertFalse(ok)
+        self.assertTrue(any("décision inconnue" in reason for reason in reasons))
         self.assertTrue(any("vérification humaine externe" in reason for reason in reasons))
-        self.assertTrue(any("ratification simulée" in reason for reason in reasons))
 
     def test_write_check_deterministic_and_tamper(self) -> None:
         report = self.report()

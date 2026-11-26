@@ -260,7 +260,7 @@ def run_linked(payload: Optional[Dict[str, Any]], config_sha256: Optional[str], 
             return False
         if _canonical_text(item["trace_evidence"]) is None:
             return False
-        if item["energy_status"] not in ENERGY_STATUSES:
+        if not isinstance(item["energy_status"], str) or item["energy_status"] not in ENERGY_STATUSES:
             return False
         for key in ("quality", "p95_ms", "cost_eur", "co2e_kg"):
             if _number(item[key], key) is None:
@@ -317,7 +317,7 @@ def review_declaration_valid(
     role = _canonical_text(payload["role"])
     if role is None or role.lower() not in {"independent", "indépendant"}:
         return False
-    if payload["decision"] not in REVIEW_DECISIONS:
+    if not isinstance(payload["decision"], str) or payload["decision"] not in REVIEW_DECISIONS:
         return False
     if _canonical_text(payload["declaration"]) is None:
         return False
@@ -330,13 +330,6 @@ def review_declaration_valid(
     if reviewer.lower() in {name.lower() for name in authors}:
         return False
     return reviewed_at is not None and executed_at is not None and reviewed_at >= executed_at
-
-
-def recommendation_ready(gates: Dict[str, bool]) -> bool:
-    """Vrai seulement si toutes les portes, y compris la vérification humaine, sont levées."""
-    return bool(gates) and not gates.get("autorisation_collective", True) and all(
-        value for key, value in gates.items() if key != "autorisation_collective"
-    )
 
 
 def build_report(
@@ -426,10 +419,11 @@ def build_report(
             for name in STRATEGIES
         )
 
+    # La vérification humaine externe et l'autorisation collective sont des
+    # portes bloquées hors ligne : aucun état « recommandation à ratifier »
+    # n'est atteignable ni vérifiable par cet outil. Au mieux A_TESTER.
     if not (gates["cas_geles"] and gates["modeles_ab_valides"]):
         decision = "NO_GO"
-    elif recommendation_ready(gates):
-        decision = "RECOMMANDATION_A_RATIFIER"
     else:
         decision = "A_TESTER"
 
@@ -478,8 +472,8 @@ def build_report(
         if not gates[key]:
             blocking_reasons.append(reason)
     blocking_reasons.append(
-        "Autorisation collective non vérifiée : l'outil ne peut émettre qu'une recommandation "
-        "à ratifier par l'équipe, jamais un GO."
+        "Autorisation collective non vérifiée : l'outil ne peut émettre qu'un avis A_TESTER "
+        "à ratifier par l'équipe, jamais une recommandation ni un GO."
     )
     if case_blockers and not gates["cas_geles"]:
         blocking_reasons.extend(case_blockers[:2])
@@ -621,9 +615,9 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
         elif path.read_text(encoding="utf-8") != content:
             reasons.append(f"{rel.as_posix()} obsolète : relancer --write")
     if report["decision"] == "GO":
-        reasons.append("GO interdit : seule une recommandation à ratifier peut être émise")
-    if report["decision"] not in {"NO_GO", "A_TESTER", "RECOMMANDATION_A_RATIFIER"}:
-        reasons.append("décision inconnue")
+        reasons.append("GO interdit : la vérification humaine externe reste hors ligne")
+    if report["decision"] not in {"NO_GO", "A_TESTER"}:
+        reasons.append("décision inconnue : seule NO_GO ou A_TESTER est émettable hors ligne")
     gates = report["gates"]
     if gates.get("revue_independante_attestee") is not None:
         reasons.append("porte « revue attestée » supprimée : la revue n'est qu'une déclaration")
@@ -633,10 +627,6 @@ def check_outputs(root: Path, report: Dict[str, Any]) -> tuple[bool, List[str]]:
         reasons.append("authentification externe des références non vérifiable hors ligne : porte bloquée obligatoire")
     if gates.get("commit_reference") is not None:
         reasons.append("porte « commit_reference » supprimée : la référence n'est que déclarée")
-    if report["decision"] == "RECOMMANDATION_A_RATIFIER" and not recommendation_ready(gates):
-        reasons.append("recommandation sans toutes les portes ou avec vérification/ratification simulée")
-    if report["decision"] == "A_TESTER" and recommendation_ready(gates):
-        reasons.append("portes levées : la recommandation à ratifier est attendue")
     return not reasons, reasons
 
 
@@ -659,7 +649,7 @@ def main(argv: List[str] | None = None) -> int:
             args.root, args.manifest, args.results, args.models,
             args.reviewer, args.commit, args.review_declaration,
         )
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
         print(str(exc))
         return 1
     if args.write:
