@@ -1,0 +1,31 @@
+name: RCS-67 veille et décisions
+
+on:
+  push:
+    paths:
+      - "tools/rcs67_veille.py"
+      - "tests/test_rcs67_veille.py"
+      - "governance/adr_register.csv"
+      - "governance/rcs67/**"
+      - "docs/46_rcs67_veille_journal_decisions.md"
+      - ".github/workflows/rcs67-veille.yml"
+  pull_request:
+    paths:
+      - "tools/rcs67_veille.py"
+      - "tests/test_rcs67_veille.py"
+      - "governance/adr_register.csv"
+      - "governance/rcs67/**"
+      - "docs/46_rcs67_veille_journal_decisions.md"
+
+jobs:
+  veille-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Contrôler fiches datées, limites, alternatives et ADR
+        run: python -m unittest tests.test_rcs67_veille -v
+      - name: Vérifier que le journal reste sans conclusion scientifique
+        run: python -m tools.rcs67_veille --check

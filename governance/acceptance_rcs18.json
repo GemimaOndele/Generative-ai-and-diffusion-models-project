@@ -1,0 +1,118 @@
+{
+  "ok": true,
+  "ticket": "RCS-18",
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "adrs": 10,
+    "risks": 10
+  },
+  "coverage": {
+    "projet": [
+      "Organisation/Code"
+    ],
+    "IA": [
+      "IA/Qualité"
+    ],
+    "biais": [
+      "Biais/Robustesse"
+    ],
+    "sécurité": [
+      "Sécurité"
+    ],
+    "RGPD": [
+      "Données/RGPD"
+    ],
+    "usage biomédical": [
+      "Diffusion",
+      "Usage biomédical"
+    ],
+    "fournisseur": [
+      "Fournisseur/API"
+    ],
+    "budget": [
+      "Budget/FinOps"
+    ],
+    "dette technique": [
+      "Dette technique",
+      "Organisation/Code"
+    ]
+  },
+  "criteria": [
+    {
+      "id": "ADR_REGISTER",
+      "ok": true,
+      "evidence": "docs/registre_decisions_risques.md §1 + governance/adr_register.csv (10 ADR)"
+    },
+    {
+      "id": "RISK_REGISTER",
+      "ok": true,
+      "evidence": "docs/registre_decisions_risques.md §2 + governance/risk_register.csv (10 risques)"
+    },
+    {
+      "id": "RISK_REQUIRED_FIELDS",
+      "ok": true,
+      "evidence": "cause_event, impact, probability, severity, exposure, residual, triggers, mitigation, owner, reviewer, ticket, review_date"
+    },
+    {
+      "id": "PROBABILITY_IMPACT_SCORING",
+      "ok": true,
+      "evidence": "exposition = probabilité × gravité, échelle 1..5"
+    },
+    {
+      "id": "MATRIX_AND_ESCALATION",
+      "ok": true,
+      "evidence": "exposition >= 12 ou gravité 5"
+    },
+    {
+      "id": "RISK_THEME_COVERAGE",
+      "ok": true,
+      "evidence": {
+        "projet": [
+          "Organisation/Code"
+        ],
+        "IA": [
+          "IA/Qualité"
+        ],
+        "biais": [
+          "Biais/Robustesse"
+        ],
+        "sécurité": [
+          "Sécurité"
+        ],
+        "RGPD": [
+          "Données/RGPD"
+        ],
+        "usage biomédical": [
+          "Diffusion",
+          "Usage biomédical"
+        ],
+        "fournisseur": [
+          "Fournisseur/API"
+        ],
+        "budget": [
+          "Budget/FinOps"
+        ],
+        "dette technique": [
+          "Dette technique",
+          "Organisation/Code"
+        ]
+      }
+    },
+    {
+      "id": "SPRINT_REVIEW_GO_NO_GO",
+      "ok": true,
+      "evidence": "GO/NO-GO ND tant que la revue humaine n'a pas arbitré"
+    },
+    {
+      "id": "LINKED_TICKETS",
+      "ok": true,
+      "evidence": "RCS-88, RCS-89, RCS-90"
+    },
+    {
+      "id": "GENERATED_REGISTERS_UP_TO_DATE",
+      "ok": true,
+      "evidence": "governance/adr_register.csv, governance/risk_register.csv"
+    }
+  ]
+}
