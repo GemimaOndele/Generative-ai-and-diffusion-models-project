@@ -27,7 +27,7 @@ Modèles comparés (mêmes entrées, mêmes critères) :
   - **G1-C** score par reconstruction : bruitage à t0 = 50 puis débruitage ancestral (204 NFE) — ablation fonction de score ;
   - **G1-D** = G1-C avec échantillonneur DDIM 5 pas (20 NFE) — ablation sampler.
 
-## 2. Résultats observés (test, moyenne sur 3 seeds)
+## 2. Résultats historiques exploratoires rapportés (test, moyenne sur 3 seeds)
 
 | Repr. | Modèle | PR-AUC | ROC-AUC | Rappel @5 % FPR | FPR test | F1 | ms / 1 000 obs. |
 |---|---|---|---|---|---|---|---|
@@ -61,12 +61,11 @@ Rappel par mode de panne (test, au seuil) — extrait :
 statistiques marginales proches du réel (ex. raw : couple 39,6 ± 8,9 N·m généré vs 39,7 ± 9,5 réel ; KS ≤ 0,07 sur les
 5 variables), avec une variance légèrement sous-estimée (rpm : σ 144 vs 167). Contrôle de copie : la distance médiane au
 plus proche voisin du train est 0,31 pour les générés vs 0,28 pour de vrais points held-out, et seulement **0,5 %** des
-générés sont plus proches du train que le 1er centile des vrais held-out (≈ 1 % attendu sans copie) → **pas de signe de
-mémorisation**.
+générés sont plus proches du train que le 1er centile des vrais held-out (≈ 1 % attendu sans copie) → **aucun signal de copie détecté par ce contrôle exploratoire**, sans preuve générale d'absence de mémorisation.
 
 ## 4. Analyse
 
-1. **Succès démontré** : sur les mesures brutes, la diffusion (score ELBO) dépasse les deux baselines non génératives :
+1. **Résultat exploratoire favorable sur raw** : sur les mesures brutes, la diffusion (score ELBO) dépasse les deux baselines non génératives :
    PR-AUC 0,236 vs 0,152 (z-score) et 0,069 (Isolation Forest), rappel 0,34 vs 0,24 à FPR ≈ 5 %. Elle détecte des modes
    que la règle rate (OSF 0,45 vs 0,15 ; TWF 0,19 vs 0).
 2. **Échec / limite** : avec les variables physiques dérivées, une simple règle z-score devient la meilleure méthode
@@ -75,7 +74,7 @@ mémorisation**.
    que le sampler : la reconstruction (G1-C/G1-D) est à peine au-dessus du hasard ; réduire les NFE de 40 à 12 (G1-B)
    divise la latence par ~3 mais la PR-AUC par ~2.
 3. **Hypothèse H1** (« la diffusion améliore le rappel à FPR fixé d'au moins +0,05 vs la meilleure baseline non
-   générative ») : **confirmée sur `raw` (+0,10)**, **réfutée sur `physics` (−0,19)**. ⚠ La valeur X = 0,05 n'avait
+   générative ») : **écart observé favorable sur `raw` (+0,10)**, **défavorable sur `physics` (−0,19)** ; ni confirmation ni réfutation confirmatoire puisque le seuil d'effet a été proposé après observation. ⚠ La valeur X = 0,05 n'avait
    pas été chiffrée dans la Bibliothèque V3 avant ce premier essai ; elle est proposée ici et doit être **figée par
    l'équipe avant la prochaine campagne** pour que H1 reste réfutable. Conclusion honnête : la diffusion
    apporte de la valeur quand la structure des anomalies n'est pas connue a priori ; elle ne doit pas remplacer des règles
@@ -112,7 +111,7 @@ Seuils (quantile 95 % des normaux de validation) : B0a_zscore = 2.322, B0b_isola
 🔔 = alerte (score ≥ seuil). Lecture : les 4 normaux typiques et le normal difficile ne déclenchent aucune fausse alerte ;
 seules les pannes à valeurs extrêmes sont détectées (OSF par tous, PWF par la règle z-score). HDF, TWF et RNF, dont
 chaque mesure reste individuellement dans la plage normale, sont manquées par toutes les méthodes au seuil 5 % FPR.
-**Sur 10 cas, l'écart entre méthodes (7 vs 6/10) n'est pas interprétable** : la comparaison décisive est celle du test
+**Sur 10 cas, l'écart entre méthodes (7 vs 6/10) n'est pas interprétable** : la comparaison exploratoire plus informative est celle du test
 complet (2 000 observations, 3 seeds) où G1-A double le rappel d'IForest et dépasse le z-score (docs/32_rcs71_baseline_vs_diffusion.md).
 
 Commande : `python src/run_j1_cases.py` → `experiments/j1_diffusion/test_cases.jsonl` (définition des cas, règle de
@@ -124,7 +123,7 @@ evidence_status,notes` : scores, seuils, alertes et justesse par cas et par mod�
 
 Le manifeste `experiments/j1_diffusion/case_inventory.json` identifie les 10 cas du commit 6506cba et le blob Git du JSONL. Il est établi après les résultats : **il ne prouve pas un gel préalable**. Le champ freeze_commit reste null. Les résultats et hypothèses sont exploratoires ; aucune approbation scientifique n'est revendiquée. Pour une campagne confirmatoire, faire approuver en équipe la règle, les variantes, les seuils et un manifeste daté avant les exécutions, conserver les preuves et reproduire sur un environnement versionné. Les résultats historiques restent intacts dans un fichier J1 distinct, sans remplacer le gabarit commun de main. Dépendances : schéma #19, ingestion #12, stockage #20 et socle J1 #14.
 
-## 8. Reproduction complète et absence de sélection a posteriori (24/11, suite à la revue d'Elias)
+## 8. Reproduction rapportée et sélection déterministe (24/11, suite à la revue d'Elias)
 
 **Reproduction** : exécution complète à partir du commit `d163e32` sur un environnement propre (`python scripts/download_ai4i.py` avec vérification SHA-256 des données, puis `python src/run_j1_diffusion.py` et `python src/run_j1_cases.py` ; Windows, Python 3.12.10, CPU). Rapport : `experiments/results/j1_reproduction_2026-11-24.json`.
 
@@ -134,7 +133,7 @@ Le manifeste `experiments/j1_diffusion/case_inventory.json` identifie les 10 cas
 | Fichier des 10 cas régénéré par la règle | **identique** (mêmes 10 UDI, même empreinte) |
 | Différences | uniquement les latences (`latency_batch10`), qui dépendent de la machine |
 
-**Pourquoi la sélection des cas n'est pas faite a posteriori** :
+**Pourquoi la règle de sélection n'utilise pas les scores des modèles (sans preuve d'antériorité)** :
 - la fonction `frozen_cases(df, i_test)` ne reçoit **que les données, le split et les labels** : elle n'a accès à aucun score, seuil ni résultat de modèle (vérifié par le test `test_case_selection_rule_does_not_use_model_scores`) ;
 - la règle est déterministe : la relancer redonne exactement les mêmes 10 cas, ce que la reproduction confirme ;
 - les seuils sont calculés sur les normaux de **validation** (`test_threshold_is_computed_on_validation_normals_only`), jamais sur le test ;
