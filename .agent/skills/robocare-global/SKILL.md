@@ -22,11 +22,22 @@ description: Règles globales obligatoires du monorepo RoboCare Sentinel (sécur
 - **GitHub Pages** : la vitrine statique vit uniquement sur la branche `gh-pages` (ne pas dupliquer `index.html` / `landing.js` dans `main/docs`).
 
 ## 3. Règles Git & Jira obligatoires (`RCS-48`)
-- **Jamais de push direct sur `main`**.
-- **Une branche temporaire par ticket Jira** depuis `origin/main` à jour : `<type>/RCS-XXX-sujet` (`docs/`, `feature/`, `data/`, `experiment/`, `fix/`, `test/`, `chore/`).
-- Tout commit (`<type>(RCS-XXX): description`) et toute Pull Request doivent citer la clé Jira (`RCS-XXX`) et inclure une preuve vérifiable (commande de test, log ou capture).
-- Fusion par **Squash and merge** après **au moins 1 approbation humaine indépendante** et CI verte.
-- Ne pas modifier les fichiers d'un autre module sans le signaler explicitement.
+
+- **Jamais de push direct sur `main`**. `main` reste la référence stable ; `gh-pages` reste dédiée à la vitrine.
+- **Transition** : les PR historiques restent sur leurs branches temporaires jusqu'à leur validation et fusion. Aucun déplacement, duplication, suppression ni réécriture de travaux non intégrés. Tant que les protections et paramètres ci-dessous ne sont pas vérifiés et que cette règle n'est pas approuvée, conserver la méthode historique (branche temporaire par ticket, squash).
+- Cible : cinq branches permanentes, chacune pilotée par un responsable :
+  - `dev/governance-integration` — Gémima : gouvernance, coordination, architecture et intégration ;
+  - `dev/functional-ux-quality` — Aminata : fonctionnel, UX, qualité et éthique ;
+  - `dev/data-benchmark` — Omar : données, SQL, JMerise, benchmarks ;
+  - `dev/genai-diffusion-llm` — Elias : diffusion, IA générative et Multi-LLM ;
+  - `dev/platform-monitoring` — Ayoub : plateforme, monitoring, API et déploiement.
+- Les affectations Jira priment sur les périmètres indicatifs ; les binômes coordonnent interfaces et fichiers, sans écraser le travail d'autrui. Un seul pilote par branche, une PR cohérente active par branche autant que possible, avec plusieurs tickets si leurs changements sont liés.
+- Avant activation, vérifier l'autorisation des merge commits, la protection des cinq branches contre suppression et force push, et la désactivation de la suppression automatique globale si nécessaire. Conserver les protections de main, résolution des discussions, CI et revue indépendante.
+- Synchroniser régulièrement chaque branche avec `origin/main` par merge non forcé, avant développement et avant intégration. Récupérer les dépendances depuis main après revue ; cherry-pick ciblé exceptionnel et coordonné, avec traçabilité. Ne pas copier des dossiers entiers ni importer des PR non validées.
+- Tout commit (`<type>(RCS-XXX): description`) et toute Pull Request doivent citer la ou les clés Jira et inclure une preuve vérifiable (commande de test, log ou capture). Ne pas modifier les fichiers d'un autre module sans le signaler.
+- Fusion des branches permanentes par **merge commit** (historique commun préservé), après **au moins 1 approbation humaine indépendante** sur les changements actuels, CI verte et résolution des discussions. Ne pas supprimer la branche permanente après fusion ; la resynchroniser sur main.
+- Les branches temporaires restent possibles pour une correction isolée ou un risque de conflit ; nom `<type>/RCS-XXX-sujet`, squash après revue et CI, suppression seulement après intégration vérifiée. Aucun push forcé ni auto-approbation.
+- TP08 : RCS-91 et 94 sur plateforme (Ayoub), RCS-92 sur IA (Elias), RCS-93 sur données/benchmark (Omar), RCS-95 sur gouvernance/intégration (Gémima), contribution UX/sécurité d'Aminata. Préparer les contrats d'interface en parallèle ; charge et reprise après inférence réelle autorisée. Aucune dépense ni preuve scientifique présumée.
 
 ## 4. Rigueur scientifique et observabilité
 - Toujours qualifier explicitement chaque chiffre ou résultat : **mesuré**, **calculé**, **estimé**, **hypothétique** ou **ND** (non disponible).
