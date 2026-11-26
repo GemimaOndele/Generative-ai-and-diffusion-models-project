@@ -1,0 +1,1 @@
+risk_id,component_id,model_version,dataset_version,risk_family,scenario,persons_affected,trigger,likelihood_scale,impact_scale,inherent_priority,owner,reviewer,mitigation,test_case,proof_link,residual_priority,status,review_date,related_jira

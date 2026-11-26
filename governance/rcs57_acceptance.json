@@ -1,0 +1,93 @@
+{
+  "ok": true,
+  "ticket": "RCS-57",
+  "criteria": [
+    {
+      "id": "TICKET_FIELDS",
+      "ok": true,
+      "evidence": {
+        "key": "RCS-57",
+        "summary": "Entraîner ou adapter modèle de diffusion pour J1",
+        "source": "bibliothèque RoboCare Sentinel V3",
+        "phase": "S4",
+        "objective": "Essais contrôlés, seeds, logs, hyperparamètres, deux variantes",
+        "acceptance": "Exécution reproductible et outputs conservés",
+        "competence": "Diffusion",
+        "roles": {
+          "responsable": "Elias",
+          "binome": "Ayoub",
+          "relais": "Omar",
+          "relecteur": "Gémima"
+        },
+        "volets": [
+          "contribution du pilote",
+          "apprentissage accompagné du binôme",
+          "recherche/veille documentée si la mission le requiert"
+        ],
+        "blockage": "documenter obstacle, essais et liens dans ce ticket ; solliciter le binôme et le relais, puis arbitrer au point de coordination",
+        "planification": "dates, estimations, Sprint et démarrage à fixer lors de la planification"
+      }
+    },
+    {
+      "id": "TWO_CONTROLLED_VARIANTS",
+      "ok": true,
+      "evidence": "base (sans conditionnement) vs adapte (conditionné) ; données/schedule/lr/époques identiques"
+    },
+    {
+      "id": "FIXED_SEEDS",
+      "ok": true,
+      "evidence": "seed=42 identique pour les deux variantes, test=1042"
+    },
+    {
+      "id": "HYPERPARAMETERS_LOGGED",
+      "ok": true,
+      "evidence": {
+        "seed": 42,
+        "n_train": 48,
+        "n_test": 8,
+        "seq_len": 16,
+        "timesteps": 16,
+        "batch_size": 16,
+        "epochs": 2,
+        "lr": 0.02,
+        "hidden": 8,
+        "time_dim": 8,
+        "beta_start": 0.0001,
+        "beta_end": 0.02,
+        "variants": [
+          "base",
+          "adapte"
+        ]
+      }
+    },
+    {
+      "id": "LOGS_PRESERVED",
+      "ok": true,
+      "evidence": "epoch_losses et final_train_loss conservés dans l'artefact JSON"
+    },
+    {
+      "id": "OUTPUTS_PRESERVED",
+      "ok": true,
+      "evidence": "experiments/results/rcs57_diffusion_variants.json"
+    },
+    {
+      "id": "REPRODUCIBLE_EXECUTION",
+      "ok": true,
+      "evidence": "rejeu déterministe du même run_id, tolérance 1e-6"
+    },
+    {
+      "id": "NO_INVENTED_RESULTS",
+      "ok": true,
+      "evidence": "toutes les mesures sont recalculées depuis le code ; aucune valeur figée revendiquée"
+    },
+    {
+      "id": "SCOPE_J1_SYNTHETIC",
+      "ok": true,
+      "evidence": "smoke test synthétique ; seuils ND ; pas de validation médicale ; V2 J2 hors périmètre"
+    }
+  ],
+  "artifact_sha256": "ee7e521093eff62e9115e44cc60f0e0ca67b1be7407d2c0a02b6f74804635b99",
+  "config_fingerprint": "aefedbf6d93e",
+  "errors": [],
+  "scope": "preuve de reproductibilité logicielle, non validation scientifique"
+}
