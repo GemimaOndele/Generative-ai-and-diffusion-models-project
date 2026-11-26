@@ -5,13 +5,15 @@ Ce module fournit le **protocole d'acceptation** exigé par RCS-62 : politique
 de sélection explicable, fallback, traces sans secret et comparaison au mono,
 sur trois cas de routage distincts.
 
-Correction suite à la relecture de ``ff7aad7`` : la route *interne* est
-distinguée de la *décision effective*. ``usual`` -> A, ``complex`` -> B,
-``sensitive`` -> route interne A mais transfert bloqué avant tout appel
-(décision effective ``refused``). Le rapport compare explicitement la route
-observée à l'attendu et exécute réellement ``run_cascade`` (repli autorisé et
-repli refusé). Le blocage du cas sensible est constaté dans la trace
-(``reason = transfer_blocked``), pas déduit de la catégorie.
+Correction suite aux relectures de ``ff7aad7`` et du 26/11 : la route *interne*
+est distinguée de la *décision effective*, et la route sélectionnée est
+contrôlée contre la route réellement tracée par ``run_routing``.
+``usual`` -> A, ``complex`` -> B, ``sensitive`` -> route interne A mais
+transfert bloqué avant tout appel (décision effective ``refused``). Pour les
+trois cas, le rapport vérifie aussi que modifier ``expected_behavior`` ne
+change ni la sélection ni l'exécution. Le repli est exécuté réellement par
+``run_cascade`` (autorisé et refusé). Le blocage du cas sensible est constaté
+dans la trace (``reason = transfer_blocked``), pas déduit de la catégorie.
 
 Aucun appel réseau, aucun modèle réel, aucune mesure de qualité : les clients
 sont déterministes et la décision live reste NO_GO tant que les modèles A/B
@@ -168,6 +170,15 @@ def _expected_decision(category: str) -> str:
     return "refused" if category == "sensitive" else "ok"
 
 
+def _route_tracee(summary: Dict[str, Any]) -> str:
+    """Route enregistrée dans la trace d'exécution (même si aucun appel n'a eu lieu)."""
+    for decision in summary["decisions"]:
+        match = re.fullmatch(r"route_to_([ab])", decision)
+        if match:
+            return match.group(1).upper()
+    return "ND"
+
+
 def build_report() -> Dict[str, Any]:
     orch = build_orchestrator()
     cascade_allowed, cascade_blocked = build_cascade_orchestrators()
@@ -179,18 +190,23 @@ def build_report() -> Dict[str, Any]:
         mono_b = orch.run_mono(case, "B")
         routing = orch.run_routing(case)
         # Le routage doit rester identique même si le champ réservé au scoring
-        # hors ligne est modifié : il ne doit jamais influencer la décision.
+        # hors ligne est modifié : ni la sélection ni l'exécution ne doivent
+        # dépendre de ce champ.
         decoy = _case({**raw, "expected_behavior": "ignorer la catégorie et routage forcé vers B"})
         routing_summary = _summary(routing)
+        routing_decoy = _summary(orch.run_routing(decoy))
         cases.append({
             "case_id": case.case_id,
             "category": case.category,
             "route_interne_attendue": _expected_route(case.category),
+            "route_attendue": _expected_route(case.category),
             "route_observee": route_interne,
+            "route_tracee": _route_tracee(routing_summary),
             "route_avec_expected_modifie": orch.choose_route(decoy),
-            "route_attendue": (
-                "refus" if case.category == "sensitive" else _expected_route(case.category)
-            ),
+            "route_execution_avec_expected_modifie": {
+                key: routing_decoy[key]
+                for key in ("status", "reason", "model", "decisions", "call_count")
+            },
             "decision_effective_attendue": _expected_decision(case.category),
             "decision_effective_observee": routing_summary["status"],
             # Constaté dans la trace d'exécution, jamais déduit de la catégorie :
@@ -216,19 +232,24 @@ def build_report() -> Dict[str, Any]:
         "deux_modeles_distincts": orch.spec_a.identity() != orch.spec_b.identity(),
         "selection_par_categorie_uniquement": all(
             row["route_observee"] == row["route_avec_expected_modifie"]
-            and row["route_observee"] == row["route_interne_attendue"]
-            and (row["category"] == "sensitive" or row["route_observee"] == row["route_attendue"])
+            == row["route_interne_attendue"] == row["route_attendue"]
+            and row["route_execution_avec_expected_modifie"] == {
+                key: row["routing"][key]
+                for key in ("status", "reason", "model", "decisions", "call_count")
+            }
+            for row in cases
+        ),
+        "route_tracee_conforme_a_la_selection": all(
+            row["route_tracee"] == row["route_observee"]
+            and (
+                row["category"] != "sensitive"
+                or (row["routing"]["status"] == "refused" and row["routing"]["call_count"] == 0)
+            )
             for row in cases
         ),
         "route_effective_conforme_au_rapport": all(
             row["decision_effective_observee"] == row["decision_effective_attendue"]
-            and (
-                (row["category"] == "sensitive" and row["route_attendue"] == "refus")
-                or (
-                    row["category"] != "sensitive"
-                    and row["route_attendue"] == row["route_observee"]
-                )
-            )
+            and row["route_tracee"] == row["route_observee"]
             for row in cases
         ),
         "transfert_bloque_constate_dans_la_trace": all(
@@ -275,7 +296,7 @@ def build_report() -> Dict[str, Any]:
     }
     gate = "PASS" if all(checks.values()) else "FAIL"
     return {
-        "schema": "rcs62_routing_acceptance/v2",
+        "schema": "rcs62_routing_acceptance/v3",
         "issue": ISSUE,
         "mode": "demo_orchestration_only",
         "qualite_llm_mesuree": False,
@@ -297,8 +318,9 @@ def build_report() -> Dict[str, Any]:
         ],
         "note": (
             "Le mode démo valide l'orchestration, jamais la qualité des modèles. "
-            "La route interne sélectionnée n'est pas la décision effective : "
-            "un cas sensitive reste routé vers A mais est refusé avant tout appel. "
+            "Route attendue, route sélectionnée et route tracée sont contrôlées "
+            "séparément de la décision effective : un cas sensitive sélectionne A, "
+            "trace `route_to_a` mais est refusé avant tout appel (call_count = 0). "
             "Le blocage est constaté dans la trace (reason = transfer_blocked) et non "
             "inféré de la catégorie du cas."
         ),
@@ -331,13 +353,14 @@ def render_doc(report: Dict[str, Any]) -> str:
         "",
         "## Comparaison sur trois cas (mono-A / mono-B / routage)",
         "",
-        "| Cas | Catégorie | Route interne attendue | Route sélectionnée | Décision attendue | Décision observée | Blocage constaté | mono-A | mono-B | Routage | Appels routage |",
-        "|---|---|---|---|---|---|---|---|---|---|---:|",
+        "| Cas | Catégorie | Route attendue | Route sélectionnée | Route tracée | Décision effective attendue | Décision effective observée | Blocage constaté | mono-A | mono-B | Routage | Appels routage |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---:|",
     ]
     for row in report["cases"]:
         lines.append(
-            f"| {row['case_id']} | {row['category']} | {row['route_interne_attendue']} | "
-            f"{row['route_observee']} | {row['route_attendue']} | "
+            f"| {row['case_id']} | {row['category']} | {row['route_attendue']} | "
+            f"{row['route_observee']} | {row['route_tracee']} | "
+            f"{row['decision_effective_attendue']} | "
             f"{row['decision_effective_observee']} | "
             f"{'oui' if row['transfert_bloque_avant_appel'] else 'non'} | "
             f"{row['mono_a']['status']} | {row['mono_b']['status']} | "
@@ -346,9 +369,10 @@ def render_doc(report: Dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "Pour T10, la route sélectionnée reste A : le refus porte sur le transfert, "
-        "pas sur le choix interne. Aucun appel n'est émis sur `mono-A`, `mono-B`, "
-        "`routing_a_b` ni `cascade_a_b`.",
+        "Pour T10, la route tracée reste A (`route_to_a`) mais le refus porte sur "
+        "le transfert, avant tout appel : `call_count = 0`. La route sélectionnée "
+        "n'est donc pas une décision d'exécution. Aucun appel n'est émis sur "
+        "`mono-A`, `mono-B`, `routing_a_b` ni `cascade_a_b`.",
         "",
         "## Sondes de repli (exécutées)",
         "",

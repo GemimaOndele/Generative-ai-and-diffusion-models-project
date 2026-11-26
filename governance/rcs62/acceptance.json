@@ -91,8 +91,18 @@
       },
       "route_attendue": "A",
       "route_avec_expected_modifie": "A",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_a"
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok"
+      },
       "route_interne_attendue": "A",
       "route_observee": "A",
+      "route_tracee": "A",
       "routing": {
         "call_count": 1,
         "decisions": [
@@ -147,8 +157,18 @@
       },
       "route_attendue": "B",
       "route_avec_expected_modifie": "B",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_b"
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok"
+      },
       "route_interne_attendue": "B",
       "route_observee": "B",
+      "route_tracee": "B",
       "routing": {
         "call_count": 1,
         "decisions": [
@@ -201,10 +221,20 @@
         "trace_count": 1,
         "version": "demo-2"
       },
-      "route_attendue": "refus",
+      "route_attendue": "A",
       "route_avec_expected_modifie": "A",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 0,
+        "decisions": [
+          "route_to_a"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused"
+      },
       "route_interne_attendue": "A",
       "route_observee": "A",
+      "route_tracee": "A",
       "routing": {
         "call_count": 0,
         "decisions": [
@@ -231,6 +261,7 @@
     "fallback_refuse_sans_appel_b": true,
     "garde_fous_actifs": true,
     "route_effective_conforme_au_rapport": true,
+    "route_tracee_conforme_a_la_selection": true,
     "selection_par_categorie_uniquement": true,
     "traces_sans_secret_ni_expected": true,
     "transfert_bloque_constate_dans_la_trace": true
@@ -239,7 +270,7 @@
   "issue": "RCS-62",
   "live_decision": "NO_GO",
   "mode": "demo_orchestration_only",
-  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles. La route interne sélectionnée n'est pas la décision effective : un cas sensitive reste routé vers A mais est refusé avant tout appel. Le blocage est constaté dans la trace (reason = transfer_blocked) et non inféré de la catégorie du cas.",
+  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles. Route attendue, route sélectionnée et route tracée sont contrôlées séparément de la décision effective : un cas sensitive sélectionne A, trace `route_to_a` mais est refusé avant tout appel (call_count = 0). Le blocage est constaté dans la trace (reason = transfer_blocked) et non inféré de la catégorie du cas.",
   "politique": {
     "complex": {
       "decision_effective": "ok",
@@ -256,5 +287,5 @@
     }
   },
   "qualite_llm_mesuree": false,
-  "schema": "rcs62_routing_acceptance/v2"
+  "schema": "rcs62_routing_acceptance/v3"
 }

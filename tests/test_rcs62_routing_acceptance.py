@@ -58,9 +58,13 @@ class Rcs62RoutingAcceptanceTests(unittest.TestCase):
         self.assertEqual(by_id["T05"]["route_interne_attendue"], "B")
         self.assertEqual(by_id["T05"]["route_attendue"], "B")
         self.assertEqual(by_id["T10"]["route_interne_attendue"], "A")
-        self.assertEqual(by_id["T10"]["route_attendue"], "refus")
+        # Une route attendue reste A/B : le refus est une décision effective,
+        # jamais une valeur du champ de route.
+        self.assertEqual(by_id["T10"]["route_attendue"], "A")
+        self.assertEqual(by_id["T10"]["decision_effective_attendue"], "refused")
         for row in self.report["cases"]:
             self.assertEqual(row["route_observee"], row["route_interne_attendue"])
+            self.assertEqual(row["route_tracee"], row["route_observee"])
             self.assertEqual(row["decision_effective_observee"], row["decision_effective_attendue"])
             if row["category"] == "sensitive":
                 self.assertEqual(row["decision_effective_observee"], "refused")
@@ -70,6 +74,27 @@ class Rcs62RoutingAcceptanceTests(unittest.TestCase):
                 self.assertEqual(row["route_attendue"], row["route_observee"])
                 self.assertEqual(row["decision_effective_observee"], "ok")
         self.assertTrue(self.report["checks"]["route_effective_conforme_au_rapport"])
+        self.assertTrue(self.report["checks"]["route_tracee_conforme_a_la_selection"])
+        self.assertTrue(self.report["checks"]["selection_par_categorie_uniquement"])
+
+    def test_executed_trace_route_matches_selected_route(self) -> None:
+        """La route de la trace doit confirmer la sélection, y compris pour T10."""
+        by_id = {row["case_id"]: row for row in self.report["cases"]}
+        self.assertEqual(by_id["T05"]["routing"]["decisions"], ["route_to_b"])
+        self.assertEqual(by_id["T10"]["routing"]["decisions"], ["route_to_a"])
+        self.assertEqual(by_id["T05"]["route_tracee"], "B")
+        self.assertEqual(by_id["T10"]["route_tracee"], "A")
+        self.assertEqual(by_id["T10"]["routing"]["call_count"], 0)
+
+    def test_expected_behavior_does_not_change_executed_routing(self) -> None:
+        """Le champ de scoring hors ligne n'influe ni sur la sélection ni sur la trace."""
+        for row in self.report["cases"]:
+            self.assertEqual(row["route_avec_expected_modifie"], row["route_observee"])
+            self.assertEqual(
+                row["route_execution_avec_expected_modifie"],
+                {key: row["routing"][key]
+                 for key in ("status", "reason", "model", "decisions", "call_count")},
+            )
         self.assertTrue(self.report["checks"]["selection_par_categorie_uniquement"])
 
     def test_cascade_fallback_actually_runs_allowed_and_blocked(self) -> None:
@@ -119,11 +144,12 @@ class Rcs62RoutingAcceptanceTests(unittest.TestCase):
                 for line in doc.splitlines()
                 if line.startswith("| T") and "|" in line
             }
-            self.assertIn("| B | B | B |", rows["T05"])
-            self.assertIn("| A | refus | refused |", rows["T10"])
+            self.assertIn("| B | B | B | ok | ok |", rows["T05"])
+            self.assertIn("| A | A | A | refused | refused |", rows["T10"])
             json_text = (root / ACCEPTANCE_REL).read_text(encoding="utf-8")
             self.assertIn('"route_attendue": "B"', json_text)
-            self.assertIn('"route_attendue": "refus"', json_text)
+            self.assertIn('"route_attendue": "A"', json_text)
+            self.assertIn('"decision_effective_attendue": "refused"', json_text)
             ok, reasons = check_outputs(root, self.report)
             self.assertTrue(ok, reasons)
 
