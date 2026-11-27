@@ -63,6 +63,10 @@ test("accepts non-medical English spelling used by Python adapter", async () => 
   assert.match(row.innerHTML, new RegExp("a".repeat(64)));
   assert.match(row.innerHTML, /ND/);
 });
+test("shows read-only mode in visible banner", () => {
+  assert.match(html, /<div class="demo-label">SUBSTITUT INDUSTRIEL · NON MÉDICAL · LECTURE SEULE<\/div>/);
+});
+
 test("defines ND as not available/not scored, not normal", () => {
   assert.match(html, /ND = non disponible ou non scoré/);
   assert.match(html, /ND ne signifie pas « normal »/);
