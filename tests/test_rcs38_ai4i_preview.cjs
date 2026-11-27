@@ -6,6 +6,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const script = fs.readFileSync(path.join(__dirname, "../frontend/monitoring/ai4i_preview.js"), "utf8");
+const html = fs.readFileSync(path.join(__dirname, "../frontend/monitoring/ai4i_preview.html"), "utf8");
 
 function fixture(overrides = {}) {
   return {
@@ -57,6 +58,14 @@ test("accepts non-medical English spelling used by Python adapter", async () => 
   assert.equal(out.elements.summary.hidden, false);
   assert.doesNotMatch(out.elements.source.innerHTML, /<script>/);
   assert.match(out.elements.source.innerHTML, /&lt;script&gt;/);
+  const row = out.elements.observations.children[0].children[0];
+  assert.match(row.innerHTML, /SHA-256 complet/);
+  assert.match(row.innerHTML, new RegExp("a".repeat(64)));
+  assert.match(row.innerHTML, /ND/);
+});
+test("defines ND as not available/not scored, not normal", () => {
+  assert.match(html, /ND = non disponible ou non scoré/);
+  assert.match(html, /ND ne signifie pas « normal »/);
 });
 test("rejects equipment not present in declared inventory", async () => {
   const data = fixture();
