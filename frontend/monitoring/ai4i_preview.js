@@ -63,7 +63,8 @@
         " · Catégorie : " + escape(data.source.categorie) +
         " · Vérification : " + escape(data.source.date_verif) + "</p>" +
         "<p>Type : substitut industriel synthétique non médical. " +
-        "Aucune connexion avec un équipement ou un patient.</p>";
+        "Aucune connexion avec un équipement ou un patient.</p>" +
+        "<p><strong>Provenance complète :</strong> SHA-256 du fichier source disponible dans le détail de chaque observation.</p>";
       const fragment = document.createDocumentFragment();
       for (const obs of data.observations) {
         const m = obs.measurement, a = obs.anomaly;
@@ -71,10 +72,13 @@
         const score = a.score === null || a.threshold === null ?
           "ND" : text(a.score) + " / " + text(a.threshold) +
           (a.flag === true ? " · alerte candidate" : "");
+        const fullHash = escape(obs.provenance.file_sha256);
+        const hashDetails = "<details><summary>SHA-256 complet</summary><code>" +
+          fullHash + "</code></details>";
         tr.innerHTML = td(obs.equipment_id) + td(obs.source_record_id) +
           td(m.air_temp_k) + td(m.process_temp_k) + td(m.rpm) +
           td(m.torque_nm) + td(score) +
-          td(obs.provenance.file_sha256.slice(0, 12) + "…");
+          "<td>" + hashDetails + "</td>";
         fragment.appendChild(tr);
       }
       observations.appendChild(fragment);
