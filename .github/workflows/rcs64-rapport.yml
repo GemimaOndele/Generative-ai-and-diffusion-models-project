@@ -1,0 +1,17 @@
+name: RCS-64 — comparaison J2
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  rcs64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements-rcs64.txt
+      - run: python -m pytest -q tests/test_rcs64_rapport.py

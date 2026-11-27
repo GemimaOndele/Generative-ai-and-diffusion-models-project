@@ -1,0 +1,19 @@
+{
+  "original_commit": "7ff95dd5154bf4f95c04cbe159f6eab2c5195e70",
+  "source_blobs": [
+    {
+      "path": "experiments/results/tp04_local_traces.jsonl",
+      "original_blob_git_sha": "492b853891da93b7d2357aa66f12b060f34b17cf",
+      "rows": 90
+    },
+    {
+      "path": "experiments/results/tp05_lever_traces.jsonl",
+      "original_blob_git_sha": "2004da6f63fa73b1d153128801879be327d479c6",
+      "rows": 20
+    }
+  ],
+  "classification": "historical_metadata_only",
+  "freeze_commit": null,
+  "human_review_required": true,
+  "raw_history_not_purged": true
+}
