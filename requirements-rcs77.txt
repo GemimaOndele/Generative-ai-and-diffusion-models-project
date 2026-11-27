@@ -1,0 +1,7 @@
+numpy>=1.26
+scikit-learn>=1.4
+pytest>=8
+# exécution locale réelle (facultatif en CI) :
+# transformers>=4.45
+# torch>=2.2
+# codecarbon>=2.5

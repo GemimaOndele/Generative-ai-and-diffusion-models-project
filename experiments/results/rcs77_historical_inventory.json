@@ -1,0 +1,20 @@
+{
+  "original_commit": "674017f3182da246c0b09e48383db67b0caf4369",
+  "raw_history_not_purged": true,
+  "freeze_commit": null,
+  "pre_evaluation_freeze_verified": false,
+  "original_case_blob": "4622ee0f5ef8978907e1658e44e0a31044e11f60",
+  "trace_files": [
+    {
+      "path": "experiments/results/tp04_local_traces.jsonl",
+      "original_blob": "21fa62697cafbda56c0498ee29cd74b5890ba081",
+      "rows": 90
+    },
+    {
+      "path": "experiments/results/tp03_v1_local_traces.jsonl",
+      "original_blob": "3bb7fa0235460b832f32289a74db4aab272b96a6",
+      "rows": 30
+    }
+  ],
+  "warning": "T10 replaced after historical results; no new benchmark executed."
+}
