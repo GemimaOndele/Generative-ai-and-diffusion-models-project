@@ -1,0 +1,3 @@
+variant,strategy,n,quality,quality_usual,quality_complex,quality_stress,p50_ms,p95_ms,calls,input_tokens,output_tokens,errors,escalations,routed_to_B
+tok60,cascade,10,0.4,0.5,0.0,0.5,9537.0,23615.6,10,4501,600,0,1,0
+tok60,mono_b,10,0.2,0.0,0.0,0.5,8218.0,17834.3,9,3283,341,0,0,9

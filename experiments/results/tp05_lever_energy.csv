@@ -1,0 +1,3 @@
+variant,strategy,energy_kwh,co2e_kg,duration_s,cpu_model,tracking_mode,country,status
+tok60,mono_b,0.0006797638491677742,3.80932863435129e-05,96.91226600005757,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+tok60,cascade,0.00102790250083453,5.760262824426623e-05,118.40412760002073,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
