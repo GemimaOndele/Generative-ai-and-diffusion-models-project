@@ -1,0 +1,8 @@
+{
+  "track": "llm",
+  "mode": "local",
+  "v1_model": "Qwen/Qwen2.5-0.5B-Instruct@7ae5576",
+  "simulation": false,
+  "python": "3.12.10",
+  "machine": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel"
+}

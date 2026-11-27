@@ -1,0 +1,10 @@
+variant,strategy,energy_kwh,co2e_kg,duration_s,cpu_model,tracking_mode,country,status
+default,b0_extractive,4.138333006796964e-09,2.3190804336789506e-10,0.47204809996765107,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+default,mono_a,0.0008677879061104263,4.862996647052219e-05,99.22153610002715,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+default,mono_b,0.000465387084722908,2.6079826840787043e-05,53.73379730002489,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+default,routing,0.001320742376113186,7.401308201500683e-05,176.03444260009564,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+default,cascade,0.0011538722747226609,6.466184840318319e-05,132.40804310003296,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+noguards,mono_a,0.0010799880480532463,6.0521450224855877e-05,142.77602879994083,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+noguards,mono_b,0.001046903532500914,5.8667427057818734e-05,158.812835299992,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+noguards,cascade,0.0013457482797256785,7.541438784754731e-05,174.93250650004484,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
+route8w,routing,0.0006798986566641415,3.810084082080183e-05,84.56300189998001,13th Gen Intel(R) Core(TM) i7-1355U,machine,FRA,"estimé (CodeCarbon, modèle CPU/RAM local)"
