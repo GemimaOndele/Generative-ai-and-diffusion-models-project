@@ -61,6 +61,7 @@ experiments/results/live/
 # Exécution locale / temporaire
 logs/
 local_runs/
+.local/
 tmp/
 *.tmp
 *.bak
