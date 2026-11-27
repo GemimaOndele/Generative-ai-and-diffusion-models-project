@@ -1,0 +1,10 @@
+variant,strategy,n,quality,quality_usual,quality_complex,quality_stress,p50_ms,p95_ms,calls,input_tokens,output_tokens,errors,escalations,routed_to_B
+default,b0_extractive,10,0.6,0.75,0.5,0.5,1.4,5.8,0,0,0,0,0,0
+default,cascade,10,0.7,0.75,1.0,0.5,11774.7,23387.1,10,4501,1177,0,1,0
+default,mono_a,10,0.6,0.75,0.5,0.5,10899.4,11817.1,9,4082,1077,0,0,0
+default,mono_b,10,0.4,0.0,1.0,0.5,4351.9,11705.2,9,3283,468,0,0,9
+default,routing,10,0.7,0.75,1.0,0.5,14006.1,33544.4,9,3884,1057,0,0,2
+noguards,cascade,10,0.5,0.75,0.5,0.25,12822.0,37630.2,10,4639,1128,0,0,0
+noguards,mono_a,10,0.5,0.75,0.5,0.25,13479.9,19909.8,10,4639,1128,0,0,0
+noguards,mono_b,10,0.3,0.0,1.0,0.25,15240.2,28337.2,10,3723,534,0,0,10
+route8w,routing,10,0.4,0.0,1.0,0.5,4932.8,23115.6,9,3283,468,0,0,9

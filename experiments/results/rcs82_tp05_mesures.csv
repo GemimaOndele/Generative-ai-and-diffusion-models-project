@@ -1,0 +1,12 @@
+source,variant,strategy,cas,taches_reussies,qualite,appels_llm,tokens_in,tokens_out,p95_ms,erreurs,energie_kwh,co2e_g,cout_api_eur,cout_elec_eur,cout_par_succes_eur,co2e_g_par_succes,projection_mensuelle_elec_eur,statut_energie,statut_cout
+tp04_local,default,b0_extractive,10,6,0.6,0,0,0,5.8,0,0.000000,0.000,0 (local),0.000000,0.000000,0.000,0.0000,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,default,cascade,10,7,0.7,10,4501,1177,23387.1,0,0.001154,0.065,0 (local),0.000288,0.000041,0.009,0.0577,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,default,mono_a,10,6,0.6,9,4082,1077,11817.1,0,0.000868,0.049,0 (local),0.000217,0.000036,0.008,0.0434,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,default,mono_b,10,4,0.4,9,3283,468,11705.2,0,0.000465,0.026,0 (local),0.000116,0.000029,0.007,0.0233,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,default,routing,10,7,0.7,9,3884,1057,33544.4,0,0.001321,0.074,0 (local),0.000330,0.000047,0.011,0.0660,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,noguards,cascade,10,5,0.5,10,4639,1128,37630.2,0,0.001346,0.075,0 (local),0.000336,0.000067,0.015,0.0673,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,noguards,mono_a,10,5,0.5,10,4639,1128,19909.8,0,0.001080,0.061,0 (local),0.000270,0.000054,0.012,0.0540,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,noguards,mono_b,10,3,0.3,10,3723,534,28337.2,0,0.001047,0.059,0 (local),0.000262,0.000087,0.020,0.0523,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp04_local,route8w,routing,10,4,0.4,9,3283,468,23115.6,0,0.000680,0.038,0 (local),0.000170,0.000042,0.010,0.0340,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp05_lever,tok60,cascade,10,4,0.4,10,4501,600,23615.6,0,0.001028,0.058,0 (local),0.000257,0.000064,0.014,0.0514,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
+tp05_lever,tok60,mono_b,10,2,0.2,9,3283,341,17834.3,0,0.000680,0.038,0 (local),0.000170,0.000085,0.019,0.0340,"estimé CodeCarbon (TDP/RAM, hors-ligne FRA)",calcul = kWh estimés × tarif HYPOTHÈSE
