@@ -1,0 +1,53 @@
+{
+  "artefact": {
+    "path": "ND",
+    "present": false,
+    "sha256": "ND"
+  },
+  "blocking_reasons": [
+    "Jeu C3 non gelé collectivement (RCS-69/RCS-81) : aucune comparaison validée.",
+    "Source de données autorisée et licence à vérifier avant tout transfert.",
+    "Le démonstrateur porte sur des signaux synthétiques, sans dispositif ni patient.",
+    "Artefact d'exécution à fournir par un humain : aucun résultat n'est généré ici."
+  ],
+  "checks": {
+    "artefact_complet": false,
+    "artefact_present": false,
+    "champs_exportes_autorises": true,
+    "indices_textuels_informatifs": true,
+    "indices_textuels_reverse": true,
+    "indices_textuels_sampler": true,
+    "indices_textuels_train": true,
+    "perimetre_synthetique_declare": false,
+    "schema_artefact_strict": true,
+    "script_present": true,
+    "seed_explicite": true
+  },
+  "clinical_validation": false,
+  "decision": "A_TESTER",
+  "issue": "RCS-70",
+  "medical_claim": false,
+  "metriques_synthetiques": {
+    "baseline_MAD": "ND",
+    "learned_diffusion_denoiser": "ND"
+  },
+  "note": "Script requis, indices textuels purement informatifs : le schéma strict rejette les clés inattendues et les marqueurs sensibles imbriqués, mais ni le hash du fichier ni les indices textuels ne prouvent son exécution, l'authenticité de l'expérience ou une validation clinique. Seul le rejeu CI apporte une preuve logicielle, sans portée clinique.",
+  "preuves": {
+    "dataset_sha256": "ND",
+    "diffusion_timesteps": "ND",
+    "generated_samples_count": "ND",
+    "numpy_version": "ND",
+    "sample_finite": "ND",
+    "scientific_status": "ND",
+    "scope": "ND",
+    "seed": "ND",
+    "train_loss_end": "ND",
+    "train_loss_start": "ND",
+    "train_updates": "ND",
+    "training_method": "ND",
+    "training_runtime_seconds": "ND"
+  },
+  "proof_status": "ND",
+  "schema": "rcs70_diffusion_proof/v1",
+  "script": "experiments/rcs69_diffusion_numpy.py"
+}

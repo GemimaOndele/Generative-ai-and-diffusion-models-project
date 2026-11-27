@@ -1,0 +1,50 @@
+name: RCS-70 preuve diffusion
+
+on:
+  push:
+    paths:
+      - "tools/rcs70_diffusion_proof.py"
+      - "tests/test_rcs70_diffusion_proof.py"
+      - "governance/rcs70/**"
+      - "docs/47_rcs70_diffusion_preuve.md"
+      - "experiments/rcs69_diffusion_numpy.py"
+      - ".github/workflows/rcs70-diffusion-proof.yml"
+  pull_request:
+    paths:
+      - "tools/rcs70_diffusion_proof.py"
+      - "tests/test_rcs70_diffusion_proof.py"
+      - "governance/rcs70/**"
+      - "docs/47_rcs70_diffusion_preuve.md"
+      - "experiments/rcs69_diffusion_numpy.py"
+      - ".github/workflows/rcs70-diffusion-proof.yml"
+  workflow_dispatch:
+
+jobs:
+  diffusion-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Vérifier les contrôles structurels et le refus des preuves invalides
+        run: python -m unittest tests.test_rcs70_diffusion_proof -v
+      - name: Contrôler le manifeste ND et la décision A_TESTER
+        run: python -m tools.rcs70_diffusion_proof --check
+      - name: Installer NumPy pour le test exécutable
+        run: python -m pip install numpy
+      - name: Rejouer le vrai module DDPM sur signaux synthétiques
+        run: python -m experiments.rcs69_diffusion_numpy --seed 42 --updates 20 --json /tmp/rcs70-run.json
+      - name: Contrôler l'artefact produit par ce rejeu
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from tools.rcs70_diffusion_proof import build_report
+          report = build_report(Path("."), "/tmp/rcs70-run.json")
+          assert report["preuves"]["train_updates"] == 20
+          assert report["preuves"]["sample_finite"] is True
+          assert report["preuves"]["generated_samples_count"] == 3
+          assert report["checks"]["artefact_complet"]
+          assert report["proof_status"] == "DECLARATION_NON_AUTHENTIFIEE"
+          assert report["decision"] == "A_TESTER"
+          PY
