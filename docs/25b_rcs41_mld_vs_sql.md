@@ -63,3 +63,15 @@ Notation : clé primaire en **gras**, clé étrangère préfixée par `#`.
 
 1. Ouvrir le `.mcd` dans JMerise 0.6.3 et lancer « Générer le MLD ». Vérifier que l'export correspond aux sections 2 et 3, puis le joindre à `docs/jmerise/` (MLD en PNG et, si JMerise le propose, SQL généré).
 2. Contrôle visuel des cardinalités (Elias), à consigner ici avec la date et la version de JMerise.
+
+## 6. Version PostgreSQL du schéma
+
+`sql/001_init_schema.sql` est écrit pour SQLite (`AUTOINCREMENT`, `PRAGMA`, triggers `RAISE(ABORT)`) et échoue sur PostgreSQL. Le portage `sql/postgresql/001_init_schema.pg.sql` reprend le même MLD (11 tables, mêmes clés et contraintes, mêmes noms de colonnes) avec les types PostgreSQL : identités `GENERATED ALWAYS AS IDENTITY`, `TIMESTAMPTZ`, `BOOLEAN`, `JSONB` pour `experiment_run.config`, triggers en PL/pgSQL.
+
+```bash
+createdb robocare
+psql -d robocare -v ON_ERROR_STOP=1 -f sql/postgresql/001_init_schema.pg.sql
+psql -d robocare -v ON_ERROR_STOP=1 -f sql/postgresql/001_smoke_test.pg.sql   # annulé par ROLLBACK
+```
+
+Vérifié sur PostgreSQL 16 : création idempotente, 11 tables, et le test de fumée refuse bien les 5 cas invalides (alerte sur un autre équipement, décision sans acteur, lot déjà importé, observation déplacée, métrique en double). Le workflow `rcs41-postgres.yml` rejoue ces étapes en CI. Le schéma cible v2 (multimodal, Bronze/Silver/Gold) reste hors du périmètre de cette PR.
