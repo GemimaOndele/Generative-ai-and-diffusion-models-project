@@ -1,0 +1,291 @@
+{
+  "blocking_reasons": [
+    "Modèles A/B réels non validés (licence, droits, région, rétention).",
+    "Cas TP04 non gelés collectivement (freeze_commit vide dans planning/rcs81_case_manifest.csv).",
+    "Aucune mesure de qualité, latence, coût ou énergie en mode démo."
+  ],
+  "cascade_probes": {
+    "cas_sensible": {
+      "call_count": 0,
+      "decisions": [
+        "try_a"
+      ],
+      "error_types": [
+        "transfer_blocked"
+      ],
+      "model": "demo-routing-a",
+      "reason": "transfer_blocked",
+      "status": "refused",
+      "strategy": "cascade_a_b",
+      "trace_count": 1,
+      "version": "demo-1"
+    },
+    "repli_autorise": {
+      "call_count": 2,
+      "decisions": [
+        "try_a",
+        "fallback_to_b"
+      ],
+      "error_types": [
+        "TimeoutError",
+        null
+      ],
+      "model": "demo-routing-b",
+      "reason": "validated_by_b",
+      "status": "ok",
+      "strategy": "cascade_a_b",
+      "trace_count": 2,
+      "version": "demo-2"
+    },
+    "repli_refuse": {
+      "call_count": 1,
+      "decisions": [
+        "try_a"
+      ],
+      "error_types": [
+        "TimeoutError"
+      ],
+      "model": "demo-routing-a",
+      "reason": "fallback_blocked",
+      "status": "abstain",
+      "strategy": "cascade_a_b",
+      "trace_count": 1,
+      "version": "demo-1"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "T01",
+      "category": "usual",
+      "decision_effective_attendue": "ok",
+      "decision_effective_observee": "ok",
+      "mono_a": {
+        "call_count": 1,
+        "decisions": [
+          "mono_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 1,
+        "decisions": [
+          "mono_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "A",
+      "route_avec_expected_modifie": "A",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_a"
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok"
+      },
+      "route_interne_attendue": "A",
+      "route_observee": "A",
+      "route_tracee": "A",
+      "routing": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "transfert_bloque_avant_appel": false
+    },
+    {
+      "case_id": "T05",
+      "category": "complex",
+      "decision_effective_attendue": "ok",
+      "decision_effective_observee": "ok",
+      "mono_a": {
+        "call_count": 1,
+        "decisions": [
+          "mono_a"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-a",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 1,
+        "decisions": [
+          "mono_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "B",
+      "route_avec_expected_modifie": "B",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_b"
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok"
+      },
+      "route_interne_attendue": "B",
+      "route_observee": "B",
+      "route_tracee": "B",
+      "routing": {
+        "call_count": 1,
+        "decisions": [
+          "route_to_b"
+        ],
+        "error_types": [
+          null
+        ],
+        "model": "demo-routing-b",
+        "reason": "validated",
+        "status": "ok",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "transfert_bloque_avant_appel": false
+    },
+    {
+      "case_id": "T10",
+      "category": "sensitive",
+      "decision_effective_attendue": "refused",
+      "decision_effective_observee": "refused",
+      "mono_a": {
+        "call_count": 0,
+        "decisions": [
+          "transfer_blocked"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "mono_a",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "mono_b": {
+        "call_count": 0,
+        "decisions": [
+          "transfer_blocked"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-b",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "mono_b",
+        "trace_count": 1,
+        "version": "demo-2"
+      },
+      "route_attendue": "A",
+      "route_avec_expected_modifie": "A",
+      "route_execution_avec_expected_modifie": {
+        "call_count": 0,
+        "decisions": [
+          "route_to_a"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused"
+      },
+      "route_interne_attendue": "A",
+      "route_observee": "A",
+      "route_tracee": "A",
+      "routing": {
+        "call_count": 0,
+        "decisions": [
+          "route_to_a"
+        ],
+        "error_types": [
+          "transfer_blocked"
+        ],
+        "model": "demo-routing-a",
+        "reason": "transfer_blocked",
+        "status": "refused",
+        "strategy": "routing_a_b",
+        "trace_count": 1,
+        "version": "demo-1"
+      },
+      "transfert_bloque_avant_appel": true
+    }
+  ],
+  "checks": {
+    "cas_sensible_refuse_sans_appel": true,
+    "comparaison_mono_presente": true,
+    "deux_modeles_distincts": true,
+    "fallback_autorise_effectif": true,
+    "fallback_refuse_sans_appel_b": true,
+    "garde_fous_actifs": true,
+    "route_effective_conforme_au_rapport": true,
+    "route_tracee_conforme_a_la_selection": true,
+    "selection_par_categorie_uniquement": true,
+    "traces_sans_secret_ni_expected": true,
+    "transfert_bloque_constate_dans_la_trace": true
+  },
+  "demo_gate": "PASS",
+  "issue": "RCS-62",
+  "live_decision": "NO_GO",
+  "mode": "demo_orchestration_only",
+  "note": "Le mode démo valide l'orchestration, jamais la qualité des modèles. Route attendue, route sélectionnée et route tracée sont contrôlées séparément de la décision effective : un cas sensitive sélectionne A, trace `route_to_a` mais est refusé avant tout appel (call_count = 0). Le blocage est constaté dans la trace (reason = transfer_blocked) et non inféré de la catégorie du cas.",
+  "politique": {
+    "complex": {
+      "decision_effective": "ok",
+      "route_interne": "B"
+    },
+    "sensitive": {
+      "decision_effective": "refused",
+      "note": "transfert bloqué avant tout appel",
+      "route_interne": "A"
+    },
+    "usual": {
+      "decision_effective": "ok",
+      "route_interne": "A"
+    }
+  },
+  "qualite_llm_mesuree": false,
+  "schema": "rcs62_routing_acceptance/v3"
+}
