@@ -1,0 +1,34 @@
+name: RCS-41 — schéma PostgreSQL
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: robocare
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: ci-only
+      PGDATABASE: robocare
+    steps:
+      - uses: actions/checkout@v4
+      - name: Créer le schéma (deux fois, pour vérifier l'idempotence)
+        run: |
+          psql -v ON_ERROR_STOP=1 -q -f sql/postgresql/001_init_schema.pg.sql
+          psql -v ON_ERROR_STOP=1 -q -f sql/postgresql/001_init_schema.pg.sql
+      - name: Test de fumée (contraintes et triggers)
+        run: psql -v ON_ERROR_STOP=1 -q -f sql/postgresql/001_smoke_test.pg.sql
+      - name: Vérifier les 11 tables
+        run: test "$(psql -tAc "select count(*) from information_schema.tables where table_schema='public'")" = "11"
