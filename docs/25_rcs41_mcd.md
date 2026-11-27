@@ -83,6 +83,8 @@ Diagramme Mermaid de lecture rapide ; la référence est l'export JMerise ci-des
 
 Ouvrir : JMerise → Fichier → Ouvrir → `docs/jmerise/RCS41_MCD_RoboCare.mcd`. Le MLD peut être régénéré depuis JMerise et comparé au SQL de la PR #19.
 
+MLD dérivé et comparaison au SQL canonique : [`25b_rcs41_mld_vs_sql.md`](25b_rcs41_mld_vs_sql.md). L’attribut `commit_sha` est déjà présent dans le `.mcd` et le PNG.
+
 ## Périmètre v1 et évolution v2
 
 Le guide BDD du 25/11/2026 reçu d'Omar propose une cible PostgreSQL 16 / stockage objet / Parquet (médaillon Bronze/Silver/Gold) et un brouillon SQL multimodal de 30 tables. Ce brouillon n'est pas une livraison de cette PR, ni une preuve de migration ou de validation collective. Conserver la v1 SQLite/AI4I, traiter MCD v2 et MPD PostgreSQL dans les compléments RCS-41/RCS-42 ou un ticket dédié après arbitrage d'équipe ; aucun nouveau branchement TP08 avant feu vert collectif. La comparaison JMerise v1/SQL reste requise.
